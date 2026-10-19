@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { loadConversations, saveConversations } from '../lib/db'
 import type { ChatRequest, Comparison, ComposerJson, MemoryUpdateEventData, SpecDimension } from '../api/types'
 
 export type MessageState = 'pending' | 'streaming' | 'done' | 'error'
@@ -59,13 +60,14 @@ interface ConversationsState {
   upsertMessage: (convId: string, msg: ChatMessage) => void
   patchMessage: (convId: string, msgId: string, patch: Partial<ChatMessage> | ((m: ChatMessage) => Partial<ChatMessage>)) => void
   patch: (convId: string, patch: Partial<Conversation>) => void
+  rename: (convId: string, title: string) => void
   remove: (convId: string) => void
   clear: () => void
 }
 
 export const useConversations = create<ConversationsState>((set, get) => ({
   conversations: {},
-  loaded: true,
+  loaded: false,
   create: (id, firstText) => {
     const now = Date.now()
     const conv: Conversation = { id, title: firstText.slice(0, 24) || '图片搜索', createdAt: now, updatedAt: now, messages: [] }
@@ -93,6 +95,13 @@ export const useConversations = create<ConversationsState>((set, get) => ({
       if (!conv) return s
       return { conversations: { ...s.conversations, [convId]: { ...conv, ...patch } } }
     }),
+  rename: (convId, title) =>
+    set((s) => {
+      const conv = s.conversations[convId]
+      const clean = title.trim()
+      if (!conv || !clean) return s
+      return { conversations: { ...s.conversations, [convId]: { ...conv, title: clean } } }
+    }),
   remove: (convId) =>
     set((s) => {
       const next = { ...s.conversations }
@@ -105,4 +114,48 @@ export const useConversations = create<ConversationsState>((set, get) => ({
 /** Distinct products recommended in a conversation, for the sidebar subtitle. */
 export function productCount(conv: Conversation): number {
   return new Set(conv.messages.flatMap((m) => m.productIds ?? [])).size
+}
+
+/**
+ * Load history from IndexedDB, then mirror every change back. A turn that was
+ * still streaming when the page closed is marked failed so it can be retried.
+ */
+export async function hydrateConversations() {
+  let stored: Conversation[] = []
+  try {
+    stored = await loadConversations()
+  } catch {
+    /* private mode or blocked storage: run in memory */
+  }
+  const map: Record<string, Conversation> = {}
+  for (const c of stored) {
+    map[c.id] = {
+      ...c,
+      messages: c.messages.map((m) =>
+        m.state === 'pending' || m.state === 'streaming'
+          ? { ...m, state: 'error' as const, error: '连接中断\n失败原因：页面在回答完成前被关闭或刷新。', status: undefined }
+          : m,
+      ),
+    }
+  }
+  useConversations.setState((s) => ({ conversations: { ...map, ...s.conversations }, loaded: true }))
+
+  let prev = useConversations.getState().conversations
+  let timer: ReturnType<typeof setTimeout> | null = null
+  let pending = new Set<string>()
+  useConversations.subscribe((state) => {
+    const next = state.conversations
+    if (next === prev) return
+    for (const id of new Set([...Object.keys(prev), ...Object.keys(next)])) if (prev[id] !== next[id]) pending.add(id)
+    prev = next
+    timer ??= setTimeout(() => {
+      timer = null
+      const ids = pending
+      pending = new Set()
+      const all = useConversations.getState().conversations
+      const changed = [...ids].map((id) => all[id]).filter((c): c is Conversation => Boolean(c) && c.messages.length > 0)
+      const removed = [...ids].filter((id) => !all[id])
+      void saveConversations(changed, removed).catch(() => undefined)
+    }, 400)
+  })
 }

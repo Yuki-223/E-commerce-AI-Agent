@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { historyGroup, historyTime } from '../../lib/format'
-import { productCount, useConversations, type Conversation } from '../../stores/conversations'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { historyGroup } from '../../lib/format'
+import { useConversations, type Conversation } from '../../stores/conversations'
 import { IconCompose, IconSearch } from '../Icons'
 import { AccountButton } from './AccountButton'
+import { ClearHistoryDialog } from './ClearHistoryDialog'
+import { HistoryItem } from './HistoryItem'
 
 const GROUPS = ['今天', '昨天', '更早'] as const
 
@@ -11,12 +13,27 @@ export function Sidebar() {
   const navigate = useNavigate()
   const conversations = useConversations((s) => s.conversations)
   const [query, setQuery] = useState('')
+  const [confirmClear, setConfirmClear] = useState(false)
+  const search = useRef<HTMLInputElement>(null)
+  const total = useConversations((s) => Object.values(s.conversations).filter((c) => c.messages.length).length)
+
+  // ⌘K / Ctrl+K focuses history search, as the hint in the box says.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        search.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase()
     const list = Object.values(conversations)
       .filter((c) => c.messages.length > 0)
-      .filter((c) => !q || c.title.toLowerCase().includes(q) || c.messages.some((m) => m.text.toLowerCase().includes(q)))
+      .filter((c) => !q || c.title.toLowerCase().includes(q) || c.messages.some((m) => `${m.text} ${m.composer?.opening ?? ''}`.toLowerCase().includes(q)))
       .sort((a, b) => b.updatedAt - a.updatedAt)
     const out = new Map<string, Conversation[]>()
     for (const c of list) {
@@ -45,6 +62,9 @@ export function Sidebar() {
         <span className="sr-only-label">搜索历史对话</span>
         <input
           id="history-search"
+          ref={search}
+          type="search"
+          onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="搜索历史对话"
@@ -62,30 +82,18 @@ export function Sidebar() {
           <div key={g} className="flex flex-col gap-0.5">
             <div className={`px-2 pb-1 text-xs text-ink-subtle ${i === 0 ? 'pt-2' : 'pt-3'}`}>{g}</div>
             {grouped.get(g)!.map((c) => (
-              <NavLink
-                key={c.id}
-                to={`/c/${c.id}`}
-                className={({ isActive }) =>
-                  `flex flex-col gap-0.5 rounded-[10px] px-2.5 py-[9px] text-ink no-underline hover:bg-overlay hover:text-ink ${
-                    isActive ? 'bg-surface shadow-[0_1px_3px_rgba(43,30,18,0.06)]' : ''
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <span className={`truncate ${isActive ? 'font-semibold' : ''}`}>{c.title}</span>
-                    <span className="text-xs text-ink-subtle">
-                      {historyTime(c.updatedAt)}
-                      {productCount(c) > 0 && ` · ${productCount(c)} 个商品`}
-                    </span>
-                  </>
-                )}
-              </NavLink>
+              <HistoryItem key={c.id} conv={c} />
             ))}
           </div>
         ))}
+        {total > 0 && !query && (
+          <button type="button" onClick={() => setConfirmClear(true)} className="mt-2 self-start px-2 py-1 text-xs text-ink-subtle hover:text-error-text">
+            清空全部历史
+          </button>
+        )}
       </nav>
       <AccountButton />
+      {confirmClear && <ClearHistoryDialog onClose={() => setConfirmClear(false)} />}
     </aside>
   )
 }
