@@ -160,6 +160,45 @@ open client/AIShoppingGuide.xcodeproj
 推荐一款 500 元以内、不要含酒精的防晒
 ```
 
+### 6. 运行网页版
+
+网页版在 `web/` 目录（React + Vite + TypeScript + Tailwind），需要 Node.js 20+。
+
+```bash
+cd web
+npm install
+```
+
+**只看前端（模拟数据，不需要后端和模型 Key）：**
+
+```bash
+npm run dev:mock
+```
+
+打开 `http://localhost:5173`。模拟层直接读取 `data/` 下的商品 JSON 和图片，用脚本化的 SSE 流回答对话，购物车和偏好存在浏览器本地；接口路径、SSE 事件名和字段与真实后端一致。
+
+**连接本地后端：**
+
+先按第 4 步启动后端（`http://127.0.0.1:8000`），再运行
+
+```bash
+npm run dev
+```
+
+开发服务器把 `/api/*` 代理到 `http://127.0.0.1:8000`，所以不需要给后端加 CORS。两种模式只差环境变量 `VITE_USE_MOCK=1`（`dev:mock` 已经带上）。
+
+其他命令：
+
+```bash
+npm test          # SSE 解析和对比合并的单元测试
+npm run build     # 生产构建到 web/dist；不带 VITE_USE_MOCK 时不会打包模拟数据
+npm run preview   # 本地预览生产构建（含 PWA，可“添加到主屏幕”）
+```
+
+- 页面宽度小于 768 px 时自动切换为手机布局；用手机访问时，`vite --host` 可在局域网暴露开发服务器（真实后端需按第 4 步以 `HOST=0.0.0.0` 启动）。
+- 历史对话和偏好档案存在浏览器 IndexedDB 里；购物车全局只有一份，由后端保存。
+- 模拟模式下复现加载中、出错、断线重试、后端未连接等状态的方法见 `web/README.md`。
+
 ## 直接调用 API
 
 FastAPI 交互式文档位于 `http://127.0.0.1:8000/docs`。
@@ -192,6 +231,7 @@ client/AIShoppingGuide/
 ├── CartView.swift
 └── PreferenceView.swift
 
+web/           # 网页版前端（React + Vite），含模拟数据层
 data/          # 商品 JSON 与图片
 scripts/       # 本地启动、停止、重启和开发脚本
 ```

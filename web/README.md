@@ -1,6 +1,6 @@
 # CartPilot 网页版
 
-React + Vite + TypeScript + Tailwind。运行说明见仓库根目录 README 的「运行网页版」一节。
+React + Vite + TypeScript + Tailwind。安装和运行见仓库根目录 README.zh-CN.md 的「6. 运行网页版」。
 
 ## 在模拟模式下复现各种状态（对照 WebStates.dc.html）
 

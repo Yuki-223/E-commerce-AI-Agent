@@ -160,6 +160,19 @@ Select an iPhone simulator, press **Run**, and try:
 推荐一款 500 元以内、不要含酒精的防晒
 ```
 
+### 6. Run the web app
+
+The web client lives in `web/` (React + Vite + TypeScript + Tailwind) and needs Node.js 20+.
+
+```bash
+cd web
+npm install
+npm run dev:mock   # front end only: in-browser mock backend, no Python backend or model key
+npm run dev        # against the local backend from step 4; /api/* is proxied to http://127.0.0.1:8000
+```
+
+Open `http://localhost:5173`. The mock layer reads the product JSON and images under `data/`, answers chats with a scripted SSE stream and keeps the cart and preferences in the browser, using the same paths, SSE event names and fields as the real backend. The only switch is `VITE_USE_MOCK=1`. `npm test` runs the unit tests, `npm run build` writes `web/dist` (the mock layer is left out unless the flag is set), and `npm run preview` serves the build, including the installable PWA. See `web/README.md` for how to trigger each UI state in mock mode.
+
 ## Try the API directly
 
 FastAPI documentation is available at `http://127.0.0.1:8000/docs`.
@@ -192,6 +205,7 @@ client/AIShoppingGuide/
 ├── CartView.swift
 └── PreferenceView.swift
 
+web/           # Web client (React + Vite) with the mock data layer
 data/          # Product JSON and catalog images
 scripts/       # Local start, stop, restart, and development helpers
 ```
