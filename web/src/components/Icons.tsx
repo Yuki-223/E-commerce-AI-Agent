@@ -266,9 +266,10 @@ export const IconWifiOff = (p: P) => (
   </svg>
 )
 
+/** Two-line "open sidebar" mark (long over short), as in claude.ai / ChatGPT / Grok on phones. */
 export const IconMenu = (p: P) => (
-  <svg {...base('0 0 20 16', p.size, 20, 16, p)} {...S} strokeWidth={2}>
-    <path d="M2 2h16M2 8h16M2 14h10" />
+  <svg {...base('0 0 24 24', p.size, 22, 22, p)} {...S} strokeWidth={1.9}>
+    <path d="M3.5 8.5h17M3.5 15.5h10" />
   </svg>
 )
 

@@ -9,7 +9,7 @@ const BTN = 'flex h-11 w-11 shrink-0 items-center justify-center p-0 text-ink'
 export function MenuButton() {
   const open = useDrawer((s) => s.set)
   return (
-    <button type="button" aria-label="打开菜单" onClick={() => open(true)} className={BTN}>
+    <button type="button" aria-label="打开菜单" onClick={() => open(true)} className={`${BTN} rounded-full active:bg-secondary`}>
       <IconMenu />
     </button>
   )
