@@ -7,6 +7,10 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url))
 
 export default defineConfig({
   plugins: [react()],
+  // Pre-bundle up front so a newly discovered dep never forces a reload with a second React copy.
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-dom/client', 'react-router-dom', '@tanstack/react-query', 'zustand', 'idb'],
+  },
   server: {
     port: 5173,
     // The mock layer imports product JSON and images from ../data and ../backend.
