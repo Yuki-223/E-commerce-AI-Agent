@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useMatch, useNavigate } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
 import { useConversations } from '../../stores/conversations'
@@ -6,6 +6,7 @@ import { useSidebar } from '../../stores/ui'
 import { IconCart, IconPlus, IconSearch, IconSidebar } from '../Icons'
 import { AccountButton } from './AccountButton'
 import { HistoryItem } from './HistoryItem'
+import { SearchDialog } from './SearchDialog'
 
 const ROW = 'flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink no-underline hover:bg-sidebar-hover hover:text-ink'
 const RAIL_BTN = 'flex h-9 w-9 items-center justify-center rounded-lg p-0 text-ink-muted hover:bg-sidebar-hover hover:text-ink'
@@ -35,7 +36,7 @@ function RailButton({ label, onClick, children, to }: { label: string; onClick?:
 
 /**
  * Desktop sidebar in the claude.ai / classic style: logo + collapse toggle,
- * flat nav rows (新对话 · 搜索 · 购物车), a single-line 最近 list, account row
+ * flat nav rows (新对话 · 搜索 window · 购物车), a single-line 最近 list, account row
  * pinned to the bottom. Collapsed, it becomes a 56px icon rail.
  */
 export function Sidebar() {
@@ -45,39 +46,28 @@ export function Sidebar() {
   const { data: cart } = useCart()
   const cartCount = cart?.cart.item_count ?? 0
   const onCart = useMatch('/cart')
-  const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
-  const search = useRef<HTMLInputElement>(null)
 
-  const startSearch = () => {
-    if (collapsed) toggle()
-    setSearching(true)
-    requestAnimationFrame(() => search.current?.focus())
-  }
-  const endSearch = () => {
-    setQuery('')
-    setSearching(false)
-  }
-
-  // ⌘K / Ctrl+K opens history search (expanding the rail if needed).
+  // ⌘K / Ctrl+K opens the search window, as in claude.ai.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        startSearch()
+        setSearching((o) => !o)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  })
+  }, [])
 
-  const list = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return Object.values(conversations)
-      .filter((c) => c.messages.length > 0)
-      .filter((c) => !q || c.title.toLowerCase().includes(q) || c.messages.some((m) => `${m.text} ${m.composer?.opening ?? ''}`.toLowerCase().includes(q)))
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-  }, [conversations, query])
+  const list = useMemo(
+    () =>
+      Object.values(conversations)
+        .filter((c) => c.messages.length > 0)
+        .sort((a, b) => b.updatedAt - a.updatedAt),
+    [conversations],
+  )
+  const dialog = searching && <SearchDialog onClose={() => setSearching(false)} />
 
   if (collapsed) {
     return (
@@ -88,7 +78,7 @@ export function Sidebar() {
         <button type="button" aria-label="新对话" title="新对话" onClick={() => navigate('/')} className={`${RAIL_BTN} mt-2`}>
           <NewChatDot />
         </button>
-        <RailButton label="搜索对话" onClick={startSearch}>
+        <RailButton label="搜索对话" onClick={() => setSearching(true)}>
           <IconSearch size={16} />
         </RailButton>
         <RailButton label={`购物车（${cartCount} 件）`} to="/cart">
@@ -99,6 +89,7 @@ export function Sidebar() {
         </RailButton>
         <div className="grow" />
         <AccountButton compact />
+        {dialog}
       </aside>
     )
   }
@@ -119,32 +110,13 @@ export function Sidebar() {
           <NewChatDot />
           新对话
         </button>
-        {searching ? (
-          <label className="flex h-9 items-center gap-2.5 rounded-lg bg-surface px-2 text-sm shadow-[0_0_0_1px_var(--line-strong)]">
-            <span className="flex w-6 justify-center text-ink-muted">
-              <IconSearch size={15} />
-            </span>
-            <span className="sr-only-label">搜索历史对话</span>
-            <input
-              ref={search}
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Escape' && endSearch()}
-              onBlur={() => !query && setSearching(false)}
-              placeholder="搜索历史对话"
-              className="min-w-0 grow bg-transparent text-ink outline-none placeholder:text-ink-subtle"
-            />
-          </label>
-        ) : (
-          <button type="button" onClick={startSearch} className={`${ROW} group`}>
-            <span className="flex w-6 justify-center text-ink-muted">
-              <IconSearch size={15} />
-            </span>
-            <span className="grow">搜索</span>
-            <kbd className="hidden rounded-[5px] border border-line-strong px-1.5 py-px font-sans text-[11px] text-ink-subtle group-hover:inline">⌘K</kbd>
-          </button>
-        )}
+        <button type="button" onClick={() => setSearching(true)} className={`${ROW} group`}>
+          <span className="flex w-6 justify-center text-ink-muted">
+            <IconSearch size={15} />
+          </span>
+          <span className="grow">搜索</span>
+          <kbd className="hidden rounded-[5px] border border-line-strong px-1.5 py-px font-sans text-[11px] text-ink-subtle group-hover:inline">⌘K</kbd>
+        </button>
         <Link to="/cart" className={`${ROW} ${onCart ? 'bg-sidebar-active' : ''}`}>
           <span className="flex w-6 justify-center text-ink-muted">
             <IconCart size={17} strokeWidth={2} />
@@ -155,10 +127,10 @@ export function Sidebar() {
       </nav>
 
       <nav aria-label="历史对话" className="flex min-h-0 grow flex-col overflow-y-auto px-2.5 pb-2">
-        <div className="px-2 pb-1 pt-3 text-xs font-medium text-ink-subtle">{query ? '搜索结果' : '最近'}</div>
+        <div className="px-2 pb-1 pt-3 text-xs font-medium text-ink-subtle">最近</div>
         {list.length === 0 && (
           <p className="m-0 px-2 py-2 text-xs leading-[18px] text-ink-subtle">
-            {query ? '没有找到相关对话' : '还没有历史对话。新对话会自动保存在这台设备上。'}
+            还没有历史对话。新对话会自动保存在这台设备上。
           </p>
         )}
         {list.map((c) => (
@@ -169,6 +141,7 @@ export function Sidebar() {
       <div className="shrink-0 border-t border-line px-2.5 py-2">
         <AccountButton />
       </div>
+      {dialog}
     </aside>
   )
 }
