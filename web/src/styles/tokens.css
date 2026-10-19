@@ -1,0 +1,76 @@
+/*
+ * Design tokens. Base values come from client/AIShoppingGuide/AppTheme.swift;
+ * the *-text variants are the darker shades the web artboards use for small text.
+ * Dark mode swaps values only, so components never branch on theme.
+ */
+:root {
+  --primary: #CE8763;
+  --primary-text: #B8704D;
+  --primary-hover: #B06C4A;
+  --primary-soft: #FBEFE8;
+  --primary-tint: rgba(206, 135, 99, 0.12);
+  --secondary: #F5EFE7;
+  --soft-blue: #F6F0E8;
+  --soft-purple: #F4EEE5;
+  --background: #FBFAF7;
+  --surface: #FFFFFF;
+  --sidebar: #F5F0E9;
+  --field: #FAF6F1;
+  --chip: rgba(245, 239, 231, 0.9);
+  --text-primary: #2B2520;
+  --text-secondary: #8A7E72;
+  --text-muted: #6F655B;
+  --text-subtle: #7A6F63;
+  --error: #D2543E;
+  --error-text: #C24E3A;
+  --success: #3F9F6B;
+  --success-text: #2F8558;
+  --line: rgba(43, 37, 32, 0.08);
+  --line-strong: rgba(43, 37, 32, 0.12);
+  --line-faint: rgba(43, 37, 32, 0.06);
+  --disabled: #CFC9C2;
+  --avatar: #D9CFC4;
+  --star-empty: #D9D1C8;
+  --overlay: rgba(255, 255, 255, 0.7);
+  --shadow-card: 0 2px 5px rgba(43, 30, 18, 0.03);
+  --shadow-pop: 0 16px 40px rgba(43, 30, 18, 0.16);
+  --shadow-input: 0 4px 16px rgba(43, 30, 18, 0.06);
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
+  --font-logo: Georgia, "Times New Roman", serif;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --primary: #EBA886;
+  --primary-text: #EBA886;
+  --primary-hover: #F2BB9E;
+  --primary-soft: #3A2A21;
+  --primary-tint: rgba(235, 168, 134, 0.16);
+  --secondary: #2A231D;
+  --soft-blue: #211C17;
+  --soft-purple: #241E18;
+  --background: #13110F;
+  --surface: #1E1A16;
+  --sidebar: #181512;
+  --field: #241E18;
+  --chip: rgba(42, 35, 29, 0.9);
+  --text-primary: #F2ECE4;
+  --text-secondary: #A89C8E;
+  --text-muted: #B3A698;
+  --text-subtle: #A89C8E;
+  --error: #F0846E;
+  --error-text: #F0846E;
+  --success: #5BD08C;
+  --success-text: #5BD08C;
+  --line: rgba(242, 236, 228, 0.10);
+  --line-strong: rgba(242, 236, 228, 0.16);
+  --line-faint: rgba(242, 236, 228, 0.07);
+  --disabled: #4A423A;
+  --avatar: #5A4E43;
+  --star-empty: #4A423A;
+  --overlay: rgba(255, 255, 255, 0.05);
+  --shadow-card: 0 2px 5px rgba(0, 0, 0, 0.25);
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-input: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
