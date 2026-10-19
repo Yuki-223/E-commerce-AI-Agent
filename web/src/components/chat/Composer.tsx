@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { useSpeech } from '../../hooks/useSpeech'
 import { compressImage, firstImage, IMAGE_ACCEPT } from '../../lib/image'
+import type { ProductRef } from '../../lib/productRef'
 import { IconClose, IconImage, IconMic, IconPlus, IconSend, IconStop } from '../Icons'
+import { ComposerMenu } from './ComposerMenu'
+import { ProductRefChip } from './ProductRefChip'
 
 export interface ComposerHandle {
   setText: (text: string) => void
@@ -12,16 +15,21 @@ interface Props {
   variant: 'home' | 'chat'
   busy?: boolean
   disabled?: boolean
-  onSend: (text: string, image?: string) => void
+  onSend: (text: string, image?: string, refProduct?: ProductRef) => void
   onStop?: () => void
   /** Lets the page push a follow-up chip into the input. */
   handleRef?: (h: ComposerHandle) => void
   placeholder?: string
 }
 
+/** Touch devices get 拍照 in the + menu; <input capture> opens the camera there. */
+const canCapture = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+
 /**
- * Text + image + voice input. Images arrive by the upload button, paste anywhere
- * on the page, or drag-and-drop onto the window (WebHome ⑯).
+ * Text + image + voice input. The + menu adds an image (or a photo on phones),
+ * references a product from the cart / recently viewed, or switches the
+ * preference profile. Images also arrive by paste anywhere on the page or
+ * drag-and-drop onto the window (WebHome ⑯).
  */
 export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, placeholder }: Props) {
   const [text, setText] = useState('')
@@ -29,7 +37,10 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
   const [imageSource, setImageSource] = useState<'粘贴' | '拖入' | '选择'>('选择')
   const [dragging, setDragging] = useState(false)
   const [imageError, setImageError] = useState('')
+  const [refProduct, setRefProduct] = useState<ProductRef | null>(null)
+  const [menu, setMenu] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const speechBase = useRef('')
   const speech = useSpeech(useCallback((t: string) => setText(speechBase.current + t), []))
@@ -112,15 +123,16 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
     el.style.overflowY = el.scrollHeight > 132 ? 'auto' : 'hidden'
   }, [text])
 
-  const canSend = !busy && !disabled && (text.trim().length > 0 || image !== null)
+  const canSend = !busy && !disabled && (text.trim().length > 0 || image !== null || refProduct !== null)
 
   const submit = (e?: FormEvent) => {
     e?.preventDefault()
     if (!canSend) return
     if (speech.listening) speech.stop()
-    onSend(text.trim(), image ?? undefined)
+    onSend(text.trim(), image ?? undefined, refProduct ?? undefined)
     setText('')
     setImage(null)
+    setRefProduct(null)
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -168,20 +180,60 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
             </div>
           </div>
         )}
-        <div className={`flex items-center ${home ? 'gap-2.5' : 'gap-2.5'}`}>
-          <button
-            type="button"
-            aria-label="上传图片"
-            title="添加图片"
-            onClick={() => fileRef.current?.click()}
-            className={`flex ${btn} shrink-0 items-center justify-center rounded-full border border-line-strong bg-transparent p-0 text-ink-muted hover:bg-secondary hover:text-ink`}
-          >
-            <IconPlus size={15} strokeWidth={2.2} />
-          </button>
+        {refProduct && (
+          <div className="flex p-1">
+            <ProductRefChip productRef={refProduct}>
+              <button
+                type="button"
+                aria-label="取消引用"
+                onClick={() => setRefProduct(null)}
+                className="-mr-1 ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full p-0 text-ink-subtle hover:bg-secondary hover:text-ink"
+              >
+                <IconClose size={9} strokeWidth={2.4} />
+              </button>
+            </ProductRefChip>
+          </div>
+        )}
+        <div className="flex items-center gap-2.5">
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              aria-label="添加图片、引用商品或切换档案"
+              aria-haspopup="menu"
+              aria-expanded={menu}
+              title="添加"
+              onClick={() => setMenu((m) => !m)}
+              className={`flex ${btn} items-center justify-center rounded-full border border-line-strong p-0 text-ink-muted hover:bg-secondary hover:text-ink ${menu ? 'bg-secondary text-ink' : 'bg-transparent'}`}
+            >
+              <IconPlus size={15} strokeWidth={2.2} className={`transition-transform ${menu ? 'rotate-45' : ''}`} />
+            </button>
+            {menu && (
+              <ComposerMenu
+                onClose={() => setMenu(false)}
+                onImage={() => fileRef.current?.click()}
+                onCamera={canCapture ? () => cameraRef.current?.click() : undefined}
+                onProduct={(r) => {
+                  setRefProduct(r)
+                  inputRef.current?.focus()
+                }}
+              />
+            )}
+          </div>
           <input
             ref={fileRef}
             type="file"
             accept={IMAGE_ACCEPT}
+            hidden
+            onChange={(e) => {
+              void attach(e.target.files?.[0] ?? null, '选择')
+              e.target.value = ''
+            }}
+          />
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
             hidden
             onChange={(e) => {
               void attach(e.target.files?.[0] ?? null, '选择')

@@ -350,3 +350,16 @@ export const IconChevronUpDown = (p: P) => (
     <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
   </svg>
 )
+
+export const IconBox = (p: P) => (
+  <svg {...base('0 0 24 24', p.size, 18, 18, p)} {...S} strokeWidth={1.9}>
+    <path d="M3.5 7.5L12 3l8.5 4.5v9L12 21l-8.5-4.5z" />
+    <path d="M3.5 7.5L12 12l8.5-4.5M12 12v9" />
+  </svg>
+)
+
+export const IconCheck = (p: P) => (
+  <svg {...base('0 0 24 24', p.size, 14, 14, p)} {...S} strokeWidth={2.6}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </svg>
+)

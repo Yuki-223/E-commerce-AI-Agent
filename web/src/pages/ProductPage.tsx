@@ -7,6 +7,7 @@ import { ProductImage } from '../components/product/ProductImage'
 import { Reviews } from '../components/product/Reviews'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useProduct } from '../hooks/useProducts'
+import { useRecordView } from '../stores/recentProducts'
 
 function share(product: Product) {
   const data = { title: product.title, url: window.location.href }
@@ -58,6 +59,7 @@ export function ProductPage() {
   const { productId = '' } = useParams()
   const { data: product, isPending, isError, refetch } = useProduct(productId)
   useDocumentTitle(product?.title ?? '商品详情')
+  useRecordView(product?.productID)
   return (
     <>
       <MobileHeader

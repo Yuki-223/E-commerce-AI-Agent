@@ -9,6 +9,7 @@ import { ApiError } from '../api/http'
 import { streamChat } from '../api/sse'
 import type { CartResponse, ChatRequest, UserPreference } from '../api/types'
 import { CART_KEY } from '../hooks/useCart'
+import { withProductRef, type ProductRef } from '../lib/productRef'
 import { preferenceKey } from '../hooks/usePreference'
 import { useConversations, type ChatMessage } from '../stores/conversations'
 import { toast } from '../stores/toast'
@@ -41,6 +42,7 @@ export interface SendInput {
   text: string
   /** data: URL of a compressed JPEG. */
   image?: string
+  refProduct?: ProductRef
   userId: string
 }
 
@@ -48,14 +50,14 @@ export interface SendInput {
 export async function send(convId: string, input: SendInput) {
   const s = store()
   let conv = s.conversations[convId]
-  if (!conv) conv = s.create(convId, input.text.trim() || '图片搜索')
+  if (!conv) conv = s.create(convId, input.text.trim() || (input.refProduct ? input.refProduct.title : '图片搜索'))
   const isFirstTurn = conv.messages.length === 0
 
-  const userMsg: ChatMessage = { id: uid(), role: 'user', createdAt: Date.now(), text: input.text.trim(), image: input.image }
+  const userMsg: ChatMessage = { id: uid(), role: 'user', createdAt: Date.now(), text: input.text.trim(), image: input.image, refProduct: input.refProduct }
   s.upsertMessage(convId, userMsg)
 
   const request: ChatRequest = {
-    query: input.text.trim(),
+    query: withProductRef(input.text, input.refProduct),
     session_id: conv.sessionId ?? null,
     user_id: input.userId,
     image_base64: input.image ?? null,
@@ -64,7 +66,7 @@ export async function send(convId: string, input: SendInput) {
   s.upsertMessage(convId, { id: assistantId, role: 'assistant', createdAt: Date.now(), text: '', state: 'pending', request })
   await run(convId, assistantId, request)
 
-  if (isFirstTurn) void nameConversation(convId, input.text.trim())
+  if (isFirstTurn) void nameConversation(convId, [input.refProduct?.title, input.text.trim()].filter(Boolean).join(' '))
 }
 
 /** 重新尝试: resend the stored request into the same assistant message. */

@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/endpoints'
 import { send } from '../chat/engine'
+import type { ProductRef } from '../lib/productRef'
 import { CartButton } from '../components/CartButton'
 import { Composer } from '../components/chat/Composer'
 import { IconCup, IconDrop, IconLaptop, IconRunner } from '../components/Icons'
@@ -27,9 +28,9 @@ export function HomePage() {
   const narrow = useIsNarrow()
   const categories = data?.categories.length ? data.categories : FALLBACK_CATEGORIES
 
-  const start = (text: string, image?: string) => {
+  const start = (text: string, image?: string, refProduct?: ProductRef) => {
     const id = crypto.randomUUID()
-    void send(id, { text, image, userId: profile.userId })
+    void send(id, { text, image, refProduct, userId: profile.userId })
     navigate(`/c/${id}`)
   }
 

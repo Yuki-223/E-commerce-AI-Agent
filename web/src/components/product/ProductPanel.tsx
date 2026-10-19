@@ -4,6 +4,7 @@ import { useCartMutation } from '../../hooks/useCart'
 import { useProduct } from '../../hooks/useProducts'
 import { ApiError } from '../../api/http'
 import { defaultSelection, findSku, optionPrice } from '../../lib/sku'
+import { useRecordView } from '../../stores/recentProducts'
 import { toast } from '../../stores/toast'
 import { IconBulb, IconCartAdd, IconClose } from '../Icons'
 import { ProductImage } from './ProductImage'
@@ -143,6 +144,7 @@ function PanelBody({ product }: { product: Product }) {
 /** Right column on desktop (Web.dc.html ⑩): pick a spec and add to cart in place. */
 export function ProductPanel({ productId, onClose }: { productId: string; onClose: () => void }) {
   const { data: product, isPending, isError, refetch } = useProduct(productId)
+  useRecordView(product?.productID)
   return (
     <aside aria-label="商品详情" className="flex w-[420px] shrink-0 flex-col border-l border-line bg-surface shadow-[-8px_0_24px_rgba(43,30,18,0.04)]">
       <div className="flex h-14 shrink-0 items-center gap-2 border-b border-line-faint pl-5 pr-4">

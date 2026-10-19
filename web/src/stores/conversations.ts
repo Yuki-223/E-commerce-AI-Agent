@@ -1,3 +1,4 @@
+import type { ProductRef } from '../lib/productRef'
 import { create } from 'zustand'
 import { loadConversations, saveConversations } from '../lib/db'
 import type { ChatRequest, Comparison, ComposerJson, MemoryUpdateEventData, SpecDimension } from '../api/types'
@@ -26,6 +27,8 @@ export interface ChatMessage {
   text: string
   /** User attachment as a data URL thumbnail. */
   image?: string
+  /** Product attached from the composer's 引用商品; shown as a chip above the bubble. */
+  refProduct?: ProductRef
   state?: MessageState
   /** Latest status.message while working. */
   status?: string

@@ -127,9 +127,9 @@ export function ChatPage() {
             busy={busy}
             onStop={() => stop(conv.id)}
             handleRef={(h) => (composer.current = h)}
-            onSend={(text, image) => {
+            onSend={(text, image, refProduct) => {
               setAtBottom(true)
-              void send(conv.id, { text, image, userId: profile.userId })
+              void send(conv.id, { text, image, refProduct, userId: profile.userId })
             }}
           />
           <div className="mt-2 hidden text-center text-xs text-ink-subtle md:block">Enter 发送 · Shift + Enter 换行 · 价格与库存以商品库为准</div>
