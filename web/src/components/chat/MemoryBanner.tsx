@@ -63,7 +63,7 @@ export function MemoryBanner({ convId, message }: { convId: string; message: Cha
         {notices.map((n) => n.message).join('；')} <span className="font-normal text-ink-subtle">· 以后推荐会自动参考</span>
         {failed && <span className="ml-2 font-normal text-error-text">撤销失败</span>}
       </span>
-      <button type="button" disabled={busy} onClick={() => void undo()} className="h-[30px] rounded-full bg-soft-purple px-3 text-[13px] font-semibold text-primary-text disabled:opacity-60">
+      <button type="button" disabled={busy} onClick={() => void undo()} className="h-7 rounded-full bg-soft-purple px-3 text-[13px] font-semibold text-primary-text disabled:opacity-60">
         {busy ? '撤销中…' : failed ? '重试撤销' : '撤销'}
       </button>
       <button type="button" onClick={() => openSettings('preferences')} className="p-0 text-[13px] text-ink-muted">

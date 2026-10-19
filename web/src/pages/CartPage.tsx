@@ -237,7 +237,7 @@ export function CartPage() {
                 <span className="text-xs text-ink-subtle">已选 {selectedQty} 件</span>
                 <span className="text-lg font-bold text-primary-text" data-testid="cart-total">{yuan2(selectedTotal)}</span>
               </div>
-              <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-11 rounded-full bg-primary px-5 text-[15px] font-semibold text-on-primary disabled:opacity-50">
+              <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-11 rounded-full bg-primary px-5 active:scale-[0.97] text-[15px] font-semibold text-on-primary disabled:opacity-50">
                 结算（{selectedQty}）
               </button>
             </div>
@@ -308,7 +308,7 @@ export function CartPage() {
               </span>
             </div>
             {/* Checkout is a no-op, matching the iOS app (handoff doc: 不做真实下单). */}
-            <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-12 rounded-3xl bg-primary text-base font-semibold text-on-primary disabled:opacity-50">
+            <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-12 rounded-3xl bg-primary active:scale-[0.98] text-base font-semibold text-on-primary disabled:opacity-50">
               结算（{selectedQty}）
             </button>
             <p className="m-0 text-xs leading-[18px] text-ink-subtle">

@@ -18,7 +18,7 @@ export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
         <span className="text-sm font-semibold">清空全部历史对话？</span>
         <span className="text-xs text-ink-muted">此操作不能撤销。</span>
         <div className="flex gap-2">
-          <button type="button" autoFocus onClick={onClose} className="h-[34px] grow rounded-[10px] border border-line-strong bg-surface text-[13px] text-ink">
+          <button type="button" autoFocus onClick={onClose} className="h-8 grow rounded-lg active:scale-[0.97] border border-line-strong bg-surface text-[13px] text-ink">
             取消
           </button>
           <button
@@ -29,7 +29,7 @@ export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
               onClose()
               navigate('/')
             }}
-            className="h-[34px] grow-[2] rounded-[10px] bg-error-text text-[13px] font-semibold text-on-primary disabled:opacity-50"
+            className="h-8 grow-[2] rounded-lg active:scale-[0.97] bg-error-text text-[13px] font-semibold text-on-primary disabled:opacity-50"
           >
             清空全部 {count} 段对话
           </button>

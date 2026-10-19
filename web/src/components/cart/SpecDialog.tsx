@@ -43,14 +43,14 @@ export function SpecDialog({ line, product, onCancel, onConfirm, busy }: {
       ))}
       {sku && <div className="text-xs text-ink-subtle">单价 {sku.price.display}</div>}
       <div className="flex gap-2">
-        <button type="button" onClick={onCancel} className="h-[38px] grow rounded-[10px] border border-line-strong bg-surface text-sm text-ink">
+        <button type="button" onClick={onCancel} className="h-10 grow rounded-[10px] border active:scale-[0.97] border-line-strong bg-surface text-sm text-ink">
           取消
         </button>
         <button
           type="button"
           disabled={!sku || sku.id === line.sku_id || busy}
           onClick={() => sku && onConfirm(sku.id)}
-          className="h-[38px] grow rounded-[10px] bg-primary text-sm font-semibold text-on-primary disabled:opacity-50"
+          className="h-10 grow rounded-[10px] bg-primary active:scale-[0.97] text-sm font-semibold text-on-primary disabled:opacity-50"
         >
           确认修改规格
         </button>

@@ -73,7 +73,7 @@ export const SECTIONS = '-mt-8 [&>section:last-child]:border-b-0 [&>div:last-chi
 
 export const FIELD = 'h-9 rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none focus:border-primary'
 
-const BUTTON_BASE = 'inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-[13px] font-medium disabled:opacity-40'
+const BUTTON_BASE = 'inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-[13px] font-medium active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100'
 export const BUTTON = `${BUTTON_BASE} border border-line-strong bg-surface text-ink hover:bg-secondary`
 export const BUTTON_DANGER = `${BUTTON_BASE} border border-[color-mix(in_srgb,var(--error-text)_40%,transparent)] bg-surface text-error-text hover:bg-[color-mix(in_srgb,var(--error)_8%,transparent)]`
 export const BUTTON_PRIMARY = `${BUTTON_BASE} bg-primary text-on-primary hover:bg-primary-hover`

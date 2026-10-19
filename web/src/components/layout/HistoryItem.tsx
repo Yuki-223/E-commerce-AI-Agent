@@ -107,7 +107,7 @@ export function HistoryItem({ conv, dense = false }: { conv: Conversation; dense
               setDraft(conv.title)
               setEditing(true)
             }}
-            className="flex h-[34px] items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-ink hover:bg-secondary"
+            className="flex h-8 items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-ink hover:bg-secondary"
           >
             <IconPencil />
             重命名
@@ -120,7 +120,7 @@ export function HistoryItem({ conv, dense = false }: { conv: Conversation; dense
               remove(conv.id)
               if (active) navigate('/')
             }}
-            className="flex h-[34px] items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-error-text hover:bg-secondary"
+            className="flex h-8 items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-error-text hover:bg-secondary"
           >
             <IconTrash size={14} />
             删除对话

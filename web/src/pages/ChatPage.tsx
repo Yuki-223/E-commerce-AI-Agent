@@ -113,7 +113,7 @@ export function ChatPage() {
           <button
             type="button"
             onClick={() => scrollToBottom(true)}
-            className="absolute bottom-3 left-1/2 flex h-[34px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3.5 text-[13px] font-semibold text-ink shadow-[0_6px_16px_rgba(43,30,18,0.12)]"
+            className="absolute bottom-3 left-1/2 flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3.5 text-[13px] font-semibold text-ink shadow-[0_6px_16px_rgba(43,30,18,0.12)]"
           >
             <IconArrowDown />
             回到最新

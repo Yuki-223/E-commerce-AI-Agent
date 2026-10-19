@@ -45,7 +45,7 @@ function Body({ product }: { product: Product }) {
           type="button"
           onClick={() => void cart.add()}
           disabled={!cart.sku || cart.adding}
-          className="flex h-11 grow items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-on-primary disabled:opacity-60"
+          className="flex h-11 grow items-center justify-center gap-2 rounded-xl bg-primary active:scale-[0.98] text-base font-semibold text-on-primary disabled:opacity-60"
         >
           {cart.sku ? `加入购物车 · ${cart.sku.price.display}` : '该规格暂无货'}
         </button>

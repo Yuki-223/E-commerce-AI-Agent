@@ -216,7 +216,7 @@ export function ComparePage() {
           <button
             type="button"
             onClick={() => (navigator.share ? void navigator.share({ title: '商品对比', url: window.location.href }).catch(() => undefined) : void navigator.clipboard?.writeText(window.location.href))}
-            className="flex h-11 grow items-center justify-center rounded-xl bg-primary text-sm font-semibold text-on-primary"
+            className="flex h-11 grow items-center justify-center rounded-xl bg-primary active:scale-[0.98] text-sm font-semibold text-on-primary"
           >
             分享对比
           </button>

@@ -76,7 +76,7 @@ export function SpecPicker({ product, selection, onChoose }: { product: Product;
 
 export function QuantityStepper({ value, onChange, max = 99 }: { value: number; onChange: (n: number) => void; max?: number }) {
   return (
-    <div className="flex h-10 items-center rounded-xl bg-secondary">
+    <div className="flex h-10 items-center rounded-[10px] bg-secondary">
       <button type="button" aria-label="减少" disabled={value <= 1} onClick={() => onChange(value - 1)} className="h-10 w-9 p-0 text-lg text-ink-subtle disabled:opacity-45">
         −
       </button>
@@ -131,7 +131,7 @@ function PanelBody({ product }: { product: Product }) {
           type="button"
           onClick={() => void cart.add()}
           disabled={!cart.sku || cart.adding}
-          className="flex h-11 grow items-center justify-center gap-2 rounded-xl bg-primary text-[15px] font-semibold text-on-primary disabled:opacity-60"
+          className="flex h-10 grow items-center justify-center gap-2 rounded-[10px] bg-primary active:scale-[0.98] text-[15px] font-semibold text-on-primary disabled:opacity-60"
         >
           <IconCartAdd />
           {cart.sku ? (cart.adding ? '正在加入…' : '加入购物车') : '该规格暂无货'}

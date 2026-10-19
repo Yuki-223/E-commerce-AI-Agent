@@ -14,7 +14,7 @@ body {
 button, input, textarea { font-family: inherit; }
 button { cursor: pointer; }
 button, a {
-  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
   transition-duration: var(--dur-fast);
   transition-timing-function: var(--ease-out);
 }
