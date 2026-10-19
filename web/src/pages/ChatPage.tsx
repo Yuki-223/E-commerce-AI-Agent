@@ -72,7 +72,7 @@ export function ChatPage() {
       </MainHeader>
       <div className="relative min-h-0 grow">
         <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-8 pb-4 pt-6">
-          <div className="mx-auto flex max-w-[960px] flex-col gap-4">
+          <div className="mx-auto flex max-w-[820px] flex-col gap-4">
             {messages.map((m, i) =>
               m.role === 'user' ? (
                 <UserMessage key={m.id} message={m} />
@@ -101,7 +101,7 @@ export function ChatPage() {
         )}
       </div>
       <div className="shrink-0 px-8 pb-[18px] pt-3">
-        <div className="mx-auto max-w-[960px]">
+        <div className="mx-auto max-w-[820px]">
           <Composer
             variant="chat"
             busy={busy}

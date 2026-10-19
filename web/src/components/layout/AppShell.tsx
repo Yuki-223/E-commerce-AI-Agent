@@ -1,5 +1,6 @@
 import { Outlet, useSearchParams } from 'react-router-dom'
 import { ProductPanel } from '../product/ProductPanel'
+import { Toaster } from '../Toaster'
 import { OfflineBanner } from './OfflineBanner'
 import { Sidebar } from './Sidebar'
 
@@ -15,9 +16,10 @@ export function AppShell() {
   return (
     <div className="flex h-full min-h-0 bg-bg text-ink">
       <Sidebar />
-      <main className="flex min-w-0 grow flex-col">
+      <main className="relative flex min-w-0 grow flex-col">
         <OfflineBanner />
         <Outlet />
+        <Toaster />
       </main>
       {productId && <ProductPanel key={productId} productId={productId} onClose={closeProduct} />}
     </div>
