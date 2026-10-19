@@ -101,12 +101,15 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
     }
   }, [attach])
 
-  // Grow the textarea with its content up to ~5 lines.
+  // Grow the textarea with its content up to ~5 lines. It only scrolls past
+  // that cap; otherwise Windows fonts that measure a pixel over the line
+  // height make the browser draw a scrollbar with ▲▼ arrows.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
     el.style.height = 'auto'
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`
+    el.style.overflowY = el.scrollHeight > 132 ? 'auto' : 'hidden'
   }, [text])
 
   const canSend = !busy && !disabled && (text.trim().length > 0 || image !== null)
@@ -169,10 +172,11 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
           <button
             type="button"
             aria-label="上传图片"
+            title="添加图片"
             onClick={() => fileRef.current?.click()}
-            className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 ${home ? 'bg-soft-purple text-primary-text' : 'bg-primary text-on-primary'}`}
+            className={`flex ${btn} shrink-0 items-center justify-center rounded-full border border-line-strong bg-transparent p-0 text-ink-muted hover:bg-secondary hover:text-ink`}
           >
-            {home ? <IconImage /> : <IconPlus />}
+            <IconPlus size={15} strokeWidth={2.2} />
           </button>
           <input
             ref={fileRef}
@@ -195,7 +199,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={placeholder ?? (home ? '说说你想买什么，比如「500 元以内不含酒精的防晒」' : '继续追问，或把商品图片拖进来 / 直接粘贴截图')}
-            className={`min-w-0 grow resize-none bg-transparent px-1 leading-[22px] text-ink outline-none placeholder:text-ink-subtle focus-visible:outline-none ${home ? 'text-base' : 'text-[15px]'}`}
+            className={`min-w-0 grow resize-none overflow-y-hidden bg-transparent px-1 leading-[22px] [scrollbar-width:thin] text-ink outline-none placeholder:text-ink-subtle focus-visible:outline-none ${home ? 'text-base' : 'text-[15px]'}`}
           />
           {speech.supported && (
             <button
