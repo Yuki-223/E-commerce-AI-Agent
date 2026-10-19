@@ -55,6 +55,13 @@ export default {
         'pop-up': { from: { opacity: '0', transform: 'translateY(-4px) scale(0.97)' } },
         'dialog-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.98)' } },
         'drawer-in': { from: { transform: 'translateX(-100%)' } },
+        // Thinking dots: each rises, holds, then fades before the next wave.
+        'quiet-dot': {
+          '0%, 8%': { opacity: '0', transform: 'translateY(2px)' },
+          '22%': { opacity: '1', transform: 'translateY(-2.5px)' },
+          '36%, 70%': { opacity: '1', transform: 'translateY(0)' },
+          '90%, 100%': { opacity: '0', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in var(--dur-base) var(--ease-out)',
@@ -64,6 +71,7 @@ export default {
         'dialog-in': 'dialog-in var(--dur-base) var(--ease-out)',
         'drawer-in': 'drawer-in var(--dur-sheet) var(--ease-snap)',
         'toast-in': 'pop-in var(--dur-sheet) var(--ease-overshoot)',
+        'quiet-dot': 'quiet-dot 1.9s cubic-bezier(.4, 0, .2, 1) infinite',
       },
     },
   },

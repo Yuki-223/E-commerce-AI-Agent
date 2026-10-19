@@ -11,12 +11,15 @@ export function StatusBubble({ text, retryAttempt }: { text?: string; retryAttem
         </>
       ) : (
         <>
-          <span aria-hidden="true" className="flex gap-1">
+          <span aria-hidden="true" className="flex items-center gap-[3.5px] pt-0.5">
             {[0, 1, 2].map((i) => (
-              <span key={i} className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" style={{ animationDelay: `${i * 180}ms` }} />
+              <span key={i} className="h-1 w-1 animate-quiet-dot rounded-full bg-primary" style={{ animationDelay: `${i * 150}ms` }} />
             ))}
           </span>
-          {text || '正在为你寻找合适的商品'}
+          {/* Keyed so each new phase (routing → tool → compose) fades in. */}
+          <span key={text} className="animate-fade-in">
+            {text || '正在为你寻找合适的商品'}
+          </span>
         </>
       )}
     </div>
