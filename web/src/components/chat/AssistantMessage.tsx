@@ -6,6 +6,7 @@ import type { ChatMessage } from '../../stores/conversations'
 import { IconAlert, IconCompare, IconRetry } from '../Icons'
 import { InlineComparison } from '../compare/InlineComparison'
 import { ProductCard } from './ProductCard'
+import { SpecSelectionCard } from './SpecSelectionCard'
 import { StatusBubble } from './StatusBubble'
 
 interface Props {
@@ -15,9 +16,11 @@ interface Props {
   isLatest: boolean
   onFollowup: (text: string) => void
   onOpenProduct: (productId: string) => void
+  onSpecSubmit: (chosen: Record<string, string>, phrase: string) => void
+  busy: boolean
 }
 
-export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpenProduct }: Props) {
+export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpenProduct, onSpecSubmit, busy }: Props) {
   const [params] = useSearchParams()
   const viewing = params.get('product')
   const [compare, setCompare] = useState<string[]>([])
@@ -83,6 +86,8 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
       )}
 
       {done && message.comparison && <InlineComparison comparison={message.comparison} convId={convId} />}
+
+      {done && message.specSelection && <SpecSelectionCard spec={message.specSelection} disabled={busy || !isLatest} onSubmit={onSpecSubmit} />}
 
       {(compare.length >= 2 || followups.length > 0) && (
         <div className="flex flex-wrap items-center gap-2">

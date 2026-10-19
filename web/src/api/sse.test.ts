@@ -85,7 +85,7 @@ describe('interpretToolResult', () => {
     expect(effect).toMatchObject({ kind: 'specSelection', productId: 'p' })
   })
   it('returns the cart snapshot for add / view and an empty cart for checkout', () => {
-    expect(interpretToolResult(tr('cart', { action: 'add', added: {}, cart }))).toEqual({ kind: 'cart', action: 'add', cart })
+    expect(interpretToolResult(tr('cart', { action: 'add', added: { quantity: 1 }, cart }))).toEqual({ kind: 'cart', action: 'add', cart, added: { quantity: 1 } })
     expect(interpretToolResult(tr('cart', { action: 'checkout', order: {} }))).toMatchObject({ kind: 'cart', cart: { item_count: 0 } })
     expect(interpretToolResult(tr('cart', { action: 'noop' }))).toEqual({ kind: 'cart', action: 'noop', cart: null })
   })

@@ -18,6 +18,7 @@ export function ChatPage() {
   const profile = useActiveProfile()
   const conv = useConversations((s) => s.conversations[conversationId])
   const loaded = useConversations((s) => s.loaded)
+  const patchMessage = useConversations((s) => s.patchMessage)
   const composer = useRef<ComposerHandle | null>(null)
   const scroller = useRef<HTMLDivElement>(null)
   const [atBottom, setAtBottom] = useState(true)
@@ -84,6 +85,12 @@ export function ChatPage() {
                   isLatest={i === messages.length - 1}
                   onFollowup={(t) => composer.current?.setText(t)}
                   onOpenProduct={openProduct}
+                  busy={busy}
+                  onSpecSubmit={(chosen, phrase) => {
+                    patchMessage(conv.id, m.id, { specSelection: { ...m.specSelection!, chosen } })
+                    setAtBottom(true)
+                    void send(conv.id, { text: phrase, userId: profile.userId })
+                  }}
                 />
               ),
             )}

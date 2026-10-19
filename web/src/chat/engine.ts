@@ -11,6 +11,7 @@ import type { CartResponse, ChatRequest, UserPreference } from '../api/types'
 import { CART_KEY } from '../hooks/useCart'
 import { preferenceKey } from '../hooks/usePreference'
 import { useConversations, type ChatMessage } from '../stores/conversations'
+import { toast } from '../stores/toast'
 
 let queryClient: QueryClient | null = null
 const controllers = new Map<string, AbortController>()
@@ -111,6 +112,10 @@ async function run(convId: string, msgId: string, request: ChatRequest) {
               else if (effect.kind === 'cart') {
                 patch({ cartAction: effect.action })
                 if (effect.cart) queryClient?.setQueryData<CartResponse>(CART_KEY, { cart: effect.cart })
+                if (effect.added) {
+                  const spec = Object.values(effect.added.options).join(' / ')
+                  toast({ title: '已加入购物车', detail: `数量 ${effect.added.quantity}${spec ? ` · 规格：${spec}` : ''}`, action: { label: '去看看', to: '/cart' } })
+                }
               }
               break
             }
