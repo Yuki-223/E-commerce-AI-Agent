@@ -35,7 +35,7 @@ export function SpecSelectionCard({ spec, disabled, onSubmit }: { spec: SpecSele
                   aria-checked={on}
                   disabled={submitted}
                   onClick={() => setSelected((s) => ({ ...s, [d.name]: v }))}
-                  className={`rounded-full px-3.5 py-2 text-sm font-medium ${on ? 'bg-primary text-white' : 'bg-soft-purple text-primary-text'}`}
+                  className={`rounded-full px-3.5 py-2 text-sm font-medium ${on ? 'bg-primary text-on-primary' : 'bg-soft-purple text-primary-text'}`}
                 >
                   {v}
                 </button>
@@ -48,7 +48,7 @@ export function SpecSelectionCard({ spec, disabled, onSubmit }: { spec: SpecSele
         type="button"
         disabled={!allChosen || submitted || disabled}
         onClick={() => onSubmit(selected, `我要 ${spec.dimensions.map((d) => selected[d.name]).join(' ')}`)}
-        className={`h-10 rounded-xl text-sm font-semibold text-white ${allChosen && !submitted && !disabled ? 'bg-primary' : 'bg-[rgba(206,135,99,0.4)]'}`}
+        className={`h-10 rounded-xl text-sm font-semibold text-on-primary ${allChosen && !submitted && !disabled ? 'bg-primary' : 'bg-[rgba(206,135,99,0.4)]'}`}
       >
         {label}
       </button>

@@ -50,7 +50,7 @@ export function SpecDialog({ line, product, onCancel, onConfirm, busy }: {
           type="button"
           disabled={!sku || sku.id === line.sku_id || busy}
           onClick={() => sku && onConfirm(sku.id)}
-          className="h-[38px] grow rounded-[10px] bg-primary text-sm font-semibold text-white disabled:opacity-50"
+          className="h-[38px] grow rounded-[10px] bg-primary text-sm font-semibold text-on-primary disabled:opacity-50"
         >
           确认修改规格
         </button>

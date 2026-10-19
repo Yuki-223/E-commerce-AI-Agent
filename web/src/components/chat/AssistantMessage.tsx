@@ -43,7 +43,7 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
         <button
           type="button"
           onClick={() => void retry(convId, message.id)}
-          className="flex h-[42px] items-center justify-center gap-1.5 rounded-xl bg-primary text-[15px] font-semibold text-white"
+          className="flex h-[42px] items-center justify-center gap-1.5 rounded-xl bg-primary text-[15px] font-semibold text-on-primary"
         >
           <IconRetry />
           重新尝试
@@ -95,7 +95,7 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
           {compare.length >= 2 && (
             <Link
               to={`/compare?ids=${compare.join(',')}&from=${convId}`}
-              className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-[13px] font-semibold text-white no-underline hover:text-white"
+              className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-[13px] font-semibold text-on-primary no-underline hover:text-on-primary"
             >
               <IconCompare />
               对比所选（{compare.length}）

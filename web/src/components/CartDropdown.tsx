@@ -58,7 +58,7 @@ export function CartDropdown({ data, onClose }: { data: CartResponse | undefined
                 onClose()
                 navigate('/cart')
               }}
-              className="h-[42px] rounded-full bg-primary px-[22px] text-[15px] font-semibold text-white"
+              className="h-[42px] rounded-full bg-primary px-[22px] text-[15px] font-semibold text-on-primary"
             >
               去结算（{data!.cart.item_count}）
             </button>

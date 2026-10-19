@@ -97,7 +97,7 @@ export function Basis({ product }: { product: Product }) {
   }, [product])
   if (!text) return null
   return (
-    <div className="flex flex-col gap-1.5 rounded-[14px] bg-[rgba(245,239,231,0.6)] p-3">
+    <div className="flex flex-col gap-1.5 rounded-[14px] bg-secondary p-3">
       <div className="flex items-center gap-1.5 text-xs font-semibold text-primary-text">
         <IconBulb />
         推荐依据
@@ -130,7 +130,7 @@ function PanelBody({ product }: { product: Product }) {
           type="button"
           onClick={() => void cart.add()}
           disabled={!cart.sku || cart.adding}
-          className="flex h-11 grow items-center justify-center gap-2 rounded-xl bg-primary text-[15px] font-semibold text-white disabled:opacity-60"
+          className="flex h-11 grow items-center justify-center gap-2 rounded-xl bg-primary text-[15px] font-semibold text-on-primary disabled:opacity-60"
         >
           <IconCartAdd />
           {cart.sku ? (cart.adding ? '正在加入…' : '加入购物车') : '该规格暂无货'}
@@ -160,7 +160,7 @@ export function ProductPanel({ productId, onClose }: { productId: string; onClos
           ) : isError ? (
             <>
               商品详情加载失败
-              <button type="button" onClick={() => void refetch()} className="rounded-full bg-primary px-4 py-1.5 text-[13px] font-semibold text-white">
+              <button type="button" onClick={() => void refetch()} className="rounded-full bg-primary px-4 py-1.5 text-[13px] font-semibold text-on-primary">
                 重试
               </button>
             </>

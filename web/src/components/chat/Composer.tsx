@@ -170,7 +170,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
             type="button"
             aria-label="上传图片"
             onClick={() => fileRef.current?.click()}
-            className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 ${home ? 'bg-soft-purple text-primary-text' : 'bg-primary text-white'}`}
+            className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 ${home ? 'bg-soft-purple text-primary-text' : 'bg-primary text-on-primary'}`}
           >
             {home ? <IconImage /> : <IconPlus />}
           </button>
@@ -217,7 +217,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
               type="submit"
               aria-label="发送"
               disabled={!canSend}
-              className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-white ${canSend ? 'bg-primary' : 'bg-disabled'}`}
+              className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-on-primary ${canSend ? 'bg-primary' : 'bg-disabled'}`}
             >
               <IconSend size={home ? 17 : 16} />
             </button>
@@ -226,7 +226,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
         {imageError && <p className="m-0 px-1 text-xs text-error-text">{imageError}</p>}
       </form>
       {dragging && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-[rgba(251,250,247,0.82)]">
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-[var(--scrim)]">
           <div className="rounded-3xl border-2 border-dashed border-primary bg-surface px-10 py-8 text-center shadow-pop">
             <IconImage size={32} className="mx-auto mb-2 text-primary-text" />
             <div className="text-base font-semibold">松开即可添加图片</div>

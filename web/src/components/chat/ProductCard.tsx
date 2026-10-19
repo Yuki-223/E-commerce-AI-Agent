@@ -43,7 +43,7 @@ export function ProductCard({ product, description, viewing, compareChecked, onT
         <button
           type="button"
           onClick={onOpen}
-          className={`h-9 grow rounded-[10px] text-[13px] font-semibold ${viewing ? 'bg-soft-purple text-primary-text' : 'bg-primary text-white'}`}
+          className={`h-9 grow rounded-[10px] text-[13px] font-semibold ${viewing ? 'bg-soft-purple text-primary-text' : 'bg-primary text-on-primary'}`}
         >
           {viewing ? '正在查看详情' : '查看详情'}
         </button>

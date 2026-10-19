@@ -32,7 +32,7 @@ function Card({ title, children, htmlFor }: { title: string; children: ReactNode
   )
 }
 
-const FIELD = 'h-10 rounded-[10px] border border-[rgba(43,37,32,0.16)] bg-surface px-3 text-[15px] text-ink outline-none focus:border-primary'
+const FIELD = 'h-10 rounded-[10px] border border-line-strong bg-surface px-3 text-[15px] text-ink outline-none focus:border-primary'
 
 function ProfileChip({ profile, active, onSelect }: { profile: Profile; active: boolean; onSelect: () => void }) {
   const { data } = usePreference(profile.userId)
@@ -309,7 +309,7 @@ export function PreferencePage() {
                       type="button"
                       aria-pressed={on}
                       onClick={() => mutate((p) => ({ ...p, favorite_categories: toggle(p.favorite_categories, c) }))}
-                      className={`h-10 rounded-full text-sm font-medium ${on ? 'bg-primary text-white' : 'bg-secondary text-ink'}`}
+                      className={`h-10 rounded-full text-sm font-medium ${on ? 'bg-primary text-on-primary' : 'bg-secondary text-ink'}`}
                     >
                       {c}
                     </button>
@@ -366,7 +366,7 @@ export function PreferencePage() {
                       setNewKeyword('')
                     }
                   }}
-                  className="h-9 w-[130px] rounded-full border border-dashed border-[rgba(43,37,32,0.24)] bg-transparent px-3 text-sm outline-none focus:border-primary"
+                  className="h-9 w-[130px] rounded-full border border-dashed border-line-strong bg-transparent px-3 text-sm outline-none focus:border-primary"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -391,7 +391,7 @@ export function PreferencePage() {
                   if (clean === (pref.preference_note ?? '').trim()) return
                   mutate((p) => ({ ...p, preference_note: clean ? notes : null, notes: clean ? notes : null }))
                 }}
-                className="min-h-[44px] resize-y rounded-[10px] border border-[rgba(43,37,32,0.16)] bg-surface px-3 py-2.5 text-sm leading-[21px] text-ink outline-none focus:border-primary"
+                className="min-h-[44px] resize-y rounded-[10px] border border-line-strong bg-surface px-3 py-2.5 text-sm leading-[21px] text-ink outline-none focus:border-primary"
               />
             </Card>
           </div>

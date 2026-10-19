@@ -8,6 +8,7 @@ export default {
     extend: {
       colors: {
         primary: { DEFAULT: v('primary'), text: v('primary-text'), hover: v('primary-hover'), soft: v('primary-soft'), tint: v('primary-tint') },
+        'on-primary': v('on-primary'),
         secondary: v('secondary'),
         'soft-blue': v('soft-blue'),
         'soft-purple': v('soft-purple'),

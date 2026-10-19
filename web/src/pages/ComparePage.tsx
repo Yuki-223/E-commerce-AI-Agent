@@ -216,7 +216,7 @@ export function ComparePage() {
           <button
             type="button"
             onClick={() => (navigator.share ? void navigator.share({ title: '商品对比', url: window.location.href }).catch(() => undefined) : void navigator.clipboard?.writeText(window.location.href))}
-            className="flex h-11 grow items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white"
+            className="flex h-11 grow items-center justify-center rounded-xl bg-primary text-sm font-semibold text-on-primary"
           >
             分享对比
           </button>
@@ -253,13 +253,13 @@ export function ComparePage() {
         ) : isError ? (
           <div className="flex flex-col items-center gap-3 rounded-[18px] border border-line bg-surface p-8 text-sm text-ink-muted">
             {(error as ApiError)?.message ?? '对比失败'}
-            <button type="button" onClick={() => void refetch()} className="rounded-full bg-primary px-4 py-1.5 text-[13px] font-semibold text-white">
+            <button type="button" onClick={() => void refetch()} className="rounded-full bg-primary px-4 py-1.5 text-[13px] font-semibold text-on-primary">
               重新尝试
             </button>
           </div>
         ) : (
           <section aria-label="对比表" className="overflow-hidden rounded-[18px] border border-line bg-surface shadow-[0_2px_8px_rgba(43,30,18,0.04)]">
-            <div className="grid bg-[rgba(245,239,231,0.65)]" style={{ gridTemplateColumns: cols }}>
+            <div className="grid bg-[var(--compare-head)]" style={{ gridTemplateColumns: cols }}>
               <div />
               {data.products.map((p) => (
                 <HeaderCell key={p.product_id} product={p} inCart={inCart.has(p.product_id)} canRemove={ids.length > 2} detailHref={withProduct(p.product_id)} onRemove={() => setIds(ids.filter((x) => x !== p.product_id))} />

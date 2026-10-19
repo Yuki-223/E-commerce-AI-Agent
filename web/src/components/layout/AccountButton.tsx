@@ -103,7 +103,7 @@ export function AccountButton() {
                   aria-label={label}
                   onClick={() => theme.set(value)}
                   className={`flex h-11 w-11 items-center justify-center rounded-xl p-0 ${
-                    on ? 'border border-[rgba(43,37,32,0.16)] bg-surface text-ink shadow-[0_1px_3px_rgba(43,30,18,0.08)]' : 'border border-transparent text-ink-muted'
+                    on ? 'border border-line-strong bg-secondary text-ink shadow-[0_1px_3px_rgba(43,30,18,0.08)]' : 'border border-transparent text-ink-muted'
                   }`}
                 >
                   <Icon />

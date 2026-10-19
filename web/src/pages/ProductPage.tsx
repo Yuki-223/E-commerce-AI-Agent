@@ -44,7 +44,7 @@ function Body({ product }: { product: Product }) {
           type="button"
           onClick={() => void cart.add()}
           disabled={!cart.sku || cart.adding}
-          className="flex h-11 grow items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-white disabled:opacity-60"
+          className="flex h-11 grow items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-on-primary disabled:opacity-60"
         >
           {cart.sku ? `加入购物车 · ${cart.sku.price.display}` : '该规格暂无货'}
         </button>
@@ -78,7 +78,7 @@ export function ProductPage() {
         <div className="flex grow flex-col items-center justify-center gap-3 text-sm text-ink-muted">
           {isPending ? '正在加载商品详情…' : isError ? '商品详情加载失败' : null}
           {isError && (
-            <button type="button" onClick={() => void refetch()} className="rounded-full bg-primary px-4 py-1.5 text-[13px] font-semibold text-white">
+            <button type="button" onClick={() => void refetch()} className="rounded-full bg-primary px-4 py-1.5 text-[13px] font-semibold text-on-primary">
               重试
             </button>
           )}

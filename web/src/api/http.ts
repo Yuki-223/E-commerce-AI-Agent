@@ -1,7 +1,7 @@
 import type { ApiErrorPayload } from './types'
 
 /** The single switch between the in-browser mock backend and the real FastAPI backend. */
-export const USE_MOCK = import.meta.env.VITE_USE_MOCK === '1'
+export const USE_MOCK = __USE_MOCK__
 
 /** Same-origin prefix; vite.config.ts proxies it to http://127.0.0.1:8000. */
 export const API_BASE = '/api'
@@ -24,7 +24,8 @@ export class ApiError extends Error {
  */
 export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   try {
-    if (USE_MOCK) {
+    // A compile-time constant, so builds without the flag drop the mock chunk entirely.
+    if (__USE_MOCK__) {
       const { mockFetch } = await import('../mock/server')
       return await mockFetch(path, init)
     }

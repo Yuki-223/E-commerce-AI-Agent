@@ -7,6 +7,8 @@
   --primary: #CE8763;
   --primary-text: #B8704D;
   --primary-hover: #B06C4A;
+  --on-primary: #FFFFFF;
+  --scrim: rgba(251, 250, 247, 0.82);
   --primary-soft: #FBEFE8;
   --primary-tint: rgba(206, 135, 99, 0.12);
   --secondary: #F5EFE7;
@@ -47,6 +49,8 @@
   --primary: #EBA886;
   --primary-text: #EBA886;
   --primary-hover: #F2BB9E;
+  --on-primary: #2B1A10;
+  --scrim: rgba(19, 17, 15, 0.82);
   --primary-soft: #3A2A21;
   --primary-tint: rgba(235, 168, 134, 0.16);
   --secondary: #2A231D;

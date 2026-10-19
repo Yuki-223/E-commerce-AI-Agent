@@ -41,7 +41,7 @@ export function CartButton() {
       >
         <IconCart />
         {count > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-error-text px-1 text-[11px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-error-text px-1 text-[11px] font-bold text-on-primary">
             {count > 99 ? '99+' : count}
           </span>
         )}

@@ -13,7 +13,7 @@ export function HistoryManagerDialog({ onClose }: { onClose: () => void }) {
   const [confirm, setConfirm] = useState(false)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(43,37,32,0.28)]" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={onClose}>
       <div role="dialog" aria-modal="true" aria-label="管理历史对话" onMouseDown={(e) => e.stopPropagation()} className="flex max-h-[80vh] w-[480px] max-w-[calc(100vw-32px)] flex-col rounded-[18px] border border-line-strong bg-surface shadow-pop">
         <div className="flex items-center border-b border-line-faint px-5 py-4">
           <h2 className="m-0 grow text-base font-semibold">管理历史对话</h2>

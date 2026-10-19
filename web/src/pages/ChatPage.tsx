@@ -64,7 +64,7 @@ export function ChatPage() {
     return (
       <div className="flex grow flex-col items-center justify-center gap-3 text-ink-muted">
         <p className="m-0">这段对话不存在或已被删除。</p>
-        <button type="button" onClick={() => navigate('/')} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white">
+        <button type="button" onClick={() => navigate('/')} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary">
           开始新对话
         </button>
       </div>

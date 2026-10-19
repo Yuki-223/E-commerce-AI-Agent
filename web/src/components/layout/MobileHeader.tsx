@@ -36,7 +36,7 @@ export function MobileCartLink() {
     <Link to="/cart" aria-label={`购物车，${count} 件`} className={`${BTN} relative text-primary-text`}>
       <IconCart size={22} strokeWidth={2.1} />
       {count > 0 && (
-        <span className="absolute right-[3px] top-[5px] flex h-4 min-w-4 items-center justify-center rounded-full bg-error-text px-1 text-[10px] font-bold text-white">{count > 99 ? '99+' : count}</span>
+        <span className="absolute right-[3px] top-[5px] flex h-4 min-w-4 items-center justify-center rounded-full bg-error-text px-1 text-[10px] font-bold text-on-primary">{count > 99 ? '99+' : count}</span>
       )}
     </Link>
   )

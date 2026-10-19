@@ -10,7 +10,7 @@ export function CartEmpty({ compact = false }: { compact?: boolean }) {
       </span>
       <span className="text-[17px] font-semibold">购物车为空</span>
       <span className="text-[13px] leading-[19px] text-ink-muted">从导购推荐里加入商品后会显示在这里。</span>
-      <Link to="/" className="mt-1.5 rounded-full bg-primary px-[18px] py-[9px] text-sm font-semibold text-white no-underline hover:text-white">
+      <Link to="/" className="mt-1.5 rounded-full bg-primary px-[18px] py-[9px] text-sm font-semibold text-on-primary no-underline hover:text-on-primary">
         去问问 AI
       </Link>
     </div>

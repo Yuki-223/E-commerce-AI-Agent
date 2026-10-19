@@ -7,7 +7,7 @@ export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
   const count = useConversations((s) => Object.values(s.conversations).filter((c) => c.messages.length).length)
   const clear = useConversations((s) => s.clear)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(43,37,32,0.28)]" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={onClose}>
       <div
         role="alertdialog"
         aria-label="确认清空"
@@ -29,7 +29,7 @@ export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
               onClose()
               navigate('/')
             }}
-            className="h-[34px] grow-[2] rounded-[10px] bg-error-text text-[13px] font-semibold text-white disabled:opacity-50"
+            className="h-[34px] grow-[2] rounded-[10px] bg-error-text text-[13px] font-semibold text-on-primary disabled:opacity-50"
           >
             清空全部 {count} 段对话
           </button>

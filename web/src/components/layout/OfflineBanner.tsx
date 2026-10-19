@@ -19,7 +19,7 @@ export function OfflineBanner() {
         type="button"
         onClick={() => recheck()}
         disabled={checking}
-        className="h-8 shrink-0 rounded-2xl bg-primary px-3.5 text-[13px] font-semibold text-white disabled:opacity-70"
+        className="h-8 shrink-0 rounded-2xl bg-primary px-3.5 text-[13px] font-semibold text-on-primary disabled:opacity-70"
       >
         {checking ? '检测中…' : '重试连接'}
       </button>
