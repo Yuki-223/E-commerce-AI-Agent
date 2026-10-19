@@ -16,7 +16,7 @@ export interface Profile {
 
 export const DEFAULT_USER_ID = 'local-user'
 export const DEFAULT_PROFILE: Profile = { id: 'default', name: '我', userId: DEFAULT_USER_ID, color: '#D9CFC4' }
-const AVATAR_COLORS = ['#D9CFC4', '#C9D3CC', '#CCC6D9', '#D9C4C4', '#C4D2D9', '#D6D0B8']
+export const AVATAR_COLORS = ['#D9CFC4', '#C9D3CC', '#CCC6D9', '#D9C4C4', '#C4D2D9', '#D6D0B8']
 
 interface ProfilesState {
   profiles: Profile[]
@@ -24,6 +24,7 @@ interface ProfilesState {
   setActive: (id: string) => void
   create: (name: string) => Profile
   rename: (id: string, name: string) => void
+  recolor: (id: string, color: string) => void
   remove: (id: string) => void
 }
 
@@ -43,6 +44,7 @@ export const useProfiles = create<ProfilesState>((set, get) => ({
     return profile
   },
   rename: (id, name) => set((s) => ({ profiles: s.profiles.map((p) => (p.id === id && name.trim() ? { ...p, name: name.trim() } : p)) })),
+  recolor: (id, color) => set((s) => ({ profiles: s.profiles.map((p) => (p.id === id ? { ...p, color } : p)) })),
   remove: (id) =>
     set((s) => {
       if (id === DEFAULT_PROFILE.id || s.profiles.length <= 1) return s

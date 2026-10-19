@@ -68,6 +68,10 @@ export function AccountButton() {
             <IconChevronRight className="text-ink-subtle" />
           </Link>
           <div aria-hidden="true" className="mx-1 my-1.5 h-px bg-line" />
+          <Link role="menuitem" to="/settings/general" onClick={close} className={ITEM}>
+            <IconGear />
+            <span className="grow">设置</span>
+          </Link>
           <Link role="menuitem" to="/cart" onClick={close} className={ITEM}>
             <IconCart size={18} strokeWidth={2.1} />
             <span className="grow">购物车</span>
