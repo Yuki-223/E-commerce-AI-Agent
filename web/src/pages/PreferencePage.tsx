@@ -4,6 +4,7 @@ import { api } from '../api/endpoints'
 import type { UserPreference } from '../api/types'
 import { IconCheckCircle, IconChevronDown, IconClose, IconPencil } from '../components/Icons'
 import { Avatar } from '../components/layout/AccountButton'
+import { Segmented } from '../components/Segmented'
 import { preferenceKey, usePreference } from '../hooks/usePreference'
 import { profileLabel, useActiveProfile, useProfiles } from '../stores/profiles'
 import { useSettings } from '../stores/ui'
@@ -208,23 +209,7 @@ export function PreferencePage() {
               </div>
             </Row>
             <Row label="价格倾向" hint="预算内更看重便宜还是品质" wide>
-              <div role="radiogroup" aria-label="价格倾向" className="grid grid-cols-3 rounded-lg bg-[var(--segment)] p-[3px]">
-                {TIERS.map(([value, label]) => {
-                  const on = (pref.price_tier ?? 'balanced') === value
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={on}
-                      onClick={() => mutate((p) => ({ ...p, price_tier: value }))}
-                      className={`h-[30px] rounded-md px-3.5 text-[13px] text-ink ${on ? 'bg-surface font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]' : 'text-ink-muted'}`}
-                    >
-                      {label}
-                    </button>
-                  )
-                })}
-              </div>
+              <Segmented label="价格倾向" options={TIERS} value={pref.price_tier ?? 'balanced'} onChange={(value) => mutate((p) => ({ ...p, price_tier: value }))} />
             </Row>
           </Section>
 

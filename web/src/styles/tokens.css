@@ -37,6 +37,7 @@
   --star-empty: #D9D1C8;
   --compare-head: #F8F3EC;
   --segment: #F1EEEA;
+  --segment-thumb: #FFFFFF;
   --compare-zebra: rgba(246, 240, 232, 0.42);
   --overlay: rgba(255, 255, 255, 0.7);
   --shadow-card: 0 2px 5px rgba(43, 30, 18, 0.03);
@@ -93,6 +94,7 @@
   --star-empty: #4A423A;
   --compare-head: #241E18;
   --segment: #2A231D;
+  --segment-thumb: #3D342C;
   --compare-zebra: rgba(42, 35, 29, 0.6);
   --overlay: rgba(255, 255, 255, 0.05);
   --shadow-card: 0 2px 5px rgba(0, 0, 0, 0.25);

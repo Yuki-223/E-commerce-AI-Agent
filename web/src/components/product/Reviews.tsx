@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Review } from '../../api/types'
+import { Segmented } from '../Segmented'
 
 type Filter = 'all' | 'positive' | 'negative'
 type Sort = 'default' | 'high' | 'low'
@@ -39,8 +40,6 @@ export function Reviews({ reviews, collapsedCount = 3 }: { reviews: Review[]; co
   if (!reviews.length) return <div className="text-[13px] text-ink-subtle">暂无用户评价</div>
 
   const shown = expanded ? list : list.slice(0, collapsedCount)
-  const chip = (active: boolean) =>
-    `rounded-full px-2.5 py-1 text-xs ${active ? 'bg-primary-tint font-semibold text-primary-text' : 'bg-field text-ink-muted'}`
 
   return (
     <section className="flex flex-col gap-2.5" aria-label="用户评价">
@@ -49,17 +48,19 @@ export function Reviews({ reviews, collapsedCount = 3 }: { reviews: Review[]; co
         <span className="text-xs text-ink-subtle">{dist}</span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        {(
-          [
-            ['all', '全部'],
-            ['positive', `好评 ${reviews.filter((r) => r.polarity === 'positive').length}`],
-            ['negative', `差评 ${reviews.filter((r) => r.polarity === 'negative').length}`],
-          ] as [Filter, string][]
-        ).map(([key, label]) => (
-          <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)} className={chip(filter === key)}>
-            {label}
-          </button>
-        ))}
+        <div className="w-[216px]">
+          <Segmented
+            label="筛选评价"
+            size="sm"
+            value={filter}
+            onChange={setFilter}
+            options={[
+              ['all', '全部'],
+              ['positive', `好评 ${reviews.filter((r) => r.polarity === 'positive').length}`],
+              ['negative', `差评 ${reviews.filter((r) => r.polarity === 'negative').length}`],
+            ]}
+          />
+        </div>
         <label className="ml-auto flex items-center gap-1 text-xs text-ink-subtle">
           <span className="sr-only-label">排序</span>
           <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="rounded-md bg-transparent py-0.5 text-xs text-ink-muted outline-none">
