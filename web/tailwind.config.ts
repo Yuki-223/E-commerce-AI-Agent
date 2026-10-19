@@ -14,7 +14,7 @@ export default {
         'soft-purple': v('soft-purple'),
         bg: v('background'),
         surface: v('surface'),
-        sidebar: v('sidebar'),
+        sidebar: { DEFAULT: v('sidebar'), hover: v('sidebar-hover'), active: v('sidebar-active') },
         field: v('field'),
         chip: v('chip'),
         ink: { DEFAULT: v('text-primary'), secondary: v('text-secondary'), muted: v('text-muted'), subtle: v('text-subtle') },

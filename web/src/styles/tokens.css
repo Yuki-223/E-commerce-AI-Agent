@@ -17,6 +17,8 @@
   --background: #FBFAF7;
   --surface: #FFFFFF;
   --sidebar: #F5F0E9;
+  --sidebar-hover: rgba(43, 37, 32, 0.05);
+  --sidebar-active: rgba(43, 37, 32, 0.08);
   --field: #FAF6F1;
   --chip: rgba(245, 239, 231, 0.9);
   --text-primary: #2B2520;
@@ -60,6 +62,8 @@
   --background: #13110F;
   --surface: #1E1A16;
   --sidebar: #181512;
+  --sidebar-hover: rgba(242, 236, 228, 0.05);
+  --sidebar-active: rgba(242, 236, 228, 0.09);
   --field: #241E18;
   --chip: rgba(42, 35, 29, 0.9);
   --text-primary: #F2ECE4;

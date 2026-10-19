@@ -4,7 +4,7 @@ import { useCart } from '../../hooks/useCart'
 import { preferenceSummary, usePreference } from '../../hooks/usePreference'
 import { profileLabel, useActiveProfile, type Profile } from '../../stores/profiles'
 import { useSettings } from '../../stores/ui'
-import { IconCart, IconChevronRight, IconGear, IconHelp, IconHistory, IconSliders } from '../Icons'
+import { IconCart, IconChevronRight, IconChevronUpDown, IconGear, IconHelp, IconHistory, IconSliders } from '../Icons'
 import { HistoryManagerDialog } from './HistoryManagerDialog'
 
 export function Avatar({ profile, size = 32 }: { profile: Profile; size?: number }) {
@@ -21,8 +21,8 @@ export function Avatar({ profile, size = 32 }: { profile: Profile; size?: number
 
 const ITEM = 'flex min-h-[46px] items-center gap-3 rounded-xl px-3 text-[15px] text-ink no-underline hover:bg-secondary hover:text-ink'
 
-/** Sidebar footer + ㊒ WebAccountMenu popover. */
-export function AccountButton() {
+/** Sidebar footer + ㊒ WebAccountMenu popover; `compact` is the collapsed rail's avatar-only button. */
+export function AccountButton({ compact = false }: { compact?: boolean }) {
   const profile = useActiveProfile()
   const { data } = usePreference(profile.userId)
   const { data: cart } = useCart()
@@ -51,7 +51,7 @@ export function AccountButton() {
         <div
           role="menu"
           aria-label="账户菜单"
-          className="absolute bottom-[calc(100%+8px)] left-0 z-40 flex w-[300px] flex-col rounded-[18px] border border-line-strong bg-surface p-2 shadow-[0_18px_48px_rgba(43,30,18,0.18),0_2px_6px_rgba(43,30,18,0.06)]"
+          className={`absolute bottom-[calc(100%+8px)] left-0 z-40 flex ${compact ? 'w-[300px]' : 'right-0'} flex-col rounded-[18px] border border-line-strong bg-surface p-2 shadow-[0_18px_48px_rgba(43,30,18,0.18),0_2px_6px_rgba(43,30,18,0.06)]`}
         >
           <button
             type="button"
@@ -119,15 +119,24 @@ export function AccountButton() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={open ? '关闭账户菜单' : '打开账户菜单'}
+        title={compact ? profileLabel(profile) : undefined}
         onClick={() => setOpen((o) => !o)}
-        className={`flex w-full items-center gap-2.5 rounded-xl p-2.5 text-left text-ink ${open ? 'border-[1.5px] border-primary bg-surface' : 'border-[1.5px] border-transparent bg-overlay'}`}
+        className={
+          compact
+            ? `flex h-10 w-10 items-center justify-center rounded-lg p-0 hover:bg-sidebar-hover ${open ? 'bg-sidebar-active' : ''}`
+            : `flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-ink hover:bg-sidebar-hover ${open ? 'bg-sidebar-active hover:bg-sidebar-active' : ''}`
+        }
       >
-        <Avatar profile={profile} />
-        <span className="flex min-w-0 grow flex-col">
-          <span className="text-sm font-semibold">{profileLabel(profile)}</span>
-          <span className="truncate text-xs text-ink-subtle">{preferenceSummary(data)}</span>
-        </span>
-        <IconGear className="text-ink-subtle" />
+        <Avatar profile={profile} size={compact ? 30 : 32} />
+        {!compact && (
+          <>
+            <span className="flex min-w-0 grow flex-col">
+              <span className="text-sm font-semibold">{profileLabel(profile)}</span>
+              <span className="truncate text-xs text-ink-subtle">{preferenceSummary(data)}</span>
+            </span>
+            <IconChevronUpDown className="shrink-0 text-ink-subtle" />
+          </>
+        )}
       </button>
       {history && <HistoryManagerDialog onClose={() => setHistory(false)} />}
     </div>

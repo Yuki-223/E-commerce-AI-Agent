@@ -14,3 +14,25 @@ export const useSettings = create<{ tab: SettingsTab | null; open: (tab?: Settin
   open: (tab = 'general') => set({ tab }),
   close: () => set({ tab: null }),
 }))
+
+const SIDEBAR_KEY = 'cartpilot.sidebarCollapsed'
+
+/** Desktop sidebar collapsed to the icon rail; remembered per browser. */
+export const useSidebar = create<{ collapsed: boolean; toggle: () => void }>((set, get) => ({
+  collapsed: (() => {
+    try {
+      return localStorage.getItem(SIDEBAR_KEY) === '1'
+    } catch {
+      return false
+    }
+  })(),
+  toggle: () => {
+    const collapsed = !get().collapsed
+    try {
+      localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+    set({ collapsed })
+  },
+}))

@@ -337,3 +337,16 @@ export const IconDatabase = (p: P) => (
     <path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
   </svg>
 )
+
+export const IconSidebar = (p: P) => (
+  <svg {...base('0 0 24 24', p.size, 18, 18, p)} {...S} strokeWidth={1.9}>
+    <rect x="3" y="4" width="18" height="16" rx="3" />
+    <path d="M9.5 4v16" />
+  </svg>
+)
+
+export const IconChevronUpDown = (p: P) => (
+  <svg {...base('0 0 24 24', p.size, 14, 14, p)} {...S} strokeWidth={2.2}>
+    <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
+  </svg>
+)
