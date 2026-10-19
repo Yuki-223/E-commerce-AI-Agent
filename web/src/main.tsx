@@ -6,6 +6,8 @@ import { App } from './App'
 import { bindQueryClient } from './chat/engine'
 import { api } from './api/endpoints'
 import { hydrateConversations } from './stores/conversations'
+import { hydrateProfiles } from './stores/profiles'
+import { initTheme } from './stores/theme'
 import './styles/index.css'
 
 const queryClient = new QueryClient({
@@ -13,6 +15,8 @@ const queryClient = new QueryClient({
 })
 bindQueryClient(queryClient)
 void hydrateConversations()
+void hydrateProfiles()
+initTheme()
 // Handy in the console during development: await __cartpilotApi.cart()
 if (import.meta.env.DEV) (window as unknown as { __cartpilotApi: typeof api }).__cartpilotApi = api
 
