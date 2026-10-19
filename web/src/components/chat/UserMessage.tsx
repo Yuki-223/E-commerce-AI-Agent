@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ChatMessage } from '../../stores/conversations'
 import { ProductRefChip } from './ProductRefChip'
 
 export function UserMessage({ message }: { message: ChatMessage }) {
+  // Only a message just sent pops in; history renders still.
+  const [fresh] = useState(() => Date.now() - message.createdAt < 1000)
   return (
-    <div className="flex flex-col items-end gap-1.5">
+    <div className={`flex origin-bottom-right flex-col items-end gap-1.5 ${fresh ? 'animate-bubble-in' : ''}`}>
       {message.image && <img src={message.image} alt="用户发送的图片" className="h-24 w-24 rounded-[14px] border border-line object-cover" />}
       {message.refProduct && (
         <Link to={`?product=${message.refProduct.id}`} className="max-w-[85%] no-underline md:max-w-[70%]" title="查看商品详情">

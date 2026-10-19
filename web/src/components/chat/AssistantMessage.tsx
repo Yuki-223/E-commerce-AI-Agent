@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { retry } from '../../chat/engine'
 import { useProducts } from '../../hooks/useProducts'
@@ -7,6 +8,7 @@ import { InlineComparison } from '../compare/InlineComparison'
 import { ProductCard } from './ProductCard'
 import { SpecSelectionCard } from './SpecSelectionCard'
 import { StatusBubble } from './StatusBubble'
+import { StreamText } from './StreamText'
 
 interface Props {
   convId: string
@@ -26,6 +28,9 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
   const compare = message.compareIds ?? []
   const setCompare = (next: (c: string[]) => string[]) => patchMessage(convId, message.id, (m) => ({ compareIds: next(m.compareIds ?? []) }))
   const { data: products } = useProducts(message.productIds)
+  // Answers that arrive while on screen rise in; ones loaded from history don't.
+  const [live] = useState(() => message.state === 'pending' || message.state === 'streaming')
+  const rise = live ? 'animate-fade-up' : ''
 
   if (message.state === 'error') {
     return (
@@ -65,13 +70,13 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
     <div className="flex flex-col gap-4">
       {opening && (
         <div className="max-w-[640px] self-start whitespace-pre-line rounded-[18px] border border-line bg-surface px-4 py-[11px] text-[15px] leading-[22px]">
-          {opening}
+          <StreamText text={opening} />
           {!done && <span aria-hidden="true" className="ml-0.5 inline-block h-[15px] w-0.5 animate-pulse bg-primary align-[-2px]" />}
         </div>
       )}
 
       {done && products && products.length > 0 && (
-        <div className="grid max-w-[860px] grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4">
+        <div className={`${rise} grid max-w-[860px] grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4`}>
           {products.map((p) => (
             <ProductCard
               key={p.productID}
@@ -86,12 +91,20 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
         </div>
       )}
 
-      {done && message.comparison && <InlineComparison comparison={message.comparison} convId={convId} />}
+      {done && message.comparison && (
+        <div className={rise}>
+          <InlineComparison comparison={message.comparison} convId={convId} />
+        </div>
+      )}
 
-      {done && message.specSelection && <SpecSelectionCard spec={message.specSelection} disabled={busy || !isLatest} onSubmit={onSpecSubmit} />}
+      {done && message.specSelection && (
+        <div className={rise}>
+          <SpecSelectionCard spec={message.specSelection} disabled={busy || !isLatest} onSubmit={onSpecSubmit} />
+        </div>
+      )}
 
       {(compare.length >= 2 || followups.length > 0) && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className={`${rise} flex flex-wrap items-center gap-2`}>
           {compare.length >= 2 && (
             <Link
               to={`/compare?ids=${compare.join(',')}&from=${convId}`}

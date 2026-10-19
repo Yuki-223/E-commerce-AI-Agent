@@ -55,6 +55,9 @@ export default {
         'pop-up': { from: { opacity: '0', transform: 'translateY(-4px) scale(0.97)' } },
         'dialog-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.98)' } },
         'drawer-in': { from: { transform: 'translateX(-100%)' } },
+        reveal: { from: { opacity: '0', filter: 'blur(6px)' } },
+        'bubble-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.92)' } },
+        'fade-up': { from: { opacity: '0', transform: 'translateY(10px)' } },
         // Thinking dots: each rises, holds, then fades before the next wave.
         'quiet-dot': {
           '0%, 8%': { opacity: '0', transform: 'translateY(2px)' },
@@ -71,6 +74,10 @@ export default {
         'dialog-in': 'dialog-in var(--dur-base) var(--ease-out)',
         'drawer-in': 'drawer-in var(--dur-sheet) var(--ease-snap)',
         'toast-in': 'pop-in var(--dur-sheet) var(--ease-overshoot)',
+        // Streamed text: each new piece sharpens out of a blur.
+        reveal: 'reveal var(--dur-base) cubic-bezier(.215, .61, .355, 1)',
+        'bubble-in': 'bubble-in var(--dur-slow) var(--ease-overshoot)',
+        'fade-up': 'fade-up var(--dur-slow) var(--ease-out)',
         'quiet-dot': 'quiet-dot 1.9s cubic-bezier(.4, 0, .2, 1) infinite',
       },
     },
