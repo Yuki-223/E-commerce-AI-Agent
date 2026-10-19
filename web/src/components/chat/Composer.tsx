@@ -25,6 +25,9 @@ interface Props {
 /** Touch devices get 拍照 in the + menu; <input capture> opens the camera there. */
 const canCapture = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
 
+/** 20px shell; the dual-ring shadow replaces the border and deepens on focus. */
+const SHELL = 'flex flex-col rounded-[20px] bg-surface shadow-input transition-shadow duration-base ease-out focus-within:shadow-input-focus'
+
 /**
  * Text + image + voice input. The + menu adds an image (or a photo on phones),
  * references a product from the cart / recently viewed, or switches the
@@ -157,8 +160,8 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
         onSubmit={submit}
         className={
           home
-            ? 'flex w-full max-w-[760px] flex-col gap-2.5 rounded-3xl border border-line-strong bg-surface p-3 shadow-[0_8px_28px_rgba(43,30,18,0.08)]'
-            : 'flex flex-col gap-2 rounded-[22px] border border-line-strong bg-surface px-2.5 py-2 shadow-input focus-within:border-primary'
+            ? `${SHELL} w-full max-w-[760px] gap-2.5 p-3`
+            : `${SHELL} gap-2 px-2.5 py-2`
         }
       >
         {image && (

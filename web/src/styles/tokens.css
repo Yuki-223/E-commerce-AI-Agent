@@ -41,7 +41,9 @@
   --overlay: rgba(255, 255, 255, 0.7);
   --shadow-card: 0 2px 5px rgba(43, 30, 18, 0.03);
   --shadow-pop: 0 16px 40px rgba(43, 30, 18, 0.16);
-  --shadow-input: 0 4px 16px rgba(43, 30, 18, 0.06);
+  /* Composer: soft lift plus a hairline ring; focus deepens both rings. */
+  --shadow-input: 0 4px 20px rgba(43, 30, 18, 0.035), inset 0 0 0 1px rgba(43, 37, 32, 0.10);
+  --shadow-input-focus: 0 4px 20px rgba(43, 30, 18, 0.075), inset 0 0 0 1px rgba(43, 37, 32, 0.18), 0 0 0 1px rgba(43, 37, 32, 0.18);
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
   --font-logo: Georgia, "Times New Roman", serif;
   --font-serif: Georgia, "Songti SC", STSong, "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
@@ -95,6 +97,7 @@
   --overlay: rgba(255, 255, 255, 0.05);
   --shadow-card: 0 2px 5px rgba(0, 0, 0, 0.25);
   --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.5);
-  --shadow-input: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-input: 0 4px 20px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(242, 236, 228, 0.10);
+  --shadow-input-focus: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(242, 236, 228, 0.20), 0 0 0 1px rgba(242, 236, 228, 0.20);
   color-scheme: dark;
 }

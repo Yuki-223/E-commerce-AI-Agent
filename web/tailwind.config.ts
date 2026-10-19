@@ -35,6 +35,7 @@ export default {
         card: v('shadow-card'),
         pop: v('shadow-pop'),
         input: v('shadow-input'),
+        'input-focus': v('shadow-input-focus'),
       },
       transitionDuration: {
         fast: v('dur-fast'),
