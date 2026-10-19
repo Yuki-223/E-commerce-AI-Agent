@@ -32,6 +32,8 @@ export interface ChatMessage {
   statusPhase?: string
   composer?: ComposerJson | null
   productIds?: string[]
+  /** Cards ticked 加入对比 under this answer. */
+  compareIds?: string[]
   comparison?: Comparison | null
   specSelection?: SpecSelection | null
   cartAction?: string

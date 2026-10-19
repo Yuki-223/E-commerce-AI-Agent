@@ -41,7 +41,7 @@ export function MemoryBanner({ convId, message }: { convId: string; message: Cha
     setBusy(false)
   }
 
-  const box = 'mx-auto mt-3 flex w-[calc(100%-64px)] max-w-[820px] shrink-0 items-center gap-2.5 rounded-[14px] border bg-surface px-3.5 py-2.5 shadow-[0_2px_8px_rgba(43,30,18,0.05)]'
+  const box = 'mx-auto mt-3 flex w-[calc(100%-24px)] md:w-[calc(100%-64px)] max-w-[820px] shrink-0 items-center gap-2.5 rounded-[14px] border bg-surface px-3.5 py-2.5 shadow-[0_2px_8px_rgba(43,30,18,0.05)]'
 
   if (undone) {
     return (

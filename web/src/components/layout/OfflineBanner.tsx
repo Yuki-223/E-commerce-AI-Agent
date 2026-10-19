@@ -8,7 +8,7 @@ export function OfflineBanner() {
   return (
     <div
       role="alert"
-      className="mx-6 mt-3 flex items-center gap-2.5 rounded-[14px] border border-[rgba(194,78,58,0.35)] bg-surface px-3.5 py-3 shadow-[0_4px_12px_rgba(43,30,18,0.04)]"
+      className="mx-3 mt-3 flex items-center gap-2.5 rounded-[14px] md:mx-6 border border-[rgba(194,78,58,0.35)] bg-surface px-3.5 py-3 shadow-[0_4px_12px_rgba(43,30,18,0.04)]"
     >
       <IconWifiOff className="shrink-0 text-error-text" />
       <div className="flex min-w-0 grow flex-col gap-0.5">

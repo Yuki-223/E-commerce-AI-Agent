@@ -22,7 +22,7 @@ export function ProductCard({ product, description, viewing, compareChecked, onT
     >
       <div className="flex gap-3">
         <button type="button" onClick={onOpen} className="shrink-0 rounded-xl p-0" aria-label={`查看 ${product.title} 详情`}>
-          <ProductImage src={product.imageURL} alt={product.title} className="h-28 w-28 rounded-xl border border-line" />
+          <ProductImage src={product.imageURL} alt={product.title} className="h-[92px] w-[92px] rounded-xl border border-line md:h-28 md:w-28" />
         </button>
         <div className="flex min-w-0 flex-col gap-1.5">
           {tags.length > 0 && (
@@ -49,7 +49,8 @@ export function ProductCard({ product, description, viewing, compareChecked, onT
         </button>
         <label className="flex cursor-pointer items-center gap-1.5 rounded-[10px] border border-line-strong px-3 text-[13px]">
           <input type="checkbox" checked={compareChecked} onChange={(e) => onToggleCompare(e.target.checked)} className="m-0 accent-[var(--primary)]" />
-          加入对比
+          <span className="md:hidden">对比</span>
+          <span className="hidden md:inline">加入对比</span>
         </label>
       </div>
     </article>

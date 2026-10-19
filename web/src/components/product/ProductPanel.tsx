@@ -89,7 +89,7 @@ export function QuantityStepper({ value, onChange, max = 99 }: { value: number; 
   )
 }
 
-function Basis({ product }: { product: Product }) {
+export function Basis({ product }: { product: Product }) {
   const text = useMemo(() => {
     const s = product.summary ?? product.evidence.find((e) => e.sourceType === 'productDetail')?.snippet ?? ''
     const two = s.split(/(?<=[。！？])/).slice(0, 2).join('')

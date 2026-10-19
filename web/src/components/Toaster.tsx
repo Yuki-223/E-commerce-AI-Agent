@@ -7,7 +7,7 @@ export function Toaster() {
   const toasts = useToasts((s) => s.toasts)
   if (!toasts.length) return null
   return (
-    <div className="pointer-events-none absolute bottom-24 right-6 z-40 flex w-[320px] flex-col gap-2">
+    <div className="pointer-events-none absolute bottom-[calc(96px+env(safe-area-inset-bottom))] left-3 right-3 z-40 flex flex-col gap-2 md:left-auto md:right-6 md:w-[320px]">
       {toasts.map((t) => (
         <div
           key={t.id}

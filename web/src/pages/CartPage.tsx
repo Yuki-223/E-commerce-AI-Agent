@@ -8,6 +8,8 @@ import { SpecDialog } from '../components/cart/SpecDialog'
 import { ProductImage } from '../components/product/ProductImage'
 import { useCart, useCartMutation } from '../hooks/useCart'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useIsNarrow } from '../hooks/useIsNarrow'
+import { BackButton, MenuButton, MobileHeader, MobileTitle } from '../components/layout/MobileHeader'
 import { shortSummary, useProducts } from '../hooks/useProducts'
 import { optionsText, yuan, yuan2 } from '../lib/format'
 import { round2 } from '../lib/money'
@@ -118,6 +120,77 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
   )
 }
 
+/** ㊑ MWebCart row: card with checkbox, photo, spec chip and stepper. */
+function MobileCartRow({ line, product, selected, onSelect }: { line: CartLine; product?: Product; selected: boolean; onSelect: (on: boolean) => void }) {
+  const mutation = useCartMutation()
+  const [specOpen, setSpecOpen] = useState(false)
+  const run = async (req: Parameters<typeof mutation.mutateAsync>[0]) => {
+    try {
+      await mutation.mutateAsync(req)
+    } catch (err) {
+      toast({ tone: 'error', title: '购物车更新失败', detail: err instanceof ApiError ? err.message : '请稍后再试' })
+    }
+  }
+  const id = String(line.cart_item_id)
+  const specName = product?.specifications.map((s) => s.name).join(' / ') || '规格'
+  return (
+    <article className="relative flex gap-2.5 rounded-[18px] border border-line bg-surface p-3 shadow-card">
+      <label className="flex w-7 shrink-0 cursor-pointer items-center justify-center">
+        <input type="checkbox" checked={selected} onChange={(e) => onSelect(e.target.checked)} aria-label={`选择 ${line.title}`} className="m-0 h-5 w-5 accent-[var(--primary)]" />
+      </label>
+      <Link to={`/p/${line.product_id}`} className="block h-[76px] w-[76px] shrink-0 overflow-hidden rounded-[14px] border border-line">
+        <ProductImage src={product?.imageURL ?? null} alt={line.title} className="h-full w-full" fit="cover" />
+      </Link>
+      <div className="flex min-w-0 grow flex-col gap-1.5">
+        <div className="flex gap-1">
+          <span className="line-clamp-2 grow text-sm font-semibold leading-[19px]">{line.title}</span>
+          <button type="button" aria-label={`删除 ${line.title}`} onClick={() => void run({ action: 'remove', cartItemID: id })} className="flex h-8 w-8 shrink-0 items-center justify-center p-0 text-ink-subtle">
+            <IconTrash size={15} />
+          </button>
+        </div>
+        {Object.keys(line.options).length > 0 && (
+          <div className="relative self-start">
+            <button
+              type="button"
+              aria-expanded={specOpen}
+              disabled={!product || product.skus.length < 2}
+              onClick={() => setSpecOpen((o) => !o)}
+              className="flex items-center gap-1 rounded-full bg-soft-purple px-[9px] py-1 text-xs text-ink-muted"
+            >
+              {specName}：{optionsText(line.options)}
+              {product && product.skus.length > 1 && <IconChevronDown />}
+            </button>
+            {specOpen && product && (
+              <SpecDialog
+                line={line}
+                product={product}
+                busy={mutation.isPending}
+                onCancel={() => setSpecOpen(false)}
+                onConfirm={async (skuId) => {
+                  await run({ action: 'updateSpecification', cartItemID: id, productID: line.product_id, skuID: skuId, quantity: line.quantity })
+                  setSpecOpen(false)
+                }}
+              />
+            )}
+          </div>
+        )}
+        <div className="flex items-center">
+          <span className="grow text-base font-bold text-error-text">{yuan(line.unit_price)}</span>
+          <div className="flex h-9 items-center rounded-[10px] bg-secondary">
+            <button type="button" aria-label="减少" disabled={mutation.isPending || line.quantity <= 1} onClick={() => void run({ action: 'updateQuantity', cartItemID: id, quantity: line.quantity - 1 })} className="h-9 w-9 p-0 text-[17px] text-ink-muted disabled:opacity-40">
+              −
+            </button>
+            <span className="w-7 text-center text-[15px] font-semibold">{line.quantity}</span>
+            <button type="button" aria-label="增加" disabled={mutation.isPending} onClick={() => void run({ action: 'updateQuantity', cartItemID: id, quantity: line.quantity + 1 })} className="h-9 w-9 p-0 text-[17px] text-primary-text">
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
+
 /** ⑱ WebCart: full cart page. Every amount shown is a value from GET /cart. */
 export function CartPage() {
   const { data, isPending, isError, refetch } = useCart()
@@ -135,6 +208,44 @@ export function CartPage() {
   const selectedQty = selected.reduce((n, l) => n + l.quantity, 0)
   // With everything ticked this is exactly cart.total; otherwise the sum of the ticked lines' subtotals.
   const selectedTotal = allSelected ? data!.cart.total : round2(selected.reduce((n, l) => n + l.subtotal, 0))
+  const narrow = useIsNarrow()
+
+  if (narrow) {
+    return (
+      <>
+        <MobileHeader left={<BackButton label="返回对话" />} right={<MenuButton />}>
+          <MobileTitle>购物车（{itemCount}）</MobileTitle>
+        </MobileHeader>
+        {isPending ? (
+          <div className="p-6 text-sm text-ink-muted">正在加载购物车…</div>
+        ) : lines.length === 0 ? (
+          <CartEmpty />
+        ) : (
+          <>
+            <div className="flex min-h-0 grow flex-col gap-3 overflow-y-auto px-4 pb-4 pt-3.5">
+              {lines.map((l) => (
+                <MobileCartRow key={l.cart_item_id} line={l} product={byId.get(l.product_id)} selected={!unselected.includes(l.cart_item_id)} onSelect={(on) => toggle(l.cart_item_id, on)} />
+              ))}
+              <p className="mx-1 mt-1 text-xs leading-[18px] text-ink-subtle">点规格可以改；在对话里说“把第二个删掉”也能修改购物车。</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-3 border-t border-line bg-surface px-4 pb-[max(10px,env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-6px_16px_rgba(43,30,18,0.05)]">
+              <label className="flex min-h-11 cursor-pointer items-center gap-1.5 text-sm">
+                <input type="checkbox" checked={allSelected} onChange={(e) => setAll(lines.map((l) => l.cart_item_id), e.target.checked)} className="m-0 h-5 w-5 accent-[var(--primary)]" />
+                全选
+              </label>
+              <div className="flex grow flex-col gap-px">
+                <span className="text-xs text-ink-subtle">已选 {selectedQty} 件</span>
+                <span className="text-lg font-bold text-primary-text" data-testid="cart-total">{yuan2(selectedTotal)}</span>
+              </div>
+              <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-11 rounded-full bg-primary px-5 text-[15px] font-semibold text-white disabled:opacity-50">
+                结算（{selectedQty}）
+              </button>
+            </div>
+          </>
+        )}
+      </>
+    )
+  }
 
   return (
     <div className="flex min-h-0 grow flex-col gap-5 overflow-y-auto px-10 py-7">

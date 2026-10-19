@@ -1,8 +1,7 @@
-import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { retry } from '../../chat/engine'
 import { useProducts } from '../../hooks/useProducts'
-import type { ChatMessage } from '../../stores/conversations'
+import { useConversations, type ChatMessage } from '../../stores/conversations'
 import { IconAlert, IconCompare, IconRetry } from '../Icons'
 import { InlineComparison } from '../compare/InlineComparison'
 import { ProductCard } from './ProductCard'
@@ -23,7 +22,9 @@ interface Props {
 export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpenProduct, onSpecSubmit, busy }: Props) {
   const [params] = useSearchParams()
   const viewing = params.get('product')
-  const [compare, setCompare] = useState<string[]>([])
+  const patchMessage = useConversations((s) => s.patchMessage)
+  const compare = message.compareIds ?? []
+  const setCompare = (next: (c: string[]) => string[]) => patchMessage(convId, message.id, (m) => ({ compareIds: next(m.compareIds ?? []) }))
   const { data: products } = useProducts(message.productIds)
 
   if (message.state === 'error') {

@@ -3,11 +3,13 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/http'
 import type { ComparisonProduct } from '../api/types'
 import { CartButton } from '../components/CartButton'
-import { IconCheckCircle, IconChevronLeft, IconClose, IconCrown, IconPlusCircle } from '../components/Icons'
+import { IconCheckCircle, IconChevronLeft, IconClose, IconCrown, IconPlusCircle, IconSwipe } from '../components/Icons'
 import { ProductImage } from '../components/product/ProductImage'
 import { useCart, useCartMutation } from '../hooks/useCart'
 import { MAX_COMPARE, useComparison } from '../hooks/useComparison'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useIsNarrow } from '../hooks/useIsNarrow'
+import { BackButton, MobileCartLink, MobileHeader, MobileTitle } from '../components/layout/MobileHeader'
 import { useProducts } from '../hooks/useProducts'
 import { useConversations } from '../stores/conversations'
 import { toast } from '../stores/toast'
@@ -35,19 +37,20 @@ function AddSlot({ candidates, onAdd }: { candidates: string[]; onAdd: (id: stri
   const { data: products } = useProducts(open ? candidates : undefined)
   const list = (products ?? []).filter((p) => !q || p.title.includes(q) || p.brand.includes(q))
   return (
-    <div className={`relative p-4 ${CELL_BORDER}`}>
+    <div className={`relative px-2.5 py-3 md:p-4 ${CELL_BORDER}`}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex h-full min-h-[150px] w-full flex-col items-center justify-center gap-1.5 rounded-[14px] border-[1.5px] border-dashed border-[rgba(184,112,77,0.5)] bg-overlay text-sm font-semibold text-primary-text"
+        className="flex h-full min-h-[100px] w-full flex-col items-center justify-center gap-1 rounded-xl md:min-h-[150px] md:gap-1.5 md:rounded-[14px] border-[1.5px] border-dashed border-[rgba(184,112,77,0.5)] bg-overlay text-sm font-semibold text-primary-text"
       >
         <IconPlusCircle />
-        添加商品对比
-        <span className="text-xs font-normal text-ink-subtle">从对话推荐或搜索中选择</span>
+        <span className="md:hidden">添加商品</span>
+        <span className="hidden md:inline">添加商品对比</span>
+        <span className="hidden text-xs font-normal text-ink-subtle md:inline">从对话推荐或搜索中选择</span>
       </button>
       {open && (
-        <div role="dialog" aria-label="选择要对比的商品" className="absolute left-4 right-4 top-[calc(100%-8px)] z-30 flex max-h-[360px] flex-col gap-2 rounded-2xl border border-line-strong bg-surface p-3 shadow-pop">
+        <div role="dialog" aria-label="选择要对比的商品" className="fixed inset-x-4 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 flex max-h-[360px] md:absolute md:inset-x-4 md:bottom-auto md:top-[calc(100%-8px)] md:z-30 flex-col gap-2 rounded-2xl border border-line-strong bg-surface p-3 shadow-pop">
           <label className="flex items-center gap-2 rounded-[10px] bg-field px-2.5">
             <span className="sr-only-label">搜索商品</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索对话里推荐过的商品" className="h-[34px] grow bg-transparent text-[13px] outline-none" />
@@ -128,6 +131,7 @@ export function ComparePage() {
   const inCart = new Set(cart?.cart.lines.map((l) => l.product_id))
   const candidates = useCandidates(ids, fromConv)
   useDocumentTitle('商品对比')
+  const narrow = useIsNarrow()
 
   const setIds = (next: string[]) => {
     const p = new URLSearchParams(params)
@@ -142,6 +146,84 @@ export function ComparePage() {
   }
   const slots = (data?.products.length ?? 0) + (ids.length < MAX_COMPARE ? 1 : 0)
   const cols = `140px repeat(${Math.max(slots, 2)}, minmax(0, 1fr))`
+
+  if (narrow) {
+    const mcols = `72px repeat(${Math.max(slots, 2)}, 134px)`
+    return (
+      <>
+        <MobileHeader left={<BackButton to={fromConv ? `/c/${fromConv}` : undefined} label="返回对话" />} right={<MobileCartLink />}>
+          <MobileTitle>商品对比（{data?.products.length ?? ids.length}）</MobileTitle>
+        </MobileHeader>
+        <div className="flex min-h-0 grow flex-col gap-2.5 overflow-y-auto px-4 pb-4 pt-3.5">
+          <div className="flex items-center gap-1.5 text-xs text-ink-subtle">
+            <IconSwipe />
+            左右滑动查看更多 · 左侧维度列固定
+          </div>
+          {ids.length < 2 ? (
+            <div className="rounded-2xl border border-line bg-surface p-6 text-center text-sm text-ink-muted">至少选择 2 款商品才能对比。</div>
+          ) : !data ? (
+            <div className="rounded-2xl border border-line bg-surface p-6 text-center text-sm text-ink-muted">{isError ? (error as ApiError)?.message ?? '对比失败' : '正在生成对比…'}</div>
+          ) : (
+            <section aria-label="对比表" className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_2px_6px_rgba(43,30,18,0.04)]">
+              <div className="overflow-x-auto overscroll-x-contain">
+                <div className="w-max text-[13px] leading-[19px]">
+                  <div className="grid bg-[var(--compare-head)]" style={{ gridTemplateColumns: mcols }}>
+                    <div className="sticky left-0 z-10 bg-[var(--compare-head)]" />
+                    {data.products.map((p) => (
+                      <Link key={p.product_id} to={`/p/${p.product_id}`} className={`flex flex-col gap-1.5 px-2.5 py-3 text-ink no-underline ${CELL_BORDER}`}>
+                        <ProductImage src={p.image_url} alt={p.title} className="h-16 w-16 rounded-[10px] border border-line" />
+                        <span className="line-clamp-3 text-xs font-semibold leading-[17px]">{p.title}</span>
+                        {p.tagline && <span className="text-[11px] text-ink-muted">适合：{p.tagline}</span>}
+                        {inCart.has(p.product_id) && <span className="text-[11px] font-semibold text-success-text">已在购物车</span>}
+                      </Link>
+                    ))}
+                    {ids.length < MAX_COMPARE && <AddSlot candidates={candidates} onAdd={(id) => setIds([...ids, id])} />}
+                  </div>
+                  {data.rows.map((row, i) => {
+                    const bg = i % 2 === 1 ? 'var(--field)' : 'var(--surface)'
+                    return (
+                      <div key={row.label} className="grid" style={{ gridTemplateColumns: mcols, background: bg }}>
+                        <div className="sticky left-0 z-10 px-2.5 py-3 text-xs font-semibold text-ink-muted" style={{ background: bg }}>
+                          {row.label}
+                        </div>
+                        {row.values.map((v, j) => (
+                          <div key={j} className={`px-2.5 py-3 ${CELL_BORDER} ${row.highlight === j ? 'font-bold text-primary-text' : ''}`}>
+                            {v}
+                            {row.highlight === j && (
+                              <>
+                                <br />
+                                <span className="mt-[3px] inline-flex items-center gap-[3px] rounded-full bg-primary-soft px-1.5 py-px text-[11px] font-semibold">
+                                  <IconCrown />
+                                  最低
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                        {ids.length < MAX_COMPARE && <div className={CELL_BORDER} />}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
+        <div className="flex shrink-0 gap-2.5 border-t border-line bg-surface px-4 pb-[max(10px,env(safe-area-inset-bottom))] pt-2.5">
+          <Link to={fromConv ? `/c/${fromConv}` : '/'} className="flex h-11 grow items-center justify-center rounded-xl border border-line-strong text-sm font-semibold text-ink no-underline">
+            问问 AI 选哪个
+          </Link>
+          <button
+            type="button"
+            onClick={() => (navigator.share ? void navigator.share({ title: '商品对比', url: window.location.href }).catch(() => undefined) : void navigator.clipboard?.writeText(window.location.href))}
+            className="flex h-11 grow items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white"
+          >
+            分享对比
+          </button>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>

@@ -5,6 +5,8 @@ import type { UserPreference } from '../api/types'
 import { IconCheckCircle, IconClose, IconPencil, IconPlus } from '../components/Icons'
 import { Avatar } from '../components/layout/AccountButton'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useIsNarrow } from '../hooks/useIsNarrow'
+import { BackButton, MenuButton, MobileHeader, MobileTitle } from '../components/layout/MobileHeader'
 import { preferenceKey, preferenceSummary, usePreference } from '../hooks/usePreference'
 import { DEFAULT_PROFILE, profileLabel, useActiveProfile, useProfiles, type Profile } from '../stores/profiles'
 
@@ -149,6 +151,7 @@ export function PreferencePage() {
   const [newKeyword, setNewKeyword] = useState('')
   const [renaming, setRenaming] = useState(false)
   const [nameDraft, setNameDraft] = useState('')
+  const narrow = useIsNarrow()
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Adopt the server copy when switching profiles or when chat remembered something.
@@ -189,10 +192,16 @@ export function PreferencePage() {
         : { text: '偏好已同步', cls: 'text-success-text' }
 
   return (
-    <div className="flex min-h-0 grow flex-col gap-4 overflow-y-auto px-10 py-[22px]">
+    <>
+    {narrow && (
+      <MobileHeader left={<BackButton />} right={<MenuButton />}>
+        <MobileTitle>个人偏好</MobileTitle>
+      </MobileHeader>
+    )}
+    <div className="flex min-h-0 grow flex-col gap-4 overflow-y-auto px-4 pb-[max(22px,env(safe-area-inset-bottom))] pt-4 md:px-10 md:py-[22px]">
       <div className="flex items-end gap-4">
         <div className="flex grow flex-col gap-1">
-          <h1 className="m-0 text-[26px] font-bold">个人偏好</h1>
+          <h1 className="m-0 hidden text-[26px] font-bold md:block">个人偏好</h1>
           <p className="m-0 text-sm text-ink-muted">推荐时会用当前档案的偏好。对话里被记住的偏好也会存进当前档案；购物车和历史对话所有档案共用。</p>
         </div>
         <span role="status" className={`flex items-center gap-1.5 text-[13px] ${status.cls}`}>
@@ -291,7 +300,7 @@ export function PreferencePage() {
               </div>
             </Card>
             <Card title="关注品类">
-              <div className="grid grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 {CATEGORIES.map((c) => {
                   const on = pref.favorite_categories.includes(c)
                   return (
@@ -311,7 +320,7 @@ export function PreferencePage() {
           </div>
           <div className="flex flex-col gap-5">
             <Card title="品牌偏好">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <BrandField
                   id="brand-include"
                   label="喜欢品牌"
@@ -389,5 +398,6 @@ export function PreferencePage() {
         </div>
       )}
     </div>
+    </>
   )
 }

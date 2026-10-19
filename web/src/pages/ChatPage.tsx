@@ -8,6 +8,8 @@ import { MemoryBanner } from '../components/chat/MemoryBanner'
 import { UserMessage } from '../components/chat/UserMessage'
 import { IconArrowDown } from '../components/Icons'
 import { MainHeader } from '../components/layout/MainHeader'
+import { MenuButton, MobileCartLink, MobileHeader } from '../components/layout/MobileHeader'
+import { useIsNarrow } from '../hooks/useIsNarrow'
 import { useConversations } from '../stores/conversations'
 import { useActiveProfile } from '../stores/profiles'
 
@@ -20,6 +22,7 @@ export function ChatPage() {
   const conv = useConversations((s) => s.conversations[conversationId])
   const loaded = useConversations((s) => s.loaded)
   const patchMessage = useConversations((s) => s.patchMessage)
+  const narrow = useIsNarrow()
   const composer = useRef<ComposerHandle | null>(null)
   const scroller = useRef<HTMLDivElement>(null)
   const [atBottom, setAtBottom] = useState(true)
@@ -70,12 +73,19 @@ export function ChatPage() {
 
   return (
     <>
-      <MainHeader title={conv.title}>
-        <CartButton />
-      </MainHeader>
+      {narrow ? (
+        <MobileHeader left={<MenuButton />} right={<MobileCartLink />}>
+          <span className="font-logo text-xl leading-[1.1] tracking-[0.3px]">CartPilot</span>
+          <span className="max-w-[220px] truncate text-[11px] text-ink-subtle">{conv.title}</span>
+        </MobileHeader>
+      ) : (
+        <MainHeader title={conv.title}>
+          <CartButton />
+        </MainHeader>
+      )}
       {memoryMsg && <MemoryBanner key={memoryMsg.id} convId={conv.id} message={memoryMsg} />}
       <div className="relative min-h-0 grow">
-        <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-8 pb-4 pt-6">
+        <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-4 pb-4 pt-4 md:px-8 md:pt-6">
           <div className="mx-auto flex max-w-[820px] flex-col gap-4">
             {messages.map((m, i) =>
               m.role === 'user' ? (
@@ -110,7 +120,7 @@ export function ChatPage() {
           </button>
         )}
       </div>
-      <div className="shrink-0 px-8 pb-[18px] pt-3">
+      <div className="shrink-0 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 md:px-8 md:pb-[18px] md:pt-3">
         <div className="mx-auto max-w-[820px]">
           <Composer
             variant="chat"
@@ -122,7 +132,7 @@ export function ChatPage() {
               void send(conv.id, { text, image, userId: profile.userId })
             }}
           />
-          <div className="mt-2 text-center text-xs text-ink-subtle">Enter 发送 · Shift + Enter 换行 · 价格与库存以商品库为准</div>
+          <div className="mt-2 hidden text-center text-xs text-ink-subtle md:block">Enter 发送 · Shift + Enter 换行 · 价格与库存以商品库为准</div>
         </div>
       </div>
     </>
