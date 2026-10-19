@@ -143,7 +143,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
         className={
           home
             ? 'flex w-full max-w-[760px] flex-col gap-2.5 rounded-3xl border border-line-strong bg-surface p-3 shadow-[0_8px_28px_rgba(43,30,18,0.08)]'
-            : 'flex flex-col gap-2 rounded-[22px] border border-line-strong bg-surface px-2.5 py-2 shadow-input'
+            : 'flex flex-col gap-2 rounded-[22px] border border-line-strong bg-surface px-2.5 py-2 shadow-input focus-within:border-primary'
         }
       >
         {image && (
@@ -195,7 +195,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={placeholder ?? (home ? '说说你想买什么，比如「500 元以内不含酒精的防晒」' : '继续追问，或把商品图片拖进来 / 直接粘贴截图')}
-            className={`min-w-0 grow resize-none bg-transparent px-1 leading-[22px] text-ink outline-none placeholder:text-ink-subtle ${home ? 'text-base' : 'text-[15px]'}`}
+            className={`min-w-0 grow resize-none bg-transparent px-1 leading-[22px] text-ink outline-none placeholder:text-ink-subtle focus-visible:outline-none ${home ? 'text-base' : 'text-[15px]'}`}
           />
           {speech.supported && (
             <button

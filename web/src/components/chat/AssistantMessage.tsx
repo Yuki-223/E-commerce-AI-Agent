@@ -4,6 +4,7 @@ import { retry } from '../../chat/engine'
 import { useProducts } from '../../hooks/useProducts'
 import type { ChatMessage } from '../../stores/conversations'
 import { IconAlert, IconCompare, IconRetry } from '../Icons'
+import { InlineComparison } from '../compare/InlineComparison'
 import { ProductCard } from './ProductCard'
 import { StatusBubble } from './StatusBubble'
 
@@ -81,11 +82,13 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
         </div>
       )}
 
+      {done && message.comparison && <InlineComparison comparison={message.comparison} convId={convId} />}
+
       {(compare.length >= 2 || followups.length > 0) && (
         <div className="flex flex-wrap items-center gap-2">
           {compare.length >= 2 && (
             <Link
-              to={`/compare?ids=${compare.join(',')}`}
+              to={`/compare?ids=${compare.join(',')}&from=${convId}`}
               className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-[13px] font-semibold text-white no-underline hover:text-white"
             >
               <IconCompare />

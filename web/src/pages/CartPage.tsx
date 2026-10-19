@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../api/http'
 import type { CartLine, Product } from '../api/types'
-import { IconCart, IconChevronDown, IconChevronUp, IconTrash } from '../components/Icons'
+import { IconChevronDown, IconChevronUp, IconTrash } from '../components/Icons'
+import { CartEmpty } from '../components/cart/CartEmpty'
 import { SpecDialog } from '../components/cart/SpecDialog'
 import { ProductImage } from '../components/product/ProductImage'
 import { useCart, useCartMutation } from '../hooks/useCart'
@@ -15,21 +16,6 @@ import { useConversations } from '../stores/conversations'
 import { toast } from '../stores/toast'
 
 const GRID = 'grid grid-cols-[28px_minmax(0,1fr)_72px_124px_92px_36px] items-center gap-3'
-
-export function CartEmpty({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className={`flex flex-col items-center justify-center gap-2.5 text-center ${compact ? 'p-6' : 'grow p-5'}`}>
-      <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-full bg-soft-purple text-primary-text">
-        <IconCart size={30} strokeWidth={1.8} />
-      </span>
-      <span className="text-[17px] font-semibold">购物车为空</span>
-      <span className="text-[13px] leading-[19px] text-ink-muted">从导购推荐里加入商品后会显示在这里。</span>
-      <Link to="/" className="mt-1.5 rounded-full bg-primary px-[18px] py-[9px] text-sm font-semibold text-white no-underline hover:text-white">
-        去问问 AI
-      </Link>
-    </div>
-  )
-}
 
 function QuantityInput({ line, onCommit, disabled }: { line: CartLine; onCommit: (q: number) => void; disabled: boolean }) {
   const [draft, setDraft] = useState(String(line.quantity))

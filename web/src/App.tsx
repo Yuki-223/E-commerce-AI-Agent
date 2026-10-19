@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
 import { CartPage } from './pages/CartPage'
 import { ChatPage } from './pages/ChatPage'
+import { ComparePage } from './pages/ComparePage'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -12,6 +13,7 @@ export function App() {
         <Route index element={<HomePage />} />
         <Route path="c/:conversationId" element={<ChatPage />} />
         <Route path="cart" element={<CartPage />} />
+        <Route path="compare" element={<ComparePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
