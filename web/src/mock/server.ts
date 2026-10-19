@@ -178,8 +178,12 @@ export async function mockFetch(path: string, init: RequestInit = {}): Promise<R
     const text = (req.user_text ?? '').trim()
     if (!text) return httpError(400, 'user_text 不能为空')
     // The real endpoint asks the model for 4-8 characters; the mock keeps the first clause.
-    const title = text.replace(/^(推荐|帮我找|我想买|找)(一款|一下|几款)?/, '').split(/[，,。！？]/)[0]
-    return json({ title: Array.from(title || text).slice(0, 12).join('') })
+    const title = text
+      .replace(/^(请)?(推荐|帮我找|帮我推荐|我想买|想买|找)(一款|一下|几款|一些|个)?/, '')
+      .replace(/不要含/g, '不含')
+      .replace(/[、，,。！？\s]+/g, (m) => (/\s/.test(m) && !/[、，,。！？]/.test(m) ? ' ' : ''))
+      .trim()
+    return json({ title: Array.from(title || text).slice(0, 16).join('') })
   }
   if (method === 'GET' && p === '/suggestions') return json(suggestions())
 

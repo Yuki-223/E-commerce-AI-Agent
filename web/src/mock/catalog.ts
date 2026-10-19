@@ -230,6 +230,10 @@ export function buildComparison(details: ProductDetail[]) {
   }
 }
 
+export function compareDim(id: string, dim: string): string {
+  return String(compareIndex[id]?.dims?.[dim] ?? '').trim()
+}
+
 /** For phase two: the tagline the real /compare does not return yet. */
 export function compareTagline(id: string): string {
   return String(compareIndex[id]?.tagline ?? '').trim()

@@ -11,7 +11,7 @@
 import type {
   CartToolPayload, ChatRequest, ComposerJson, IntentDecision, ProductCard, SseEvent, ToolResultEventData,
 } from '../api/types'
-import { buildComparison, catalog, compareTagline, getProductDetail, priceDisplay, type ProductDetail } from './catalog'
+import { buildComparison, catalog, compareDim, compareTagline, getProductDetail, priceDisplay, type ProductDetail } from './catalog'
 import { extractPreferenceUpdates } from './memory'
 import { mockCtl } from './controls'
 import { CartNotFoundError, cartStore, preferenceStore, sessionStore, type MockSession } from './state'
@@ -112,11 +112,13 @@ function search(query: string, userId: string | null | undefined) {
   return { hits: top, maxPrice, noAlcohol }
 }
 
+/** Composer-style 25–40 character pitch without brand or price, built from compare_index. */
 function itemDescription(d: ProductDetail): string {
-  const sellingPoint = compareTagline(d.product_id)
-  const desc = (d.marketing_description.split(/[。！]/)[1] || d.marketing_description).trim()
-  const brief = desc.replace(d.brand, '').slice(0, 26)
-  return sellingPoint ? `${brief}，适合${sellingPoint}` : brief
+  const point = compareDim(d.product_id, '核心卖点')
+  const who = compareTagline(d.product_id)
+  if (point && who) return `${point}，适合${who}`
+  const first = d.marketing_description.split(/[。！]/)[0] ?? ''
+  return first.replaceAll(d.brand, '').slice(0, 36)
 }
 
 function recommend(query: string, session: MockSession, userId: string | null | undefined): ToolOutcome {
@@ -127,8 +129,8 @@ function recommend(query: string, session: MockSession, userId: string | null | 
   const composer: ComposerJson = hits.length
     ? {
         opening: noAlcohol
-          ? `已帮你排除含酒精的款，为你推荐了 ${hits.length} 款${limits ? `${limits}的` : ''}${sub}`
-          : `为你推荐了 ${hits.length} 款${limits ? `${limits}的` : ''}${sub || '商品'}`,
+          ? `已帮你排除含酒精的款，为你推荐了 ${hits.length} 款${limits ? ` ${limits}的` : ''}${sub}`
+          : `为你推荐了 ${hits.length} 款${limits ? ` ${limits}的` : ''}${sub || '商品'}`,
         items: hits.map((d) => ({ productId: d.product_id, description: itemDescription(d) })),
         followup:
           sub === '防晒'

@@ -84,7 +84,15 @@ export async function* readSseStream(body: ReadableStream<Uint8Array>): AsyncGen
   const parser = new SseParser()
   try {
     for (;;) {
-      const { value, done } = await reader.read()
+      let chunk: ReadableStreamReadResult<Uint8Array>
+      try {
+        chunk = await reader.read()
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') throw err
+        // A connection dropped mid-stream reads like a failed connect to callers.
+        throw new ApiError(0, 'API_CONNECTION_FAILED', '连接中断')
+      }
+      const { value, done } = chunk
       const raws = done ? parser.end() : parser.push(value)
       for (const raw of raws) {
         const ev = decodeSseEvent(raw)
