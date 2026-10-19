@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
 import { preferenceSummary, usePreference } from '../../hooks/usePreference'
 import { profileLabel, useActiveProfile, type Profile } from '../../stores/profiles'
-import { useTheme, type ThemeChoice } from '../../stores/theme'
-import { IconCart, IconChevronRight, IconGear, IconHelp, IconHistory, IconMonitor, IconMoon, IconSliders, IconSun } from '../Icons'
+import { useSettings } from '../../stores/ui'
+import { IconCart, IconChevronRight, IconGear, IconHelp, IconHistory, IconSliders } from '../Icons'
 import { HistoryManagerDialog } from './HistoryManagerDialog'
 
 export function Avatar({ profile, size = 32 }: { profile: Profile; size?: number }) {
@@ -19,12 +19,6 @@ export function Avatar({ profile, size = 32 }: { profile: Profile; size?: number
   )
 }
 
-const THEMES: { value: ThemeChoice; label: string; Icon: typeof IconSun }[] = [
-  { value: 'light', label: '浅色', Icon: IconSun },
-  { value: 'dark', label: '深色', Icon: IconMoon },
-  { value: 'system', label: '跟随系统', Icon: IconMonitor },
-]
-
 const ITEM = 'flex min-h-[46px] items-center gap-3 rounded-xl px-3 text-[15px] text-ink no-underline hover:bg-secondary hover:text-ink'
 
 /** Sidebar footer + ㊒ WebAccountMenu popover. */
@@ -32,7 +26,7 @@ export function AccountButton() {
   const profile = useActiveProfile()
   const { data } = usePreference(profile.userId)
   const { data: cart } = useCart()
-  const theme = useTheme()
+  const openSettings = useSettings((s) => s.open)
   const [open, setOpen] = useState(false)
   const [history, setHistory] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
@@ -59,19 +53,25 @@ export function AccountButton() {
           aria-label="账户菜单"
           className="absolute bottom-[calc(100%+8px)] left-0 z-40 flex w-[300px] flex-col rounded-[18px] border border-line-strong bg-surface p-2 shadow-[0_18px_48px_rgba(43,30,18,0.18),0_2px_6px_rgba(43,30,18,0.06)]"
         >
-          <Link role="menuitem" to="/settings/preferences" onClick={close} className="flex min-h-[54px] items-center gap-3 rounded-xl bg-secondary px-3 text-ink no-underline hover:text-ink">
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => (close(), openSettings('preferences'))}
+            className="flex min-h-[54px] items-center gap-3 rounded-xl bg-secondary px-3 text-left text-ink"
+          >
             <IconSliders />
             <span className="flex grow flex-col gap-px">
               <span className="text-[15px] font-semibold">偏好管理</span>
               <span className="text-xs text-ink-muted">当前档案：{profileLabel(profile)}</span>
             </span>
             <IconChevronRight className="text-ink-subtle" />
-          </Link>
+          </button>
           <div aria-hidden="true" className="mx-1 my-1.5 h-px bg-line" />
-          <Link role="menuitem" to="/settings/general" onClick={close} className={ITEM}>
+          <button type="button" role="menuitem" onClick={() => (close(), openSettings('general'))} className={`${ITEM} text-left`}>
             <IconGear />
             <span className="grow">设置</span>
-          </Link>
+            <span className="text-xs text-ink-subtle">外观、档案、数据</span>
+          </button>
           <Link role="menuitem" to="/cart" onClick={close} className={ITEM}>
             <IconCart size={18} strokeWidth={2.1} />
             <span className="grow">购物车</span>
@@ -95,27 +95,6 @@ export function AccountButton() {
             <IconChevronRight className="text-ink-subtle" />
           </a>
           <div aria-hidden="true" className="mx-1 my-1.5 h-px bg-line" />
-          <div role="radiogroup" aria-label="外观" className="flex items-center gap-1.5 px-1.5 pb-1 pt-1.5">
-            {THEMES.map(({ value, label, Icon }) => {
-              const on = theme.choice === value
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  role="radio"
-                  aria-checked={on}
-                  aria-label={label}
-                  onClick={() => theme.set(value)}
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl p-0 ${
-                    on ? 'border border-line-strong bg-secondary text-ink shadow-[0_1px_3px_rgba(43,30,18,0.08)]' : 'border border-transparent text-ink-muted'
-                  }`}
-                >
-                  <Icon />
-                </button>
-              )
-            })}
-            <span className="grow pr-1.5 text-right text-xs text-ink-subtle">外观：{THEMES.find((t) => t.value === theme.choice)?.label}</span>
-          </div>
           <div className="flex flex-col gap-1 px-2.5 pb-1.5 pt-2 text-xs text-ink-subtle">
             <span>CartPilot · MIT License</span>
             <span>

@@ -1,16 +1,12 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
 import { CartPage } from './pages/CartPage'
 import { ChatPage } from './pages/ChatPage'
 import { ComparePage } from './pages/ComparePage'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
-import { PreferencePage } from './pages/PreferencePage'
 import { ProductPage } from './pages/ProductPage'
-import { DataSettings } from './pages/settings/DataSettings'
-import { GeneralSettings } from './pages/settings/GeneralSettings'
-import { ProfileSettings } from './pages/settings/ProfileSettings'
-import { SettingsLayout } from './pages/settings/SettingsLayout'
+import { SettingsRedirect } from './pages/settings/SettingsLayout'
 
 export function App() {
   return (
@@ -21,13 +17,7 @@ export function App() {
         <Route path="cart" element={<CartPage />} />
         <Route path="compare" element={<ComparePage />} />
         <Route path="p/:productId" element={<ProductPage />} />
-        <Route path="settings" element={<SettingsLayout />}>
-          <Route index element={<Navigate to="general" replace />} />
-          <Route path="general" element={<GeneralSettings />} />
-          <Route path="preferences" element={<PreferencePage />} />
-          <Route path="profiles" element={<ProfileSettings />} />
-          <Route path="data" element={<DataSettings />} />
-        </Route>
+        <Route path="settings/:tab?" element={<SettingsRedirect />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

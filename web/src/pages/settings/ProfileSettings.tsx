@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { IconPlus } from '../../components/Icons'
 import { Avatar } from '../../components/layout/AccountButton'
-import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { preferenceSummary, usePreference } from '../../hooks/usePreference'
 import { DEFAULT_PROFILE, profileLabel, useProfiles, type Profile } from '../../stores/profiles'
 import { BUTTON, BUTTON_DANGER, BUTTON_PRIMARY, FIELD, Section } from './ui'
@@ -61,7 +60,6 @@ function ProfileRow({ profile, active }: { profile: Profile; active: boolean }) 
 
 /** 偏好档案: one row per profile; each profile is its own backend user_id. */
 export function ProfileSettings() {
-  useDocumentTitle('偏好档案')
   const { profiles, activeId, create } = useProfiles()
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')

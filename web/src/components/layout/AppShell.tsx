@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useSearchParams } from 'react-router-dom'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { SettingsDialog } from '../../pages/settings/SettingsLayout'
 import { ProductPanel } from '../product/ProductPanel'
 import { Toaster } from '../Toaster'
 import { MobileDrawer } from './MobileDrawer'
@@ -34,6 +35,7 @@ export function AppShell() {
           <Toaster />
         </main>
         <MobileDrawer />
+        <SettingsDialog />
       </div>
     )
   }
@@ -47,6 +49,7 @@ export function AppShell() {
         <Toaster />
       </main>
       {productId && <ProductPanel key={productId} productId={productId} onClose={closeProduct} />}
+      <SettingsDialog />
     </div>
   )
 }

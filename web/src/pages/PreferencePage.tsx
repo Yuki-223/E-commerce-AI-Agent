@@ -2,12 +2,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api/endpoints'
 import type { UserPreference } from '../api/types'
-import { Link } from 'react-router-dom'
 import { IconCheckCircle, IconChevronDown, IconClose, IconPencil } from '../components/Icons'
 import { Avatar } from '../components/layout/AccountButton'
-import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { preferenceKey, usePreference } from '../hooks/usePreference'
 import { profileLabel, useActiveProfile, useProfiles } from '../stores/profiles'
+import { useSettings } from '../stores/ui'
 import { FIELD, Row, Section, Switch } from './settings/ui'
 
 /** The same option sets as PreferenceView.swift. */
@@ -110,10 +109,10 @@ function BudgetInput({ label, value, onCommit }: { label: string; value: number 
 
 /** ⑲ WebPreference, as the 购物偏好 settings tab: the active profile's preferences, saved with PUT /preferences/{user_id}. */
 export function PreferencePage() {
-  useDocumentTitle('购物偏好')
   const qc = useQueryClient()
   const profile = useActiveProfile()
   const { profiles, setActive } = useProfiles()
+  const openSettings = useSettings((s) => s.open)
   const { data: remote, isError: loadError } = usePreference(profile.userId)
   const [pref, setPref] = useState<UserPreference | null>(null)
   const [sync, setSync] = useState<Sync>('synced')
@@ -168,7 +167,11 @@ export function PreferencePage() {
   return (
     <>
       <Section title="购物偏好" description="推荐商品时会参考当前档案的偏好。对话里被记住的偏好也会出现在这里。" action={statusBadge}>
-        <Row label="正在编辑的档案" hint={<Link to="/settings/profiles" className="text-ink-muted underline underline-offset-2">管理偏好档案</Link>}>
+        <Row label="正在编辑的档案" hint={
+            <button type="button" onClick={() => openSettings('profiles')} className="p-0 text-[13px] text-ink-muted underline underline-offset-2">
+              管理偏好档案
+            </button>
+          }>
           <label className="relative flex h-9 items-center gap-2 rounded-lg border border-line-strong bg-surface pl-1.5 pr-8 text-sm">
             <Avatar profile={profile} size={24} />
             <span className="max-w-[140px] truncate">{profileLabel(profile)}</span>

@@ -7,15 +7,15 @@ import type { ReactNode } from 'react'
  */
 export function Section({ title, description, action, children }: { title: string; description?: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex flex-col border-b border-line py-7">
-      <div className="mb-4 flex items-start gap-4">
+    <section className="flex flex-col border-b border-line py-8">
+      <div className="mb-5 flex items-start gap-4">
         <div className="flex grow flex-col gap-1">
           <h2 className="m-0 text-[17px] font-semibold">{title}</h2>
           {description && <p className="m-0 text-sm leading-[21px] text-ink-muted">{description}</p>}
         </div>
         {action}
       </div>
-      <div className="flex flex-col gap-5">{children}</div>
+      <div className="flex flex-col gap-6">{children}</div>
     </section>
   )
 }
@@ -68,8 +68,8 @@ export function Switch({ checked, label, onChange }: { checked: boolean; label: 
   )
 }
 
-/** Wraps the tab content: hides the first section's top padding and the last one's hairline. */
-export const SECTIONS = '-mt-7 [&>section:last-child]:border-b-0 [&>div:last-child>section:last-child]:border-b-0'
+/** Wraps the tab content: cancels the first section's top padding and the last one's hairline. */
+export const SECTIONS = '-mt-8 [&>section:last-child]:border-b-0 [&>div:last-child>section:last-child]:border-b-0'
 
 export const FIELD = 'h-9 rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none focus:border-primary'
 

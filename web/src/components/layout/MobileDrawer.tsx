@@ -6,7 +6,7 @@ import { yuan } from '../../lib/format'
 import { historyGroup } from '../../lib/format'
 import { useConversations, type Conversation } from '../../stores/conversations'
 import { useActiveProfile } from '../../stores/profiles'
-import { useDrawer } from '../../stores/ui'
+import { useDrawer, useSettings } from '../../stores/ui'
 import { IconAddSquare, IconCart, IconClose, IconCompose, IconSearch } from '../Icons'
 import { Avatar } from './AccountButton'
 import { HistoryItem } from './HistoryItem'
@@ -24,6 +24,7 @@ export function MobileDrawer() {
   const install = useInstall()
   const [query, setQuery] = useState('')
   const [hint, setHint] = useState(false)
+  const openSettings = useSettings((s) => s.open)
 
   useEffect(() => set(false), [location.pathname, location.search, set])
   useEffect(() => {
@@ -90,13 +91,17 @@ export function MobileDrawer() {
               {cart?.cart.item_count ?? 0} 件{cart?.cart.item_count ? ` · ${yuan(cart.cart.total)}` : ''}
             </span>
           </Link>
-          <Link to="/settings/preferences" className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 text-[15px] text-ink no-underline">
+          <button
+            type="button"
+            onClick={() => (set(false), openSettings('preferences'))}
+            className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 text-left text-[15px] text-ink"
+          >
             <Avatar profile={profile} size={22} />
             <span className="flex min-w-0 grow flex-col">
-              <span>个人偏好</span>
+              <span>设置与偏好</span>
               <span className="truncate text-xs text-ink-subtle">{preferenceSummary(pref)}</span>
             </span>
-          </Link>
+          </button>
           {!install.installed && (
             <button
               type="button"

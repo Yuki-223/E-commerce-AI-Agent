@@ -1,71 +1,127 @@
-import { NavLink, Outlet } from 'react-router-dom'
-import { BackButton, MenuButton, MobileHeader, MobileTitle } from '../../components/layout/MobileHeader'
+import { useEffect, useRef, type ComponentType } from 'react'
+import { Navigate, useParams } from 'react-router-dom'
+import { IconClose, IconDatabase, IconGear, IconSliders, IconUsers } from '../../components/Icons'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { useSettings, type SettingsTab } from '../../stores/ui'
+import { PreferencePage } from '../PreferencePage'
+import { DataSettings } from './DataSettings'
+import { GeneralSettings } from './GeneralSettings'
+import { ProfileSettings } from './ProfileSettings'
 import { SECTIONS } from './ui'
 
-export const SETTINGS_TABS = [
-  { to: 'general', label: '通用' },
-  { to: 'preferences', label: '购物偏好' },
-  { to: 'profiles', label: '偏好档案' },
-  { to: 'data', label: '数据与存储' },
-] as const
+export const SETTINGS_TABS: { id: SettingsTab; label: string; Icon: typeof IconGear; Page: ComponentType }[] = [
+  { id: 'general', label: '通用', Icon: IconGear, Page: GeneralSettings },
+  { id: 'preferences', label: '购物偏好', Icon: IconSliders, Page: PreferencePage },
+  { id: 'profiles', label: '偏好档案', Icon: IconUsers, Page: ProfileSettings },
+  { id: 'data', label: '数据与存储', Icon: IconDatabase, Page: DataSettings },
+]
+
+/** Old /settings/:tab links open the dialog over the home page. */
+export function SettingsRedirect() {
+  const { tab } = useParams()
+  const open = useSettings((s) => s.open)
+  const known = SETTINGS_TABS.find((t) => t.id === tab)?.id ?? 'general'
+  useEffect(() => open(known), [open, known])
+  return <Navigate to="/" replace />
+}
 
 /**
- * /settings/*, laid out like claude.ai/settings: a page title, a vertical tab
- * list on the left and one narrow column of sections on the right. On phones
- * the tabs become a horizontally scrolling strip under the header.
+ * Settings as a floating window over the app, like claude.ai: a serif title,
+ * an icon tab list on the left and one column of sections on the right.
+ * On phones it fills the screen and the tabs become a scrolling strip.
  */
-export function SettingsLayout() {
+export function SettingsDialog() {
+  const { tab, open, close } = useSettings()
   const narrow = useIsNarrow()
+  const panel = useRef<HTMLDivElement>(null)
+  const body = useRef<HTMLDivElement>(null)
 
-  if (narrow) {
-    return (
-      <>
-        <MobileHeader left={<BackButton to="/" />} right={<MenuButton />}>
-          <MobileTitle>设置</MobileTitle>
-        </MobileHeader>
-        <nav aria-label="设置分类" className="flex shrink-0 gap-1 overflow-x-auto border-b border-line-faint px-3 py-2">
-          {SETTINGS_TABS.map((t) => (
-            <NavLink
-              key={t.to}
-              to={t.to}
-              className={({ isActive }) =>
-                `flex h-8 shrink-0 items-center rounded-lg px-3 text-sm no-underline ${isActive ? 'bg-secondary font-medium text-ink' : 'text-ink-muted'}`
-              }
-            >
-              {t.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="min-h-0 grow overflow-y-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-5">
-          <div className={SECTIONS}>
-            <Outlet />
-          </div>
-        </div>
-      </>
-    )
-  }
+  useEffect(() => {
+    if (!tab) return
+    const onKey = (e: KeyboardEvent) => {
+      // Let nested dialogs (history manager, clear confirmation) take Escape first.
+      if (e.key === 'Escape' && !document.querySelector('[role=alertdialog], [aria-label="管理历史对话"]')) close()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [tab, close])
+
+  useEffect(() => {
+    body.current?.scrollTo({ top: 0 })
+  }, [tab])
+
+  if (!tab) return null
+  const current = SETTINGS_TABS.find((t) => t.id === tab) ?? SETTINGS_TABS[0]
+  const { Page } = current
+
+  const closeButton = (
+    <button type="button" aria-label="关闭设置" onClick={close} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg p-0 text-ink-muted hover:bg-secondary hover:text-ink">
+      <IconClose size={14} strokeWidth={2.2} />
+    </button>
+  )
 
   return (
-    <div className="min-h-0 grow overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[960px] flex-col px-10 pb-16 pt-12">
-        <h1 className="m-0 mb-8 font-logo text-[28px] font-normal tracking-[0.2px]">设置</h1>
-        <div className="flex items-start gap-10">
-          <nav aria-label="设置分类" className="sticky top-0 flex w-[180px] shrink-0 flex-col gap-0.5">
-            {SETTINGS_TABS.map((t) => (
-              <NavLink
-                key={t.to}
-                to={t.to}
-                className={({ isActive }) =>
-                  `flex h-9 items-center rounded-lg px-3 text-sm no-underline hover:text-ink ${isActive ? 'bg-secondary font-medium text-ink' : 'text-ink-muted hover:bg-[color-mix(in_srgb,var(--secondary)_60%,transparent)]'}`
-                }
+    <div
+      className="fixed inset-0 z-[45] flex items-center justify-center bg-[rgba(20,16,12,0.36)] backdrop-blur-[2px] md:p-6"
+      onMouseDown={(e) => !panel.current?.contains(e.target as Node) && close()}
+    >
+      <div
+        ref={panel}
+        role="dialog"
+        aria-modal="true"
+        aria-label="设置"
+        className={
+          narrow
+            ? 'flex h-[100dvh] w-full flex-col bg-bg pt-[env(safe-area-inset-top)]'
+            : 'flex h-[min(720px,calc(100dvh-48px))] w-[920px] max-w-full overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-[0_24px_64px_rgba(20,16,12,0.24),0_2px_8px_rgba(20,16,12,0.08)]'
+        }
+      >
+        {narrow ? (
+          <>
+            <div className="flex h-14 shrink-0 items-center gap-2 pl-4 pr-2">
+              <h1 className="m-0 grow font-serif text-[22px] font-normal">设置</h1>
+              {closeButton}
+            </div>
+            <nav aria-label="设置分类" className="flex shrink-0 gap-1 overflow-x-auto border-b border-line-faint px-3 pb-2">
+              {SETTINGS_TABS.map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-current={id === tab ? 'page' : undefined}
+                  onClick={() => open(id)}
+                  className={`flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm ${id === tab ? 'bg-secondary font-medium text-ink' : 'text-ink-muted'}`}
+                >
+                  <Icon size={15} />
+                  {label}
+                </button>
+              ))}
+            </nav>
+          </>
+        ) : (
+          <nav aria-label="设置分类" className="flex w-[220px] shrink-0 flex-col gap-0.5 border-r border-line bg-sidebar px-3 pb-4 pt-6">
+            <h1 className="m-0 mb-5 px-3 font-serif text-[26px] font-normal tracking-[0.2px]">设置</h1>
+            {SETTINGS_TABS.map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                type="button"
+                aria-current={id === tab ? 'page' : undefined}
+                onClick={() => open(id)}
+                className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-left text-sm ${
+                  id === tab ? 'bg-[color-mix(in_srgb,var(--text-primary)_7%,transparent)] font-medium text-ink' : 'text-ink-muted hover:bg-[color-mix(in_srgb,var(--text-primary)_4%,transparent)] hover:text-ink'
+                }`}
               >
-                {t.label}
-              </NavLink>
+                <Icon size={16} />
+                {label}
+              </button>
             ))}
           </nav>
-          <div className={`min-w-0 max-w-[680px] grow ${SECTIONS}`}>
-            <Outlet />
+        )}
+        <div className="relative flex min-w-0 grow flex-col">
+          {!narrow && <div className="absolute right-3 top-3 z-10">{closeButton}</div>}
+          <div ref={body} className={`min-h-0 grow overflow-y-auto ${narrow ? 'px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-6' : 'px-12 pb-12 pt-10'}`}>
+            <div className={`max-w-[620px] ${SECTIONS}`}>
+              <Page />
+            </div>
           </div>
         </div>
       </div>

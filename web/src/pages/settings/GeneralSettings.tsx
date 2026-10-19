@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Avatar } from '../../components/layout/AccountButton'
-import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { AVATAR_COLORS, useActiveProfile, useProfiles } from '../../stores/profiles'
 import { useTheme, type ThemeChoice } from '../../stores/theme'
 import { FIELD, Row, Section } from './ui'
@@ -65,7 +64,6 @@ function ThemeCard({ value, label, on, onSelect }: { value: ThemeChoice; label: 
 
 /** 通用: the active profile's name and avatar (claude.ai's 个人资料), and color mode. */
 export function GeneralSettings() {
-  useDocumentTitle('通用设置')
   const profile = useActiveProfile()
   const { rename, recolor } = useProfiles()
   const theme = useTheme()

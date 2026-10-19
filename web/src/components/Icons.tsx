@@ -323,3 +323,17 @@ export const IconMore = (p: P) => (
     <circle cx="19" cy="12" r="1.8" />
   </svg>
 )
+
+export const IconUsers = (p: P) => (
+  <svg {...base('0 0 24 24', p.size, 18, 18, p)} {...S} strokeWidth={2}>
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.2A6.5 6.5 0 0 1 21.5 20" />
+  </svg>
+)
+
+export const IconDatabase = (p: P) => (
+  <svg {...base('0 0 24 24', p.size, 18, 18, p)} {...S} strokeWidth={2}>
+    <ellipse cx="12" cy="5.5" rx="8" ry="3" />
+    <path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+  </svg>
+)

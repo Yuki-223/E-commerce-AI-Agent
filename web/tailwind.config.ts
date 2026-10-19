@@ -29,6 +29,7 @@ export default {
       fontFamily: {
         sans: ['var(--font-sans)'],
         logo: ['var(--font-logo)'],
+        serif: ['var(--font-serif)'],
       },
       boxShadow: {
         card: v('shadow-card'),

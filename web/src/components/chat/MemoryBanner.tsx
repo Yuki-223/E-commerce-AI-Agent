@@ -1,10 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { api } from '../../api/endpoints'
 import type { UserPreference } from '../../api/types'
 import { preferenceKey } from '../../hooks/usePreference'
 import { useConversations, type ChatMessage } from '../../stores/conversations'
+import { useSettings } from '../../stores/ui'
 import { IconCheckCircle, IconClose, IconUndo } from '../Icons'
 
 /**
@@ -14,6 +14,7 @@ import { IconCheckCircle, IconClose, IconUndo } from '../Icons'
 export function MemoryBanner({ convId, message }: { convId: string; message: ChatMessage }) {
   const qc = useQueryClient()
   const patchMessage = useConversations((s) => s.patchMessage)
+  const openSettings = useSettings((s) => s.open)
   const [busy, setBusy] = useState(false)
   const notices = message.memory ?? []
   if (!notices.length || notices.every((n) => n.dismissed)) return null
@@ -65,9 +66,9 @@ export function MemoryBanner({ convId, message }: { convId: string; message: Cha
       <button type="button" disabled={busy} onClick={() => void undo()} className="h-[30px] rounded-full bg-soft-purple px-3 text-[13px] font-semibold text-primary-text disabled:opacity-60">
         {busy ? '撤销中…' : failed ? '重试撤销' : '撤销'}
       </button>
-      <Link to="/settings/preferences" className="text-[13px] text-ink-muted no-underline">
+      <button type="button" onClick={() => openSettings('preferences')} className="p-0 text-[13px] text-ink-muted">
         管理偏好
-      </Link>
+      </button>
       <button type="button" aria-label="关闭提示" onClick={() => update(() => ({ dismissed: true }))} className="flex h-7 w-7 items-center justify-center p-0 text-ink-subtle">
         <IconClose />
       </button>

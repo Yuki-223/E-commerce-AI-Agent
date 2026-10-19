@@ -42,6 +42,7 @@
   --shadow-input: 0 4px 16px rgba(43, 30, 18, 0.06);
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
   --font-logo: Georgia, "Times New Roman", serif;
+  --font-serif: Georgia, "Songti SC", STSong, "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
   color-scheme: light;
 }
 
