@@ -4,6 +4,7 @@ import { isStreaming, send, stop } from '../chat/engine'
 import { CartButton } from '../components/CartButton'
 import { AssistantMessage } from '../components/chat/AssistantMessage'
 import { Composer, type ComposerHandle } from '../components/chat/Composer'
+import { MemoryBanner } from '../components/chat/MemoryBanner'
 import { UserMessage } from '../components/chat/UserMessage'
 import { IconArrowDown } from '../components/Icons'
 import { MainHeader } from '../components/layout/MainHeader'
@@ -25,6 +26,7 @@ export function ChatPage() {
 
   const messages = conv?.messages ?? []
   const last = messages[messages.length - 1]
+  const memoryMsg = [...messages].reverse().find((m) => m.memory?.length)
   const busy = last?.role === 'assistant' && (last.state === 'pending' || last.state === 'streaming') && isStreaming(conversationId)
 
   const scrollToBottom = useCallback((smooth = false) => {
@@ -71,6 +73,7 @@ export function ChatPage() {
       <MainHeader title={conv.title}>
         <CartButton />
       </MainHeader>
+      {memoryMsg && <MemoryBanner key={memoryMsg.id} convId={conv.id} message={memoryMsg} />}
       <div className="relative min-h-0 grow">
         <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-8 pb-4 pt-6">
           <div className="mx-auto flex max-w-[820px] flex-col gap-4">

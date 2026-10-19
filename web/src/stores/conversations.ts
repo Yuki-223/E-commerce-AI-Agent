@@ -14,6 +14,7 @@ export interface SpecSelection {
 export interface MemoryNotice extends MemoryUpdateEventData {
   undone?: boolean
   undoError?: boolean
+  dismissed?: boolean
 }
 
 export interface ChatMessage {
