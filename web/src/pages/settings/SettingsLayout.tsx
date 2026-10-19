@@ -62,7 +62,7 @@ export function SettingsDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-[45] flex items-center justify-center bg-[rgba(20,16,12,0.36)] backdrop-blur-[2px] md:p-6"
+      className="fixed inset-0 z-[45] flex animate-fade-in items-center justify-center bg-[rgba(20,16,12,0.36)] backdrop-blur-[2px] md:p-6"
       onMouseDown={(e) => !panel.current?.contains(e.target as Node) && close()}
     >
       <div
@@ -72,8 +72,8 @@ export function SettingsDialog() {
         aria-label="设置"
         className={
           narrow
-            ? 'flex h-[100dvh] w-full flex-col bg-bg pt-[env(safe-area-inset-top)]'
-            : 'flex h-[min(720px,calc(100dvh-48px))] w-[920px] max-w-full overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-[0_24px_64px_rgba(20,16,12,0.24),0_2px_8px_rgba(20,16,12,0.08)]'
+            ? 'flex h-[100dvh] w-full animate-fade-in flex-col bg-bg pt-[env(safe-area-inset-top)]'
+            : 'flex h-[min(720px,calc(100dvh-48px))] animate-dialog-in w-[920px] max-w-full overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-[0_24px_64px_rgba(20,16,12,0.24),0_2px_8px_rgba(20,16,12,0.08)]'
         }
       >
         {narrow ? (

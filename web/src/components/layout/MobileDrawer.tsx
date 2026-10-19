@@ -47,10 +47,10 @@ export function MobileDrawer() {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50">
-      <button type="button" aria-label="关闭菜单" onClick={() => set(false)} className="absolute inset-0 bg-[rgba(28,22,17,0.38)] p-0" />
+      <button type="button" aria-label="关闭菜单" onClick={() => set(false)} className="absolute inset-0 animate-fade-in bg-[rgba(28,22,17,0.38)] p-0" />
       <nav
         aria-label="菜单"
-        className="absolute bottom-0 left-0 top-0 flex w-[304px] max-w-[85vw] flex-col gap-3.5 bg-sidebar px-3.5 pb-[max(14px,env(safe-area-inset-bottom))] pt-[calc(8px+env(safe-area-inset-top))] shadow-[8px_0_30px_rgba(28,22,17,0.18)]"
+        className="absolute bottom-0 left-0 top-0 flex animate-drawer-in w-[304px] max-w-[85vw] flex-col gap-3.5 bg-sidebar px-3.5 pb-[max(14px,env(safe-area-inset-bottom))] pt-[calc(8px+env(safe-area-inset-top))] shadow-[8px_0_30px_rgba(28,22,17,0.18)]"
       >
         <div className="flex items-center pl-2 pr-1">
           <div className="grow">

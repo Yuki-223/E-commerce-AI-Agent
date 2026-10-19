@@ -12,7 +12,7 @@ export function Toaster() {
         <div
           key={t.id}
           role="status"
-          className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-line-strong bg-surface p-3.5 shadow-[0_12px_32px_rgba(43,30,18,0.14)]"
+          className="pointer-events-auto flex animate-toast-in items-center gap-3 rounded-2xl border border-line-strong bg-surface p-3.5 shadow-[0_12px_32px_rgba(43,30,18,0.14)]"
         >
           {t.tone === 'error' ? <IconAlert className="shrink-0 text-error-text" /> : <IconCheckCircle size={22} tone="var(--success-text)" className="shrink-0" />}
           <div className="flex min-w-0 grow flex-col gap-0.5">

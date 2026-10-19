@@ -18,7 +18,7 @@ export function SpecDialog({ line, product, onCancel, onConfirm, busy }: {
     setSelection(findSku(product, next) || !fallback ? next : { ...fallback.selectedOptions })
   }
   return (
-    <div role="dialog" aria-label="修改规格" className="absolute left-0 top-full z-30 mt-2 flex w-[300px] flex-col gap-3 rounded-2xl border border-line-strong bg-surface p-4 shadow-pop">
+    <div role="dialog" aria-label="修改规格" className="absolute left-0 top-full z-30 mt-2 flex origin-top-left animate-pop-up w-[300px] flex-col gap-3 rounded-2xl border border-line-strong bg-surface p-4 shadow-pop">
       {product.specifications.map((spec) => (
         <div key={spec.id} className="flex flex-col gap-2">
           <div className="text-sm font-semibold">{spec.name}</div>

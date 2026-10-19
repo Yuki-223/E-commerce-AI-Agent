@@ -61,9 +61,9 @@ export function Switch({ checked, label, onChange }: { checked: boolean; label: 
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`flex h-6 w-10 shrink-0 rounded-full p-0.5 transition-colors ${checked ? 'justify-end bg-primary' : 'justify-start bg-disabled'}`}
+      className={`flex h-6 w-10 shrink-0 rounded-full p-0.5 transition-colors duration-snap ${checked ? 'bg-primary' : 'bg-disabled'}`}
     >
-      <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]" />
+      <span className={`h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-snap ease-snap ${checked ? 'translate-x-4' : ''}`} />
     </button>
   )
 }

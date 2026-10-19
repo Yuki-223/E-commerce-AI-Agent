@@ -50,7 +50,7 @@ function AddSlot({ candidates, onAdd }: { candidates: string[]; onAdd: (id: stri
         <span className="hidden text-xs font-normal text-ink-subtle md:inline">从对话推荐或搜索中选择</span>
       </button>
       {open && (
-        <div role="dialog" aria-label="选择要对比的商品" className="fixed inset-x-4 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 flex max-h-[360px] md:absolute md:inset-x-4 md:bottom-auto md:top-[calc(100%-8px)] md:z-30 flex-col gap-2 rounded-2xl border border-line-strong bg-surface p-3 shadow-pop">
+        <div role="dialog" aria-label="选择要对比的商品" className="fixed inset-x-4 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 flex max-h-[360px] md:absolute md:inset-x-4 md:bottom-auto md:top-[calc(100%-8px)] md:z-30 flex-col gap-2 rounded-2xl animate-pop-up border border-line-strong bg-surface p-3 shadow-pop">
           <label className="flex items-center gap-2 rounded-[10px] bg-field px-2.5">
             <span className="sr-only-label">搜索商品</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索对话里推荐过的商品" className="h-[34px] grow bg-transparent text-[13px] outline-none" />

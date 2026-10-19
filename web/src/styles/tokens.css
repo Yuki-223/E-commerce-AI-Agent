@@ -45,6 +45,15 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
   --font-logo: Georgia, "Times New Roman", serif;
   --font-serif: Georgia, "Songti SC", STSong, "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  /* Motion: five durations, three easings (claude.ai-style). */
+  --dur-fast: 60ms;
+  --dur-snap: 120ms;
+  --dur-base: 200ms;
+  --dur-sheet: 300ms;
+  --dur-slow: 450ms;
+  --ease-out: cubic-bezier(.165, .84, .44, 1);
+  --ease-snap: cubic-bezier(.32, .72, 0, 1);
+  --ease-overshoot: cubic-bezier(.34, 1.3, .64, 1);
   color-scheme: light;
 }
 

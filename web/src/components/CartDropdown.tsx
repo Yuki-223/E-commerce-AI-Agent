@@ -15,7 +15,7 @@ export function CartDropdown({ data, onClose }: { data: CartResponse | undefined
     <section
       aria-label="购物车"
       role="dialog"
-      className="absolute right-[-16px] top-[50px] z-40 flex w-[380px] flex-col rounded-[18px] border border-line-strong bg-surface shadow-[0_18px_48px_rgba(43,30,18,0.16),0_2px_6px_rgba(43,30,18,0.06)]"
+      className="absolute right-[-16px] top-[50px] z-40 flex origin-top-right animate-pop-up w-[380px] flex-col rounded-[18px] border border-line-strong bg-surface shadow-[0_18px_48px_rgba(43,30,18,0.16),0_2px_6px_rgba(43,30,18,0.06)]"
     >
       <div aria-hidden="true" className="absolute -top-[7px] right-[28px] h-3 w-3 rotate-45 border-l border-t border-line-strong bg-surface" />
       <div className="flex items-center px-[18px] pb-2.5 pt-4">

@@ -205,7 +205,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
               onClick={() => setMenu((m) => !m)}
               className={`flex ${btn} items-center justify-center rounded-full border border-line-strong p-0 text-ink-muted hover:bg-secondary hover:text-ink ${menu ? 'bg-secondary text-ink' : 'bg-transparent'}`}
             >
-              <IconPlus size={15} strokeWidth={2.2} className={`transition-transform ${menu ? 'rotate-45' : ''}`} />
+              <IconPlus size={15} strokeWidth={2.2} className={`transition-transform duration-snap ease-snap ${menu ? 'rotate-45' : ''}`} />
             </button>
             {menu && (
               <ComposerMenu

@@ -51,7 +51,7 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
         <div
           role="menu"
           aria-label="账户菜单"
-          className={`absolute bottom-[calc(100%+8px)] left-0 z-40 flex ${compact ? 'w-[300px]' : 'right-0'} flex-col rounded-[18px] border border-line-strong bg-surface p-2 shadow-[0_18px_48px_rgba(43,30,18,0.18),0_2px_6px_rgba(43,30,18,0.06)]`}
+          className={`absolute bottom-[calc(100%+8px)] left-0 z-40 flex origin-bottom-left animate-pop-in ${compact ? 'w-[300px]' : 'right-0'} flex-col rounded-[18px] border border-line-strong bg-surface p-2 shadow-[0_18px_48px_rgba(43,30,18,0.18),0_2px_6px_rgba(43,30,18,0.06)]`}
         >
           <button
             type="button"

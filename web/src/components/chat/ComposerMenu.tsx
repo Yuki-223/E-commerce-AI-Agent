@@ -150,7 +150,7 @@ export function ComposerMenu({ onImage, onCamera, onProduct, onClose }: Props) {
       ref={ref}
       role="menu"
       aria-label="添加内容"
-      className="absolute bottom-[calc(100%+10px)] left-0 z-40 flex w-[290px] max-w-[calc(100vw-32px)] flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop"
+      className="absolute bottom-[calc(100%+10px)] left-0 z-40 flex origin-bottom-left animate-pop-in w-[290px] max-w-[calc(100vw-32px)] flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop"
     >
       {view === 'root' && (
         <>

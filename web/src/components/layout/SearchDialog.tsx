@@ -70,14 +70,14 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center bg-[rgba(20,16,12,0.4)] px-4 pt-[12vh]" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-50 flex animate-fade-in justify-center bg-[rgba(20,16,12,0.4)] px-4 pt-[12vh]" onMouseDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="搜索历史对话"
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={onKeyDown}
-        className="flex h-fit max-h-[min(560px,76vh)] w-[600px] max-w-full flex-col overflow-hidden rounded-[18px] border border-line-strong bg-surface shadow-pop"
+        className="flex h-fit animate-dialog-in max-h-[min(560px,76vh)] w-[600px] max-w-full flex-col overflow-hidden rounded-[18px] border border-line-strong bg-surface shadow-pop"
       >
         <div className="flex h-14 shrink-0 items-center gap-3 border-b border-line-faint px-4">
           <IconSearch size={17} className="shrink-0 text-ink-muted" />

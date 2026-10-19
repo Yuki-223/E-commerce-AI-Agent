@@ -98,7 +98,7 @@ export function HistoryItem({ conv, dense = false }: { conv: Conversation; dense
         <IconMore />
       </button>
       {menu && (
-        <div role="menu" className="absolute right-1 top-[calc(100%-4px)] z-30 flex w-[150px] flex-col rounded-xl border border-line-strong bg-surface p-1.5 shadow-[0_10px_24px_rgba(43,30,18,0.14)]">
+        <div role="menu" className="absolute right-1 top-[calc(100%-4px)] z-30 flex origin-top-right animate-pop-up w-[150px] flex-col rounded-xl border border-line-strong bg-surface p-1.5 shadow-[0_10px_24px_rgba(43,30,18,0.14)]">
           <button
             type="button"
             role="menuitem"
