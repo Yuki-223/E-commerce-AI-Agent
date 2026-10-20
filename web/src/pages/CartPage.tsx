@@ -17,7 +17,12 @@ import { useCartSelection } from '../stores/cartSelection'
 import { useConversations } from '../stores/conversations'
 import { toast } from '../stores/toast'
 
-const GRID = 'grid grid-cols-[28px_minmax(0,1fr)_72px_124px_92px_36px] items-center gap-3'
+/*
+ * The list card is a size container. At 740px+ each row is a table row
+ * (商品 · 单价 · 数量 · 小计 · 删除); narrower, the numbers drop to a second
+ * line under the title so the product column never collapses.
+ */
+const COLS = 'grid gap-3 [@container(min-width:740px)]:grid-cols-[minmax(0,1fr)_72px_116px_88px_36px] [@container(min-width:740px)]:items-center'
 
 function QuantityInput({ line, onCommit, disabled }: { line: CartLine; onCommit: (q: number) => void; disabled: boolean }) {
   const [draft, setDraft] = useState(String(line.quantity))
@@ -64,29 +69,39 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
   const specName = product?.specifications.map((s) => s.name).join(' / ') || '规格'
   const id = String(line.cart_item_id)
   return (
-    <div className={`${GRID} relative px-5 py-[18px] ${last ? '' : 'border-b border-line-faint'}`}>
-      <input type="checkbox" checked={selected} onChange={(e) => onSelect(e.target.checked)} aria-label={`选择 ${line.title}`} className="m-0 h-[18px] w-[18px] accent-[var(--primary)]" />
-      <div className="flex min-w-0 gap-3.5">
-        <Link to={`?product=${line.product_id}`} className="block h-[88px] w-[88px] shrink-0 overflow-hidden rounded-[14px] border border-line">
-          <ProductImage src={product?.imageURL ?? null} alt={line.title} className="h-full w-full" fit="cover" />
-        </Link>
+    <div
+      className={`relative grid grid-cols-[18px_88px_minmax(0,1fr)] items-start gap-x-3.5 px-5 py-[18px] [@container(min-width:740px)]:items-center ${last ? '' : 'border-b border-line-faint'}`}
+    >
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={(e) => onSelect(e.target.checked)}
+        aria-label={`选择 ${line.title}`}
+        className="m-0 mt-[35px] h-[18px] w-[18px] accent-[var(--primary)] [@container(min-width:740px)]:mt-0"
+      />
+      <Link to={`?product=${line.product_id}`} className="block h-[88px] w-[88px] overflow-hidden rounded-[14px] border border-line">
+        <ProductImage src={product?.imageURL ?? null} alt={line.title} className="h-full w-full" fit="cover" />
+      </Link>
+      <div className={`min-w-0 ${COLS}`}>
         <div className="relative flex min-w-0 flex-col gap-1.5">
-          <Link to={`?product=${line.product_id}`} className="text-[15px] font-semibold leading-[21px] text-ink no-underline hover:text-ink">
+          <Link to={`?product=${line.product_id}`} className="line-clamp-2 text-[15px] font-semibold leading-[21px] text-ink no-underline hover:text-ink">
             {line.title}
           </Link>
           {product && <span className="truncate text-xs text-ink-subtle">{shortSummary(product)}</span>}
           {Object.keys(line.options).length > 0 && (
-            <div className="relative self-start">
+            <div className="relative min-w-0 max-w-full self-start">
               <button
                 type="button"
                 aria-expanded={specOpen}
                 disabled={!product || product.skus.length < 2}
                 onClick={() => setSpecOpen((o) => !o)}
-                className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-[5px] text-xs ${
+                className={`flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-[5px] text-xs ${
                   specOpen ? 'border-[1.5px] border-primary bg-primary-soft font-semibold text-primary-text' : 'border border-line-strong bg-field text-ink-muted'
                 }`}
               >
-                {specName}：{optionsText(line.options)}
+                <span className="truncate">
+                  {specName}：{optionsText(line.options)}
+                </span>
                 {product && product.skus.length > 1 && (specOpen ? <IconChevronUp /> : <IconChevronDown />)}
               </button>
               {specOpen && product && (
@@ -104,18 +119,23 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
             </div>
           )}
         </div>
+        <div className="flex items-center gap-4 [@container(min-width:740px)]:contents">
+          <span className="min-w-[76px] text-sm [@container(min-width:740px)]:min-w-0">
+            {yuan(line.unit_price)}
+            <span className="text-ink-subtle [@container(min-width:740px)]:hidden"> / 件</span>
+          </span>
+          <QuantityInput line={line} disabled={mutation.isPending} onCommit={(q) => void run({ action: 'updateQuantity', cartItemID: id, quantity: q })} />
+          <span className="ml-auto text-[15px] font-bold text-error-text [@container(min-width:740px)]:ml-0">{yuan2(line.subtotal)}</span>
+          <button
+            type="button"
+            aria-label={`删除 ${line.title}`}
+            onClick={() => void run({ action: 'remove', cartItemID: id })}
+            className="-ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] p-0 text-ink-subtle hover:bg-field [@container(min-width:740px)]:ml-0"
+          >
+            <IconTrash />
+          </button>
+        </div>
       </div>
-      <span className="text-sm">{yuan(line.unit_price)}</span>
-      <QuantityInput line={line} disabled={mutation.isPending} onCommit={(q) => void run({ action: 'updateQuantity', cartItemID: id, quantity: q })} />
-      <span className="text-[15px] font-bold text-error-text">{yuan2(line.subtotal)}</span>
-      <button
-        type="button"
-        aria-label={`删除 ${line.title}`}
-        onClick={() => void run({ action: 'remove', cartItemID: id })}
-        className="flex h-9 w-9 items-center justify-center rounded-[10px] p-0 text-ink-subtle hover:bg-field"
-      >
-        <IconTrash />
-      </button>
     </div>
   )
 }
@@ -269,14 +289,15 @@ export function CartPage() {
         <CartEmpty />
       ) : (
         <div className="flex items-start gap-6">
-          <section aria-label="商品清单" className="min-w-0 grow rounded-[20px] border border-line bg-surface shadow-[0_2px_6px_rgba(43,30,18,0.04)]">
-            <div className={`${GRID} border-b border-line px-5 py-3.5 text-[13px] text-ink-muted`}>
+          <section aria-label="商品清单" className="min-w-0 grow rounded-[20px] [container-type:inline-size] border border-line bg-surface shadow-[0_2px_6px_rgba(43,30,18,0.04)]">
+            <div className="grid grid-cols-[18px_minmax(0,1fr)] items-center gap-x-3.5 border-b border-line px-5 py-3.5 text-[13px] text-ink-muted">
               <input type="checkbox" checked={allSelected} onChange={(e) => setAll(lines.map((l) => l.cart_item_id), e.target.checked)} aria-label="全选" className="m-0 h-[18px] w-[18px] accent-[var(--primary)]" />
-              <span>商品（全选）</span>
-              <span>单价</span>
-              <span>数量</span>
-              <span>小计</span>
-              <span />
+              <div className={COLS}>
+                <span>商品（全选）</span>
+                <span className="hidden [@container(min-width:740px)]:block">单价</span>
+                <span className="hidden [@container(min-width:740px)]:block">数量</span>
+                <span className="hidden [@container(min-width:740px)]:block">小计</span>
+              </div>
             </div>
             {lines.map((l, i) => (
               <CartRow
