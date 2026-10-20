@@ -4,12 +4,13 @@ import { ApiError } from '../api/http'
 import type { CartLine, Product } from '../api/types'
 import { IconChevronDown, IconChevronUp, IconTrash } from '../components/Icons'
 import { CartEmpty } from '../components/cart/CartEmpty'
+import { CollapseBox } from '../components/Collapse'
 import { SpecDialog } from '../components/cart/SpecDialog'
 import { ProductImage } from '../components/product/ProductImage'
 import { useCart, useCartMutation } from '../hooks/useCart'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useIsNarrow } from '../hooks/useIsNarrow'
-import { usePresence } from '../hooks/usePresence'
+import { usePresence, usePresenceList } from '../hooks/usePresence'
 import { BackButton, MenuButton, MobileHeader, MobileTitle } from '../components/layout/MobileHeader'
 import { shortSummary, useProducts } from '../hooks/useProducts'
 import { optionsText, yuan, yuan2 } from '../lib/format'
@@ -59,6 +60,8 @@ function QuantityInput({ line, onCommit, disabled }: { line: CartLine; onCommit:
 
 function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; product?: Product; selected: boolean; onSelect: (on: boolean) => void; last: boolean }) {
   const mutation = useCartMutation()
+  // Dimmed from the 删除 click until the row has collapsed away; restored if the request fails.
+  const removing = mutation.variables?.action === 'remove' && !mutation.isError
   const [specOpen, setSpecOpen] = useState(false)
   const spec = usePresence(specOpen && !!product)
   const run = async (req: Parameters<typeof mutation.mutateAsync>[0]) => {
@@ -72,7 +75,7 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
   const id = String(line.cart_item_id)
   return (
     <div
-      className={`relative grid grid-cols-[18px_88px_minmax(0,1fr)] items-start gap-x-3.5 px-5 py-[18px] [@container(min-width:740px)]:items-center ${last ? '' : 'border-b border-line-faint'}`}
+      className={`relative grid grid-cols-[18px_88px_minmax(0,1fr)] items-start gap-x-3.5 px-5 py-[18px] transition-opacity duration-snap [@container(min-width:740px)]:items-center ${last ? '' : 'border-b border-line-faint'} ${removing ? 'opacity-50' : ''}`}
     >
       <input
         type="checkbox"
@@ -146,6 +149,8 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
 /** ㊑ MWebCart row: card with checkbox, photo, spec chip and stepper. */
 function MobileCartRow({ line, product, selected, onSelect }: { line: CartLine; product?: Product; selected: boolean; onSelect: (on: boolean) => void }) {
   const mutation = useCartMutation()
+  // Dimmed from the 删除 click until the row has collapsed away; restored if the request fails.
+  const removing = mutation.variables?.action === 'remove' && !mutation.isError
   const [specOpen, setSpecOpen] = useState(false)
   const spec = usePresence(specOpen && !!product)
   const run = async (req: Parameters<typeof mutation.mutateAsync>[0]) => {
@@ -158,7 +163,7 @@ function MobileCartRow({ line, product, selected, onSelect }: { line: CartLine; 
   const id = String(line.cart_item_id)
   const specName = product?.specifications.map((s) => s.name).join(' / ') || '规格'
   return (
-    <article className="relative flex gap-2.5 rounded-[18px] border border-line bg-surface p-3 shadow-card">
+    <article className={`relative flex gap-2.5 rounded-[18px] border border-line bg-surface p-3 shadow-card transition-opacity duration-snap ${removing ? 'opacity-50' : ''}`}>
       <label className="flex w-7 shrink-0 cursor-pointer items-center justify-center">
         <input type="checkbox" checked={selected} onChange={(e) => onSelect(e.target.checked)} aria-label={`选择 ${line.title}`} className="m-0 h-5 w-5 accent-[var(--primary)]" />
       </label>
@@ -220,7 +225,9 @@ function MobileCartRow({ line, product, selected, onSelect }: { line: CartLine; 
 export function CartPage() {
   const { data, isPending, isError, refetch } = useCart()
   const lines = useMemo(() => data?.cart.lines ?? [], [data])
-  const { data: products } = useProducts(useMemo(() => [...new Set(lines.map((l) => l.product_id))], [lines]))
+  const { data: products } = useProducts(useMemo(() => [...new Set(lines.map((l) => l.product_id))], [lines]), { keepPrevious: true })
+  // A removed line stays in place while it collapses, so the rows below slide up instead of jumping.
+  const rows = usePresenceList(lines, (l) => String(l.cart_item_id))
   const byId = new Map(products?.map((p) => [p.productID, p]))
   const { unselected, toggle, setAll } = useCartSelection()
   const lastConv = useConversations((s) => Object.values(s.conversations).sort((a, b) => b.updatedAt - a.updatedAt)[0])
@@ -247,9 +254,13 @@ export function CartPage() {
           <CartEmpty />
         ) : (
           <>
-            <div className="flex min-h-0 grow flex-col gap-3 overflow-y-auto px-4 pb-4 pt-3.5">
-              {lines.map((l) => (
-                <MobileCartRow key={l.cart_item_id} line={l} product={byId.get(l.product_id)} selected={!unselected.includes(l.cart_item_id)} onSelect={(on) => toggle(l.cart_item_id, on)} />
+            <div className="flex min-h-0 grow flex-col overflow-y-auto px-4 pb-4 pt-3.5">
+              {rows.map(({ key, item: l, props }) => (
+                <CollapseBox key={key} presence={props} appear={false}>
+                  <div className="pb-3">
+                    <MobileCartRow line={l} product={byId.get(l.product_id)} selected={!unselected.includes(l.cart_item_id)} onSelect={(on) => toggle(l.cart_item_id, on)} />
+                  </div>
+                </CollapseBox>
               ))}
               <p className="mx-1 mt-1 text-xs leading-[18px] text-ink-subtle">点规格可以改；在对话里说“把第二个删掉”也能修改购物车。</p>
             </div>
@@ -304,15 +315,16 @@ export function CartPage() {
                 <span className="hidden [@container(min-width:740px)]:block">小计</span>
               </div>
             </div>
-            {lines.map((l, i) => (
-              <CartRow
-                key={l.cart_item_id}
-                line={l}
-                product={byId.get(l.product_id)}
-                selected={!unselected.includes(l.cart_item_id)}
-                onSelect={(on) => toggle(l.cart_item_id, on)}
-                last={i === lines.length - 1}
-              />
+            {rows.map(({ key, item: l, props }) => (
+              <CollapseBox key={key} presence={props} appear={false}>
+                <CartRow
+                  line={l}
+                  product={byId.get(l.product_id)}
+                  selected={!unselected.includes(l.cart_item_id)}
+                  onSelect={(on) => toggle(l.cart_item_id, on)}
+                  last={l.cart_item_id === lines[lines.length - 1].cart_item_id}
+                />
+              </CollapseBox>
             ))}
           </section>
 

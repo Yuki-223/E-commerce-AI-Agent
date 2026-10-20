@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { api } from '../api/endpoints'
 import type { Comparison } from '../api/types'
 
@@ -41,12 +41,41 @@ export function mergeComparisons(ids: string[], pairs: Comparison[]): Comparison
   }
 }
 
+/**
+ * The last table cut down to `ids`, or null when some id is not in it. Lets a
+ * removed column disappear at once while the new pairwise /compare runs.
+ */
+export function narrowComparison(c: Comparison, ids: string[]): Comparison | null {
+  const cols = ids.map((id) => c.products.findIndex((p) => p.product_id === id))
+  if (cols.some((i) => i < 0)) return null
+  const products = cols.map((i) => c.products[i])
+  let cheapest = 0
+  products.forEach((p, i) => {
+    if (p.price < products[cheapest].price) cheapest = i
+  })
+  return {
+    ...c,
+    products,
+    rows: c.rows.map((r) => ({
+      ...r,
+      values: cols.map((i) => r.values[i]),
+      highlight: r.label === '价格' ? cheapest : r.highlight === null ? null : cols.indexOf(r.highlight) >= 0 ? cols.indexOf(r.highlight) : null,
+    })),
+  }
+}
+
+/**
+ * While a changed id set loads, keeps showing a table instead of 正在生成对比…:
+ * the old one narrowed to the remaining columns after a removal, or the old one
+ * as is (isPlaceholderData, shown dimmed) while an added column loads.
+ */
 export function useComparison(ids: string[]) {
   const key = ids.join(',')
   return useQuery({
     queryKey: ['compare', key],
     enabled: ids.length >= 2,
     staleTime: 60_000,
+    placeholderData: (prev) => (prev && narrowComparison(prev, ids)) ?? keepPreviousData(prev),
     queryFn: async () => {
       const [first, ...rest] = ids.slice(0, MAX_COMPARE)
       const pairs = await Promise.all(rest.map((other) => api.compare([first, other])))

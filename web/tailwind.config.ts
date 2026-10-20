@@ -11,6 +11,9 @@ const popIn = { from: { opacity: '0', transform: 'translateY(4px) scale(0.97)' }
 const popUp = { from: { opacity: '0', transform: 'translateY(-4px) scale(0.97)' } }
 const dialogIn = { from: { opacity: '0', transform: 'translateY(6px) scale(0.98)' } }
 const drawerIn = { from: { transform: 'translateX(-100%)' } }
+const panelIn = { from: { transform: 'translateX(100%)' } }
+// Collapse: a grid row grows from 0fr, so whatever is below slides instead of jumping.
+const expandIn = { from: { gridTemplateRows: '0fr', opacity: '0' } }
 const exit = (entry: { from: Record<string, string> }) => ({ to: entry.from })
 /** Exit: 120ms, held on the last frame until usePresence unmounts it. */
 const out = (name: string, dur = 'dur-snap', ease = 'ease-out') => `${name} var(--${dur}) var(--${ease}) forwards`
@@ -73,6 +76,10 @@ export default {
         'pop-up-out': exit(popUp),
         'dialog-out': exit(dialogIn),
         'drawer-out': exit(drawerIn),
+        'panel-in': panelIn,
+        'panel-out': exit(panelIn),
+        'expand-in': expandIn,
+        'collapse-out': exit(expandIn),
         reveal: { from: { opacity: '0', filter: 'blur(6px)' } },
         'bubble-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.92)' } },
         'fade-up': { from: { opacity: '0', transform: 'translateY(10px)' } },
@@ -99,6 +106,12 @@ export default {
         'dialog-out': out('dialog-out'),
         'drawer-out': out('drawer-out', 'dur-base', 'ease-snap'),
         'drawer-scrim-out': out('fade-out', 'dur-base', 'ease-snap'),
+        // Desktop product panel: slides over main, 300ms both ways.
+        'panel-in': 'panel-in var(--dur-sheet) var(--ease-snap)',
+        'panel-out': out('panel-out', 'dur-sheet', 'ease-snap'),
+        // Rows, banners and list items open and close their height in 200ms.
+        'expand-in': 'expand-in var(--dur-base) var(--ease-out)',
+        'collapse-out': out('collapse-out', 'dur-base'),
         // Streamed text: each new piece sharpens out of a blur.
         reveal: 'reveal var(--dur-base) cubic-bezier(.215, .61, .355, 1)',
         'bubble-in': 'bubble-in var(--dur-slow) var(--ease-overshoot)',

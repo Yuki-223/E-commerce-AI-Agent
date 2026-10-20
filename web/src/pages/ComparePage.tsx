@@ -128,7 +128,10 @@ export function ComparePage() {
   const ids = useMemo(() => [...new Set((params.get('ids') ?? '').split(',').map((s) => s.trim()).filter(Boolean))].slice(0, MAX_COMPARE), [params])
   const fromConv = params.get('from')
   const conv = useConversations((s) => (fromConv ? s.conversations[fromConv] : undefined))
-  const { data, isPending, isError, error, refetch } = useComparison(ids)
+  const { data, isPending, isError, error, refetch, isPlaceholderData } = useComparison(ids)
+  // An added column is still loading: the old table stays, dimmed, until the new one lands.
+  const loadingColumn = isPlaceholderData && data && data.products.length !== Math.min(ids.length, MAX_COMPARE)
+  const dim = `transition-opacity duration-snap ${loadingColumn ? 'opacity-60' : ''}`
   const { data: cart } = useCart()
   const inCart = new Set(cart?.cart.lines.map((l) => l.product_id))
   const candidates = useCandidates(ids, fromConv)
@@ -166,7 +169,7 @@ export function ComparePage() {
           ) : !data ? (
             <div className="rounded-2xl border border-line bg-surface p-6 text-center text-sm text-ink-muted">{isError ? (error as ApiError)?.message ?? '对比失败' : '正在生成对比…'}</div>
           ) : (
-            <section aria-label="对比表" className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_2px_6px_rgba(43,30,18,0.04)]">
+            <section aria-label="对比表" className={`overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_2px_6px_rgba(43,30,18,0.04)] ${dim}`}>
               <div className="overflow-x-auto overscroll-x-contain">
                 <div className="w-max text-[13px] leading-[19px]">
                   <div className="grid bg-[var(--compare-head)]" style={{ gridTemplateColumns: mcols }}>
@@ -260,7 +263,7 @@ export function ComparePage() {
             </button>
           </div>
         ) : (
-          <section aria-label="对比表" className="overflow-hidden rounded-[18px] border border-line bg-surface shadow-[0_2px_8px_rgba(43,30,18,0.04)]">
+          <section aria-label="对比表" className={`overflow-hidden rounded-[18px] border border-line bg-surface shadow-[0_2px_8px_rgba(43,30,18,0.04)] ${dim}`}>
             <div className="grid bg-[var(--compare-head)]" style={{ gridTemplateColumns: cols }}>
               <div />
               {data.products.map((p) => (

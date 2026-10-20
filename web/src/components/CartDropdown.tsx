@@ -10,7 +10,7 @@ import { ProductImage } from './product/ProductImage'
 export function CartDropdown({ data, onClose, presence }: { data: CartResponse | undefined; onClose: () => void; presence?: PresenceProps }) {
   const navigate = useNavigate()
   const lines = data?.cart.lines ?? []
-  const { data: products } = useProducts([...new Set(lines.map((l) => l.product_id))])
+  const { data: products } = useProducts([...new Set(lines.map((l) => l.product_id))], { keepPrevious: true })
   const byId = new Map(products?.map((p) => [p.productID, p]))
   return (
     <section
