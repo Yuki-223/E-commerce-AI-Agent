@@ -4,7 +4,7 @@ import { useCart } from '../hooks/useCart'
 import { CartDropdown } from './CartDropdown'
 import { IconCart } from './Icons'
 
-/** Header cart button with count badge; opens the cart dropdown (WebCompare ⑪). */
+/** Borderless header cart icon with count badge, as in claude.ai; opens the cart dropdown (WebCompare ⑪). */
 export function CartButton() {
   const { data } = useCart()
   const [open, setOpen] = useState(false)
@@ -35,13 +35,13 @@ export function CartButton() {
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className={`relative flex h-9 w-9 items-center justify-center rounded-full p-0 text-primary-text ${
-          open ? 'border-[1.5px] border-primary bg-primary-soft' : 'border border-line-strong bg-surface hover:bg-field'
+        className={`relative flex h-9 w-9 items-center justify-center rounded-lg p-0 hover:bg-secondary hover:text-ink ${
+          open ? 'bg-secondary text-ink' : 'text-ink-muted'
         }`}
       >
-        <IconCart />
+        <IconCart size={20} strokeWidth={2} />
         {count > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-error-text px-1 text-[11px] font-bold text-on-primary">
+          <span className="absolute right-px top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error-text px-1 text-[10px] font-bold text-on-primary">
             {count > 99 ? '99+' : count}
           </span>
         )}

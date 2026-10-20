@@ -4,12 +4,12 @@ import { useCart } from '../../hooks/useCart'
 import { useDrawer } from '../../stores/ui'
 import { IconCart, IconChevronLeft, IconMenu } from '../Icons'
 
-const BTN = 'flex h-11 w-11 shrink-0 items-center justify-center p-0 text-ink'
+const BTN = 'flex h-11 w-11 shrink-0 items-center justify-center p-0'
 
 export function MenuButton() {
   const open = useDrawer((s) => s.set)
   return (
-    <button type="button" aria-label="打开菜单" onClick={() => open(true)} className={`${BTN} rounded-full active:bg-secondary`}>
+    <button type="button" aria-label="打开菜单" onClick={() => open(true)} className={`${BTN} rounded-full text-ink active:bg-secondary`}>
       <IconMenu />
     </button>
   )
@@ -22,7 +22,7 @@ export function BackButton({ to, label = '返回' }: { to?: string; label?: stri
       type="button"
       aria-label={label}
       onClick={() => (to ? navigate(to) : window.history.length > 1 ? navigate(-1) : navigate('/'))}
-      className={BTN}
+      className={`${BTN} text-ink`}
     >
       <IconChevronLeft size={20} strokeWidth={2.2} />
     </button>
@@ -33,7 +33,7 @@ export function MobileCartLink() {
   const { data } = useCart()
   const count = data?.cart.item_count ?? 0
   return (
-    <Link to="/cart" aria-label={`购物车，${count} 件`} className={`${BTN} relative text-primary-text`}>
+    <Link to="/cart" aria-label={`购物车，${count} 件`} className={`${BTN} relative text-ink-muted`}>
       <IconCart size={22} strokeWidth={2.1} />
       {count > 0 && (
         <span className="absolute right-[3px] top-[5px] flex h-4 min-w-4 items-center justify-center rounded-full bg-error-text px-1 text-[10px] font-bold text-on-primary">{count > 99 ? '99+' : count}</span>
