@@ -20,12 +20,15 @@ interface Props {
   onClose: () => void
 }
 
-function Header({ title, onBack }: { title: string; onBack: () => void }) {
+/** Submenu title; without onBack (a standalone popover) it drops the back arrow. */
+function Header({ title, onBack }: { title: string; onBack?: () => void }) {
   return (
-    <div className="flex items-center gap-1 px-1 pb-1">
-      <button type="button" aria-label="返回" onClick={onBack} className="flex h-8 w-8 items-center justify-center rounded-lg p-0 text-ink-muted hover:bg-secondary">
-        <IconChevronLeft />
-      </button>
+    <div className={`flex items-center gap-1 pb-1 ${onBack ? 'px-1' : 'min-h-[32px] px-2.5'}`}>
+      {onBack && (
+        <button type="button" aria-label="返回" onClick={onBack} className="flex h-8 w-8 items-center justify-center rounded-lg p-0 text-ink-muted hover:bg-secondary">
+          <IconChevronLeft />
+        </button>
+      )}
       <span className="text-sm font-semibold">{title}</span>
     </div>
   )
@@ -87,8 +90,8 @@ function ProductsView({ onBack, onPick }: { onBack: () => void; onPick: (ref: Pr
   )
 }
 
-/** Profile switcher submenu; shared with the sidebar's account menu. */
-export function ProfilesView({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+/** Profile switcher; a submenu here and in the account menu, standalone under the home composer. */
+export function ProfilesView({ onBack, onDone }: { onBack?: () => void; onDone: () => void }) {
   const { profiles, activeId, setActive } = useProfiles()
   const openSettings = useSettings((s) => s.open)
   return (

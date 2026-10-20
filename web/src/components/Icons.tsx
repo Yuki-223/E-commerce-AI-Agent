@@ -286,37 +286,6 @@ export const IconAddSquare = (p: P) => (
   </svg>
 )
 
-export const IconLaptop = (p: P) => (
-  <svg {...base('0 0 26 20', p.size, 20, 16, p)} {...S} strokeWidth={1.8}>
-    <rect x="5" y="3" width="16" height="11" rx="1.5" />
-    <path d="M2 17h22" />
-  </svg>
-)
-
-export const IconRunner = (p: P) => (
-  <svg {...base('0 0 24 24', p.size, 16, 18, p)} {...S} strokeWidth={1.9}>
-    <circle cx="14" cy="4" r="2" />
-    <path d="M9 21l3-6 3 2v5" />
-    <path d="M6 11l3-3 4 1 3 3 3 1" />
-    <path d="M12 15l1-6" />
-  </svg>
-)
-
-export const IconDrop = (p: P) => (
-  <svg {...base('0 0 16 22', p.size, 14, 18, p)} {...S} strokeWidth={1.8}>
-    <path d="M8 2C8 2 2 10 2 14a6 6 0 0 0 12 0C14 10 8 2 8 2z" />
-  </svg>
-)
-
-export const IconCup = (p: P) => (
-  <svg {...base('0 0 26 20', p.size, 20, 16, p)} {...S} strokeWidth={1.8}>
-    <ellipse cx="12" cy="5" rx="7" ry="2.5" />
-    <path d="M5 5v4c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5" />
-    <path d="M19 7h2a2 2 0 0 1 0 4h-2" />
-    <path d="M3 15c2 2 16 2 18 0" />
-  </svg>
-)
-
 export const IconMore = (p: P) => (
   <svg {...base('0 0 24 24', p.size, 16, 16, p)} fill="currentColor">
     <circle cx="5" cy="12" r="1.8" />

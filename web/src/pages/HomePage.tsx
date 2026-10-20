@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import type { ComponentType } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/endpoints'
 import { send } from '../chat/engine'
 import type { ProductRef } from '../lib/productRef'
 import { CartButton } from '../components/CartButton'
 import { Composer } from '../components/chat/Composer'
-import { IconCartPilot, IconCup, IconDrop, IconLaptop, IconRunner } from '../components/Icons'
+import { ProfilePicker } from '../components/chat/ProfilePicker'
+import { IconCartPilot } from '../components/Icons'
 import { MainHeader } from '../components/layout/MainHeader'
 import { MenuButton, MobileCartLink, MobileHeader } from '../components/layout/MobileHeader'
 import { useIsNarrow } from '../hooks/useIsNarrow'
@@ -14,14 +14,10 @@ import { greeting } from '../lib/format'
 import { useActiveProfile } from '../stores/profiles'
 
 const FALLBACK_CATEGORIES = ['数码电子', '服饰运动', '美妆护肤', '食品饮料']
-const CATEGORY_ICON: Record<string, ComponentType<{ className?: string }>> = {
-  数码电子: IconLaptop,
-  服饰运动: IconRunner,
-  美妆护肤: IconDrop,
-  食品饮料: IconCup,
-}
+/** Touch screens get 44px-tall hit areas for the small text links. */
+const LINK = 'h-8 [@media(pointer:coarse)]:h-11'
 
-/** ⑯ WebHome: serif greeting, the large composer and category shortcuts. */
+/** ⑯ WebHome: serif greeting, the large composer, then a profile picker and category links under it. */
 export function HomePage() {
   const navigate = useNavigate()
   const profile = useActiveProfile()
@@ -53,24 +49,27 @@ export function HomePage() {
             {greeting()}，想买点什么？
           </span>
         </h1>
-        <div className="flex flex-wrap justify-center gap-3">
-          {categories.map((c) => {
-            const Icon = CATEGORY_ICON[c] ?? IconLaptop
-            return (
-              <button
-                key={c}
-                type="button"
-                onClick={() => start(`推荐${c}`)}
-                className="flex h-11 items-center gap-2.5 rounded-full border border-line-strong bg-surface px-4 text-[15px] md:px-5 text-ink hover:border-primary"
-              >
-                <Icon className="text-ink-subtle" />
-                {c}
-              </button>
-            )
-          })}
+        <div className="flex w-full max-w-[760px] flex-col gap-2">
+          <Composer variant="home" onSend={start} />
+          <div className="flex items-center justify-between gap-3 px-1">
+            <ProfilePicker className={LINK} />
+            <nav aria-label="按分类推荐" className="flex shrink-0 items-center text-[13px] text-ink-subtle">
+              {categories.map((c, i) => (
+                <span key={c} className="flex items-center">
+                  {i > 0 && <span aria-hidden="true">·</span>}
+                  <button
+                    type="button"
+                    title={`推荐${c}`}
+                    onClick={() => start(`推荐${c}`)}
+                    className={`${LINK} rounded-md bg-transparent px-1.5 text-ink-muted hover:text-ink hover:underline hover:underline-offset-4`}
+                  >
+                    {c.slice(0, 2)}
+                  </button>
+                </span>
+              ))}
+            </nav>
+          </div>
         </div>
-        <Composer variant="home" onSend={start} />
-        <div className="hidden text-xs text-ink-subtle md:block">支持 JPG / PNG · 也可以直接把图片拖到这个窗口</div>
       </div>
     </>
   )
