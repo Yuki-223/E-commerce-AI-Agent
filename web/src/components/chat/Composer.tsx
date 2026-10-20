@@ -152,7 +152,107 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
   }
 
   const home = variant === 'home'
-  const btn = home ? 'h-10 w-10' : 'h-9 w-9'
+  // Home toolbar buttons sit on the 32px rung, 44px on touch screens.
+  const btn = home ? 'h-8 w-8 [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11' : 'h-9 w-9'
+
+  const plusMenu = (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        aria-label="添加图片、引用商品或切换档案"
+        aria-haspopup="menu"
+        aria-expanded={menu}
+        title="添加"
+        onClick={() => setMenu((m) => !m)}
+        className={`flex ${btn} items-center justify-center rounded-full border border-line-strong p-0 text-ink-muted hover:bg-secondary hover:text-ink ${menu ? 'bg-secondary text-ink' : 'bg-transparent'}`}
+      >
+        <IconPlus size={15} strokeWidth={2.2} className={`transition-transform duration-snap ease-snap ${menu ? 'rotate-45' : ''}`} />
+      </button>
+      {menu && (
+        <ComposerMenu
+          onClose={() => setMenu(false)}
+          onImage={() => fileRef.current?.click()}
+          onCamera={canCapture ? () => cameraRef.current?.click() : undefined}
+          onProduct={(r) => {
+            setRefProduct(r)
+            inputRef.current?.focus()
+          }}
+        />
+      )}
+    </div>
+  )
+
+  const fileInputs = (
+    <>
+      <input
+        ref={fileRef}
+        type="file"
+        accept={IMAGE_ACCEPT}
+        hidden
+        onChange={(e) => {
+          void attach(e.target.files?.[0] ?? null, '选择')
+          e.target.value = ''
+        }}
+      />
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(e) => {
+          void attach(e.target.files?.[0] ?? null, '选择')
+          e.target.value = ''
+        }}
+      />
+    </>
+  )
+
+  const textarea = (
+    <>
+      <label htmlFor={`composer-${variant}`} className="sr-only-label">
+        输入需求
+      </label>
+      <textarea
+        id={`composer-${variant}`}
+        ref={inputRef}
+        rows={home ? 2 : 1}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={onKeyDown}
+        placeholder={placeholder ?? (home ? '说说你想买什么，比如「500 元以内不含酒精的防晒」' : '继续追问，或把商品图片拖进来 / 直接粘贴截图')}
+        className={`min-w-0 grow resize-none overflow-y-hidden bg-transparent leading-[22px] [scrollbar-width:thin] text-ink outline-none placeholder:text-ink-subtle focus-visible:outline-none ${home ? 'min-h-[48px] w-full px-1.5 pt-1 text-base' : 'px-1 text-[15px]'}`}
+      />
+    </>
+  )
+
+  const micButton = speech.supported && (
+    <button
+      type="button"
+      aria-label={speech.listening ? '停止语音输入' : '语音输入'}
+      aria-pressed={speech.listening}
+      onClick={toggleMic}
+      className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 ${speech.listening ? 'bg-primary-tint text-primary-text' : 'bg-transparent text-ink-subtle'}`}
+    >
+      <IconMic />
+    </button>
+  )
+
+  const sendButton =
+    busy && onStop ? (
+      <button type="button" aria-label="停止生成" onClick={onStop} className={`flex ${btn} shrink-0 items-center justify-center rounded-full bg-ink p-0 text-bg`}>
+        <IconStop />
+      </button>
+    ) : (
+      <button
+        type="submit"
+        aria-label="发送"
+        disabled={!canSend}
+        className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-on-primary ${canSend ? 'bg-primary' : 'bg-disabled'}`}
+      >
+        <IconSend size={home ? 15 : 16} />
+      </button>
+    )
 
   return (
     <>
@@ -160,7 +260,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
         onSubmit={submit}
         className={
           home
-            ? `${SHELL} w-full max-w-[760px] gap-2.5 p-3`
+            ? `${SHELL} w-full max-w-[760px] gap-2 px-3 pb-2.5 pt-3.5`
             : `${SHELL} gap-2 px-2.5 py-2`
         }
       >
@@ -197,91 +297,25 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
             </ProductRefChip>
           </div>
         )}
-        <div className="flex items-center gap-2.5">
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              aria-label="添加图片、引用商品或切换档案"
-              aria-haspopup="menu"
-              aria-expanded={menu}
-              title="添加"
-              onClick={() => setMenu((m) => !m)}
-              className={`flex ${btn} items-center justify-center rounded-full border border-line-strong p-0 text-ink-muted hover:bg-secondary hover:text-ink ${menu ? 'bg-secondary text-ink' : 'bg-transparent'}`}
-            >
-              <IconPlus size={15} strokeWidth={2.2} className={`transition-transform duration-snap ease-snap ${menu ? 'rotate-45' : ''}`} />
-            </button>
-            {menu && (
-              <ComposerMenu
-                onClose={() => setMenu(false)}
-                onImage={() => fileRef.current?.click()}
-                onCamera={canCapture ? () => cameraRef.current?.click() : undefined}
-                onProduct={(r) => {
-                  setRefProduct(r)
-                  inputRef.current?.focus()
-                }}
-              />
-            )}
+        {home ? (
+          <>
+            {textarea}
+            <div className="flex items-center gap-1.5">
+              {plusMenu}
+              <div className="grow" />
+              {micButton}
+              {sendButton}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-2.5">
+            {plusMenu}
+            {textarea}
+            {micButton}
+            {sendButton}
           </div>
-          <input
-            ref={fileRef}
-            type="file"
-            accept={IMAGE_ACCEPT}
-            hidden
-            onChange={(e) => {
-              void attach(e.target.files?.[0] ?? null, '选择')
-              e.target.value = ''
-            }}
-          />
-          <input
-            ref={cameraRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            hidden
-            onChange={(e) => {
-              void attach(e.target.files?.[0] ?? null, '选择')
-              e.target.value = ''
-            }}
-          />
-          <label htmlFor={`composer-${variant}`} className="sr-only-label">
-            输入需求
-          </label>
-          <textarea
-            id={`composer-${variant}`}
-            ref={inputRef}
-            rows={1}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder={placeholder ?? (home ? '说说你想买什么，比如「500 元以内不含酒精的防晒」' : '继续追问，或把商品图片拖进来 / 直接粘贴截图')}
-            className={`min-w-0 grow resize-none overflow-y-hidden bg-transparent px-1 leading-[22px] [scrollbar-width:thin] text-ink outline-none placeholder:text-ink-subtle focus-visible:outline-none ${home ? 'text-base' : 'text-[15px]'}`}
-          />
-          {speech.supported && (
-            <button
-              type="button"
-              aria-label={speech.listening ? '停止语音输入' : '语音输入'}
-              aria-pressed={speech.listening}
-              onClick={toggleMic}
-              className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 ${speech.listening ? 'bg-primary-tint text-primary-text' : 'bg-transparent text-ink-subtle'}`}
-            >
-              <IconMic />
-            </button>
-          )}
-          {busy && onStop ? (
-            <button type="button" aria-label="停止生成" onClick={onStop} className={`flex ${btn} shrink-0 items-center justify-center rounded-full bg-ink p-0 text-bg`}>
-              <IconStop />
-            </button>
-          ) : (
-            <button
-              type="submit"
-              aria-label="发送"
-              disabled={!canSend}
-              className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-on-primary ${canSend ? 'bg-primary' : 'bg-disabled'}`}
-            >
-              <IconSend size={home ? 17 : 16} />
-            </button>
-          )}
-        </div>
+        )}
+        {fileInputs}
         {imageError && <p className="m-0 px-1 text-xs text-error-text">{imageError}</p>}
       </form>
       {dragging && (
