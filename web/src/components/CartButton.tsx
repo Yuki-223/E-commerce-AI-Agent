@@ -35,13 +35,13 @@ export function CartButton() {
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className={`relative flex h-9 w-9 items-center justify-center rounded-lg p-0 hover:bg-secondary hover:text-ink ${
-          open ? 'bg-secondary text-ink' : 'text-ink-muted'
+        className={`relative flex h-9 w-9 items-center justify-center rounded-lg p-0 hover:bg-sidebar-active hover:text-ink ${
+          open ? 'bg-sidebar-active text-ink' : 'text-ink-muted'
         }`}
       >
         <IconCart size={20} strokeWidth={2} />
         {count > 0 && (
-          <span className="absolute right-px top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error-text px-1 text-[10px] font-bold text-on-primary">
+          <span className="absolute right-px top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-bold text-bg">
             {count > 99 ? '99+' : count}
           </span>
         )}

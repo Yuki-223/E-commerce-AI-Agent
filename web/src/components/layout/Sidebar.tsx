@@ -129,7 +129,7 @@ export function Sidebar() {
             aria-label="搜索对话"
             aria-keyshortcuts={IS_MAC ? 'Meta+K' : 'Control+K'}
             onClick={() => setSearching(true)}
-            className="my-0.5 flex h-9 w-full items-center gap-2.5 rounded-lg border border-line-strong bg-surface px-[7px] text-left text-[15px] text-ink-subtle"
+            className="my-0.5 flex h-9 w-full items-center gap-2.5 rounded-lg border border-line-strong bg-field px-[7px] text-left text-[15px] text-ink-subtle"
           >
             <span className="flex w-6 justify-center">
               <IconSearch size={17} />
