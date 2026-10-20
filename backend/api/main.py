@@ -23,13 +23,21 @@ os.environ.setdefault("CHROMA_TELEMETRY_IMPL", "none")
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from agent.memory_extractor import extract_preference_updates
+from api import auth as auth_router
+from api import merchant as merchant_router
+from api import orders as orders_router
 from api import products as products_router
+from api.auth import optional_account, shopper_id
+from api.orders import order_http_error
+from store.account_store import Account
+from store.address_store import AddressStore
 from store.cart_store import DEFAULT_ADDRESS, CartNotFoundError, CartStore
+from store.order_store import OrderError
 from store.session_store import SqliteSessionStore
 from store.user_memory_store import UserMemoryStore, UserPreference
 
@@ -98,6 +106,7 @@ class OrderRequest(BaseModel):
     items: list[OrderItem] = Field(default_factory=list)
     cartItemIDs: list[str] = Field(default_factory=list)
     address: str | None = None
+    address_id: int | None = Field(None, description="Address-book entry; wins over address")
     session_id: str | None = Field(None, description="Chat session whose pending spec question this order answers")
 
 
@@ -128,6 +137,10 @@ app = FastAPI(title="E-commerce AI Agent", version="0.2.0")
 
 # Product detail and batch-query endpoints.
 app.include_router(products_router.router)
+# Accounts, shopper orders and addresses, and the merchant console.
+app.include_router(auth_router.router)
+app.include_router(orders_router.router)
+app.include_router(merchant_router.router)
 
 
 @app.exception_handler(HTTPException)
@@ -278,11 +291,12 @@ def undo_preference(user_id: str, req: PreferenceUndoRequest) -> dict[str, Any]:
 
 
 @app.post("/chat", response_model=ChatResponse)
-def chat(req: ChatRequest) -> ChatResponse:
+def chat(req: ChatRequest, account: Account | None = Depends(optional_account)) -> ChatResponse:
     if not req.query or not req.query.strip():
         raise HTTPException(status_code=400, detail="query 不能为空")
     session = _sessions.get_or_create(req.session_id)
     _attach_user_memory(session, req.user_id)
+    session.account_id = account.user_id if account else None
     resp = _get_agent().handle_turn(req.query, session)
     memory_updates = _apply_realtime_preference_updates(req.query, session)
     if memory_updates:
@@ -314,7 +328,7 @@ def _resolve_image(req: ChatRequest) -> str | None:
 
 
 @app.post("/chat/stream")
-def chat_stream(req: ChatRequest) -> StreamingResponse:
+def chat_stream(req: ChatRequest, account: Account | None = Depends(optional_account)) -> StreamingResponse:
     """Stream one agent turn over Server-Sent Events.
 
     Each event ends with ``\\n\\n``:
@@ -332,6 +346,7 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
     """
     session = _sessions.get_or_create(req.session_id)
     _attach_user_memory(session, req.user_id)
+    session.account_id = account.user_id if account else None
     agent = _get_agent()
     image = _resolve_image(req)
 
@@ -381,13 +396,13 @@ def reset_session(session_id: str) -> dict[str, str]:
 
 
 @app.post("/cart/reset")
-def reset_cart() -> dict[str, Any]:
-    """Clear the cart for the single demonstration user.
+def reset_cart(user_id: str = Depends(shopper_id)) -> dict[str, Any]:
+    """Clear the caller's cart (the demo shopper's when not logged in).
 
     Cart state is persisted independently of sessions. Use this only for manual reset or
     debugging; clients should load existing cart state at startup.
     """
-    removed = CartStore().clear()
+    removed = CartStore(user_id=user_id).clear()
     return {"status": "cleared", "removed": removed}
 
 
@@ -410,9 +425,9 @@ def _cart_item_id(value: str | None) -> int:
 
 
 @app.post("/cart/mutate")
-def mutate_cart(req: CartMutationRequest) -> dict[str, Any]:
+def mutate_cart(req: CartMutationRequest, user_id: str = Depends(shopper_id)) -> dict[str, Any]:
     """Apply a deterministic cart mutation and return the latest snapshot."""
-    store = CartStore()
+    store = CartStore(user_id=user_id)
     action = req.action
 
     if action == "add":
@@ -450,28 +465,45 @@ def mutate_cart(req: CartMutationRequest) -> dict[str, Any]:
     return _cart_response(store)
 
 
-@app.post("/orders")
-def place_order(req: OrderRequest) -> dict[str, Any]:
-    """Place a demonstration order and return it with the latest cart snapshot.
+def _order_address(req: OrderRequest, user_id: str) -> str:
+    """Address-book entry by id, else free text, else the default entry, else the demo address."""
+    addresses = AddressStore()
+    if req.address_id is not None:
+        address = addresses.get(user_id, req.address_id)
+        if address is None:
+            raise HTTPException(status_code=404, detail="收货地址不存在")
+        return address.one_line()
+    if req.address and req.address.strip():
+        return req.address.strip()
+    default = addresses.default(user_id)
+    return default.one_line() if default else DEFAULT_ADDRESS
 
-    The chat's order card sends ``items`` with the session it came from, so the
-    pending spec question is closed and the next message is not read as an answer.
+
+@app.post("/orders")
+def place_order(req: OrderRequest, user_id: str = Depends(shopper_id)) -> dict[str, Any]:
+    """Place orders (status ``pending_payment``) and return them with the latest cart.
+
+    Stock is reserved at once; pay with ``POST /orders/{id}/pay``. The chat's order card
+    sends ``items`` with the session it came from, so the pending spec question is
+    closed and the next message is not read as an answer.
     """
-    store = CartStore()
-    address = req.address or DEFAULT_ADDRESS
+    if not req.items and not req.cartItemIDs:
+        raise HTTPException(status_code=400, detail="items 和 cartItemIDs 不能都为空")
+    store = CartStore(user_id=user_id)
+    address = _order_address(req, user_id)
     try:
         if req.items:
             order = store.build_direct_order(
                 [(i.productID, i.skuID, i.quantity) for i in req.items], address=address
             )
-        elif req.cartItemIDs:
+        else:
             order = store.build_order(
                 address=address, cart_item_ids=[_cart_item_id(c) for c in req.cartItemIDs]
             )
-        else:
-            raise HTTPException(status_code=400, detail="items 和 cartItemIDs 不能都为空")
     except CartNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except OrderError as exc:
+        raise order_http_error(exc) from exc
 
     if req.session_id:
         session = _sessions.get_or_create(req.session_id)
@@ -483,13 +515,13 @@ def place_order(req: OrderRequest) -> dict[str, Any]:
 
 
 @app.get("/cart")
-def get_cart() -> dict[str, Any]:
-    """Return the current cart snapshot for the demonstration user.
+def get_cart(user_id: str = Depends(shopper_id)) -> dict[str, Any]:
+    """Return the caller's cart snapshot (the demo shopper's when not logged in).
 
     Startup restoration keeps client state consistent with SQLite. The response matches
     the cart snapshot emitted by SSE so clients can share one parser.
     """
-    return _cart_response(CartStore())
+    return _cart_response(CartStore(user_id=user_id))
 
 
 @app.post("/compare")

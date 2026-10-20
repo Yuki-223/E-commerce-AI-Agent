@@ -15,6 +15,7 @@ or recent hits, while cart ordinals refer to cart-line order, not recommendation
 If LLM action dispatch fails, the safe fallback is to show the current cart.
 """
 
+import copy
 import logging
 from collections import OrderedDict
 import re
@@ -25,7 +26,9 @@ from agent.session import AgentSession
 from agent.tools.base import ToolResult
 from agent.tools.resolve import resolve_one
 from agent.tools.reference import resolve_indices, resolve_by_name, extract_name_query, parse_quantity
+from store.address_store import AddressStore
 from store.cart_store import CartNotFoundError, CartStore, DEFAULT_ADDRESS
+from store.order_store import OrderError
 from store.product_store import ProductStore
 
 
@@ -92,6 +95,16 @@ class CartTool:
         self._products = product_store or ProductStore()
 
     def run(self, query: str, session: AgentSession, slots: dict[str, Any]) -> ToolResult:
+        # A logged-in shopper's turn works on their own cart. The tool instance is shared
+        # across requests, so bind a shallow copy instead of mutating ``self._store``.
+        account_id = getattr(session, "account_id", None)
+        if account_id and account_id != self._store.user_id:
+            bound = copy.copy(self)
+            bound._store = self._store.for_user(account_id)
+            return bound._run(query, session)
+        return self._run(query, session)
+
+    def _run(self, query: str, session: AgentSession) -> ToolResult:
         # Use the raw utterance for product/SKU resolution because a router rewrite may
         # inject contextual product names. The rewritten query is used only for action type.
         raw_query = self._user_text(session, query)
@@ -118,7 +131,7 @@ class CartTool:
             if action == "checkout":
                 return self._checkout(args)
             return self._view()  # Safe fallback for view and unknown actions.
-        except CartNotFoundError as exc:
+        except (CartNotFoundError, OrderError) as exc:
             return self._plain(str(exc) + "。要不先看看购物车或换一件？")
 
     # ------------------------------ Action dispatch ------------------------------
@@ -671,19 +684,28 @@ class CartTool:
         )
 
     def _checkout(self, args: dict[str, Any]) -> ToolResult:
-        address = args.get("address") or DEFAULT_ADDRESS
+        address = args.get("address") or self._default_address()
         order = self._store.build_order(address=address)
         return ToolResult(
             tool_name=self.name,
             payload={"action": "checkout", "order": order.to_dict()},
             composer_hint=(
-                f"下单成功！订单号 {order.order_id}，共 {order.to_dict()['item_count']} 件、"
+                f"订单已提交！订单号 {order.order_id}，共 {order.to_dict()['item_count']} 件、"
                 f"合计 {order.total} 元，寄往：{order.address}。"
-                "请用愉快的口吻确认下单完成。"
+                "订单状态是待支付，请用愉快的口吻确认下单，并提醒用户到「我的订单」完成支付。"
             ),
         )
 
     # ------------------------------ Helpers ------------------------------
+
+    def _default_address(self) -> str:
+        """The shopper's default address-book entry, else the demo address."""
+        try:
+            address = AddressStore(self._store.db_path).default(self._store.user_id)
+        except Exception:  # noqa: BLE001 - an address lookup must not block checkout
+            logger.warning("default address lookup failed", exc_info=True)
+            address = None
+        return address.one_line() if address else DEFAULT_ADDRESS
 
     def _target_line(self, cart_index: Any):
         """Resolve a cart ordinal to a line, defaulting to the first line."""

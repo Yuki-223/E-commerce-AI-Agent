@@ -56,8 +56,11 @@ def json_text(value: Any) -> str:
 
 
 def init_database(conn: sqlite3.Connection, init_sql: Path) -> None:
+    from store.commerce_schema import ensure_commerce_schema
+
     with init_sql.open("r", encoding="utf-8") as file:
         conn.executescript(file.read())
+    ensure_commerce_schema(conn)
 
 
 def review_polarity(rating: int | float) -> str:

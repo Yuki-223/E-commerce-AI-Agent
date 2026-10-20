@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS products (
     source_path  TEXT,
     status       TEXT NOT NULL DEFAULT 'active'
         CHECK (status IN ('active', 'inactive')),
+    -- Owning merchant; NULL means platform-operated (the bundled catalog).
+    merchant_id  TEXT,
     created_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CHECK (image_path IS NOT NULL OR image_url IS NOT NULL)
@@ -82,7 +84,8 @@ CREATE TABLE IF NOT EXISTS product_reviews (
     UNIQUE (product_id, source_index)
 );
 
--- users: demo user table that provides ownership for carts and future preference or session features.
+-- users: one row per shopper; carts and orders hang off user_id. Login credentials, merchants,
+-- addresses and orders live in store/commerce_schema.py, which import_product_data applies too.
 CREATE TABLE IF NOT EXISTS users (
     user_id    TEXT PRIMARY KEY,
     nickname   TEXT NOT NULL DEFAULT 'demo_user',

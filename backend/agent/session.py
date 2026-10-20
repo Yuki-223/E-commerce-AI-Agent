@@ -76,6 +76,9 @@ class AgentSession:
 
     session_id: str = field(default_factory=lambda: uuid4().hex)
     user_id: str | None = None
+    # Logged-in account that owns the cart and orders; set per request, never persisted.
+    # ``user_id`` above keys preference memory and may be a local profile instead.
+    account_id: str | None = None
     user_profile: dict[str, Any] = field(default_factory=dict)
     history: list[Message] = field(default_factory=list)
     # Lightweight context accumulated across turns; see individual tool contracts.

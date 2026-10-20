@@ -5,23 +5,23 @@ from __future__ import annotations
 承接 init.sql 里已建好的 cart_items 表，提供对话式购物车需要的 CRUD：
     - add_item / set_quantity / remove_item / clear
     - list_items（带商品标题、SKU 规格、单价、小计）
-    - build_order（从勾选项算订单汇总，下单后 clear）
+    - build_order（把勾选项交给 OrderStore 落库、扣库存，下单后 clear）
 
 设计取舍：
-    - 演示期单用户：默认 user_id = 'demo_user'（init.sql 已 seed）。
-      多用户时把 user_id 换成会话/登录态即可，接口已留参数。
-    - 不新建 orders 表：下单返回一份结构化订单汇总并清空购物车，
-      达成"业务闭环"的演示目标，避免一次性引入订单状态机的复杂度。
+    - 一个 CartStore 实例绑定一个 user_id：未登录时是 'demo_user'（init.sql 已 seed），
+      登录后由 API 用 ``CartStore(user_id=...)`` / ``for_user`` 绑定到当前账号。
+    - 订单由 store.order_store 持久化（待支付 → 已支付 → 已发货 …），
+      这里的 OrderSummary 只是给对话和旧客户端用的结账汇总。
     - 加车默认选最便宜的在售 SKU——对话里用户很少指定规格，
       "把这款加进来"应当能直接成交，需要换规格再说"要XX色的"。
 """
 
 import sqlite3
-import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from store.order_store import LineInput, OrderNotFoundError, OrderStore
 from store.product_store import DEFAULT_DB_PATH, load_json_text
 
 
@@ -62,16 +62,24 @@ class CartLine:
 
 @dataclass(frozen=True)
 class OrderSummary:
-    """Structured result of one checkout."""
+    """Structured result of one checkout.
+
+    A checkout that spans several merchants creates several orders; ``order_id`` is
+    the first and ``order_ids`` lists them all.
+    """
 
     order_id: str
     address: str
     lines: list[CartLine]
     total: float
+    order_ids: list[str] = field(default_factory=list)
+    status: str = "pending_payment"
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "order_id": self.order_id,
+            "order_ids": self.order_ids or [self.order_id],
+            "status": self.status,
             "address": self.address,
             "lines": [line.to_dict() for line in self.lines],
             "item_count": sum(line.quantity for line in self.lines),
@@ -84,13 +92,19 @@ class CartNotFoundError(Exception):
 
 
 class CartStore:
-    def __init__(self, db_path: Path = DEFAULT_DB_PATH) -> None:
+    def __init__(self, db_path: Path = DEFAULT_DB_PATH, user_id: str = DEMO_USER_ID) -> None:
         self.db_path = db_path
+        self.user_id = user_id
+
+    def for_user(self, user_id: str | None) -> "CartStore":
+        """Return a store over the same database bound to another shopper."""
+        return CartStore(self.db_path, user_id=user_id or DEMO_USER_ID)
 
     # ------------------------------ Read ------------------------------
 
-    def list_items(self, user_id: str = DEMO_USER_ID) -> list[CartLine]:
+    def list_items(self, user_id: str | None = None) -> list[CartLine]:
         """Return cart lines in insertion order with joined product titles."""
+        user_id = user_id or self.user_id
         with self._connect() as conn:
             rows = conn.execute(
                 """
@@ -140,7 +154,7 @@ class CartStore:
     def add_product(
         self,
         product_id: str,
-        user_id: str = DEMO_USER_ID,
+        user_id: str | None = None,
         sku_id: str | None = None,
         quantity: int = 1,
     ) -> CartLine:
@@ -149,6 +163,7 @@ class CartStore:
         When ``sku_id`` is absent, select the cheapest active SKU. Existing lines add
         quantity through the unique constraint and UPSERT.
         """
+        user_id = user_id or self.user_id
         if quantity <= 0:
             quantity = 1
         with self._connect() as conn:
@@ -181,9 +196,10 @@ class CartStore:
         return self._line_from_row(row)
 
     def set_quantity(
-        self, cart_item_id: int, quantity: int, user_id: str = DEMO_USER_ID
+        self, cart_item_id: int, quantity: int, user_id: str | None = None
     ) -> CartLine | None:
         """Set line quantity; non-positive values remove the line and return ``None``."""
+        user_id = user_id or self.user_id
         if quantity <= 0:
             self.remove_item(cart_item_id, user_id)
             return None
@@ -206,7 +222,8 @@ class CartStore:
             ).fetchone()
         return self._line_from_row(row)
 
-    def remove_item(self, cart_item_id: int, user_id: str = DEMO_USER_ID) -> bool:
+    def remove_item(self, cart_item_id: int, user_id: str | None = None) -> bool:
+        user_id = user_id or self.user_id
         with self._connect() as conn:
             cur = conn.execute(
                 "DELETE FROM cart_items WHERE cart_item_id = ? AND user_id = ?",
@@ -215,7 +232,8 @@ class CartStore:
             conn.commit()
             return cur.rowcount > 0
 
-    def clear(self, user_id: str = DEMO_USER_ID) -> int:
+    def clear(self, user_id: str | None = None) -> int:
+        user_id = user_id or self.user_id
         with self._connect() as conn:
             cur = conn.execute("DELETE FROM cart_items WHERE user_id = ?", (user_id,))
             conn.commit()
@@ -225,16 +243,18 @@ class CartStore:
 
     def build_order(
         self,
-        user_id: str = DEMO_USER_ID,
+        user_id: str | None = None,
         address: str = DEFAULT_ADDRESS,
         clear_after: bool = True,
         cart_item_ids: list[int] | None = None,
     ) -> OrderSummary:
-        """Build an order from selected lines and clear purchased items by default.
+        """Place orders for selected lines and clear purchased items by default.
 
         ``cart_item_ids`` orders exactly those lines instead; the web cart keeps
-        its ticks on the client.
+        its ticks on the client. Raises ``OutOfStockError`` without touching the cart
+        when any line cannot be fulfilled.
         """
+        user_id = user_id or self.user_id
         if cart_item_ids is not None:
             wanted = set(cart_item_ids)
             lines = [line for line in self.list_items(user_id) if line.cart_item_id in wanted]
@@ -242,12 +262,8 @@ class CartStore:
             lines = [line for line in self.list_items(user_id) if line.selected]
         if not lines:
             raise CartNotFoundError("购物车里没有可下单的商品")
-        total = round(sum(line.subtotal for line in lines), 2)
-        order = OrderSummary(
-            order_id="ord_" + uuid.uuid4().hex[:12],
-            address=address,
-            lines=lines,
-            total=total,
+        summary = self._place(
+            user_id, [LineInput(l.product_id, l.sku_id, l.quantity) for l in lines], address, lines
         )
         if clear_after:
             with self._connect() as conn:
@@ -256,7 +272,7 @@ class CartStore:
                     [(line.cart_item_id, user_id) for line in lines],
                 )
                 conn.commit()
-        return order
+        return summary
 
     def build_direct_order(
         self,
@@ -264,34 +280,43 @@ class CartStore:
         address: str = DEFAULT_ADDRESS,
     ) -> OrderSummary:
         """Order (product_id, sku_id, quantity) items straight away, leaving the cart as is."""
-        lines: list[CartLine] = []
-        with self._connect() as conn:
-            for product_id, sku_id, quantity in items:
-                sku = self._resolve_sku(conn, product_id, sku_id)
-                if sku is None:
-                    raise CartNotFoundError(f"商品 {product_id} 没有可购买的 SKU")
-                lines.append(
-                    CartLine(
-                        cart_item_id=0,
-                        product_id=product_id,
-                        sku_id=sku["sku_id"],
-                        title=self.product_title(product_id),
-                        options=load_json_text(sku["properties_json"]),
-                        quantity=max(1, int(quantity)),
-                        unit_price=float(sku["price"]),
-                        selected=True,
-                    )
-                )
-        if not lines:
+        if not items:
             raise CartNotFoundError("没有可下单的商品")
-        return OrderSummary(
-            order_id="ord_" + uuid.uuid4().hex[:12],
-            address=address,
-            lines=lines,
-            total=round(sum(line.subtotal for line in lines), 2),
-        )
+        inputs = [LineInput(pid, sku_id, max(1, int(qty))) for pid, sku_id, qty in items]
+        return self._place(self.user_id, inputs, address, [])
 
     # ------------------------------ Internal ------------------------------
+
+    def _place(
+        self, user_id: str, inputs: list[LineInput], address: str, cart_lines: list[CartLine]
+    ) -> OrderSummary:
+        """Persist orders and summarize them with checkout-time prices."""
+        try:
+            orders = OrderStore(self.db_path).create_orders(user_id, inputs, address)
+        except OrderNotFoundError as exc:
+            raise CartNotFoundError(str(exc)) from exc
+        cart_ids = {line.sku_id: line.cart_item_id for line in cart_lines}
+        lines = [
+            CartLine(
+                cart_item_id=cart_ids.get(item.sku_id, 0),
+                product_id=item.product_id,
+                sku_id=item.sku_id,
+                title=item.title,
+                options=item.options,
+                quantity=item.quantity,
+                unit_price=item.unit_price,
+                selected=True,
+            )
+            for order in orders
+            for item in order.items
+        ]
+        return OrderSummary(
+            order_id=orders[0].order_id,
+            address=address,
+            lines=lines,
+            total=round(sum(order.total for order in orders), 2),
+            order_ids=[order.order_id for order in orders],
+        )
 
     def _resolve_sku(
         self, conn: sqlite3.Connection, product_id: str, sku_id: str | None
