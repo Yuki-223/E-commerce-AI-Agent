@@ -87,7 +87,8 @@ function ProductsView({ onBack, onPick }: { onBack: () => void; onPick: (ref: Pr
   )
 }
 
-function ProfilesView({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+/** Profile switcher submenu; shared with the sidebar's account menu. */
+export function ProfilesView({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
   const { profiles, activeId, setActive } = useProfiles()
   const openSettings = useSettings((s) => s.open)
   return (
