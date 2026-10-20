@@ -36,35 +36,26 @@ export function usePresence(open: boolean) {
   return { mounted: open || mounted, state, onAnimationEnd, props: { 'data-state': state, onAnimationEnd } satisfies PresenceProps }
 }
 
-interface Entry<T> {
+export interface Entry<T> {
   key: string
   item: T
   leaving: boolean
 }
 
-function merge<T>(prev: Entry<T>[], items: T[], keyOf: (item: T) => string): Entry<T>[] {
-  const next = new Map(items.map((item) => [keyOf(item), item]))
-  const known = new Set(prev.map((e) => e.key))
-  const out: Entry<T>[] = []
-  let i = 0
-  const flushNew = (until?: string) => {
-    for (; i < items.length; i++) {
-      const k = keyOf(items[i])
-      if (k === until) return
-      if (!known.has(k)) out.push({ key: k, item: items[i], leaving: false })
-    }
-  }
+/** New items in their new order; each removed item stays after the item it used to follow. */
+export function mergePresence<T>(prev: Entry<T>[], items: T[], keyOf: (item: T) => string): Entry<T>[] {
+  const next = new Set(items.map(keyOf))
+  const after = new Map<string | null, Entry<T>[]>()
+  let anchor: string | null = null
   for (const e of prev) {
-    const item = next.get(e.key)
-    if (item === undefined) {
-      out.push({ ...e, leaving: true })
-      continue
-    }
-    flushNew(e.key)
-    out.push({ key: e.key, item, leaving: false })
-    i++
+    if (next.has(e.key)) anchor = e.key
+    else after.set(anchor, [...(after.get(anchor) ?? []), { ...e, leaving: true }])
   }
-  flushNew()
+  const out: Entry<T>[] = [...(after.get(null) ?? [])]
+  for (const item of items) {
+    const key = keyOf(item)
+    out.push({ key, item, leaving: false }, ...(after.get(key) ?? []))
+  }
   return out
 }
 
@@ -78,7 +69,7 @@ export function usePresenceList<T>(items: T[], keyOf: (item: T) => string) {
   const [state, setState] = useState(() => ({ src: items, list: items.map((item) => ({ key: keyOf(item), item, leaving: false })) }))
   let list = state.list
   if (state.src !== items) {
-    list = merge(state.list, items, keyOf)
+    list = mergePresence(state.list, items, keyOf)
     setState({ src: items, list })
   }
 

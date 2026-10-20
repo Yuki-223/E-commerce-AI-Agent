@@ -10,7 +10,7 @@ import { useActiveProfile } from '../../stores/profiles'
 import { useDrawer, useSettings } from '../../stores/ui'
 import { IconAddSquare, IconCart, IconClose, IconCompose, IconSearch } from '../Icons'
 import { Avatar } from './AccountButton'
-import { HistoryItem } from './HistoryItem'
+import { HistoryList } from './HistoryItem'
 import { InstallHint, useInstall } from '../../hooks/useInstall'
 
 /** ⑬ MWebDrawer: history, cart, preferences and 添加到主屏幕. */
@@ -80,9 +80,8 @@ export function MobileDrawer() {
             .map((g, i) => (
               <div key={g} className="flex flex-col gap-0.5">
                 <div className={`px-2 pb-1 text-xs text-ink-subtle ${i ? 'pt-3' : 'pt-1.5'}`}>{g}</div>
-                {groups.get(g)!.map((c) => (
-                  <HistoryItem key={c.id} conv={c} />
-                ))}
+                {/* Keyed by the query: filtering re-lists at once; only deletions collapse. */}
+                <HistoryList key={query} conversations={groups.get(g)!} />
               </div>
             ))}
         </div>

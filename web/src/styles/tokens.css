@@ -57,7 +57,19 @@
   --ease-out: cubic-bezier(.165, .84, .44, 1);
   --ease-snap: cubic-bezier(.32, .72, 0, 1);
   --ease-overshoot: cubic-bezier(.34, 1.3, .64, 1);
+  /* Storybook spring presets sampled as linear() (17 points; max error vs the real spring in brackets).
+     card 320/28: ~2% overshoot, settles ~400ms, use with dur-sheet [1.8%].
+     bounce 380/18: ~19% overshoot, settles ~590ms, use with dur-slow [4.4%]. */
+  --ease-spring-card: linear(0, 0.08, 0.252, 0.445, 0.619, 0.76, 0.864, 0.935, 0.979, 1.004, 1.016, 1.019, 1.018, 1.015, 1.011, 1.008, 1);
+  --ease-spring-bounce: linear(0, 0.203, 0.599, 0.948, 1.146, 1.194, 1.148, 1.07, 1.004, 0.969, 0.962, 0.973, 0.988, 1, 1.006, 1.007, 1);
   color-scheme: light;
+}
+/* Browsers without linear() fall back to the closest cubic-bezier. */
+@supports not (animation-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring-card: var(--ease-overshoot);
+    --ease-spring-bounce: var(--ease-overshoot);
+  }
 }
 
 :root[data-theme="dark"] {

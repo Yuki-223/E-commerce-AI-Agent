@@ -1,9 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useMatch, useNavigate } from 'react-router-dom'
-import { usePresence } from '../../hooks/usePresence'
+import { usePresence, usePresenceList } from '../../hooks/usePresence'
 import { historyTime } from '../../lib/format'
 import { productCount, useConversations, type Conversation } from '../../stores/conversations'
+import { CollapseBox } from '../Collapse'
 import { IconMore, IconPencil, IconTrash } from '../Icons'
+
+/** History rows where a deleted conversation collapses away instead of vanishing. */
+export function HistoryList({ conversations, dense = false }: { conversations: Conversation[]; dense?: boolean }) {
+  const rows = usePresenceList(conversations, (c) => c.id)
+  return (
+    <>
+      {rows.map(({ key, item, props }) => (
+        <CollapseBox key={key} presence={props} appear={false}>
+          <HistoryItem conv={item} dense={dense} />
+        </CollapseBox>
+      ))}
+    </>
+  )
+}
 
 /**
  * One history row with the WebStates ⑥ ⋯ menu (重命名 / 删除对话).

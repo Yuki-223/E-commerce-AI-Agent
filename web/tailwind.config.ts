@@ -64,6 +64,8 @@ export default {
         out: v('ease-out'),
         snap: v('ease-snap'),
         overshoot: v('ease-overshoot'),
+        'spring-card': v('ease-spring-card'),
+        'spring-bounce': v('ease-spring-bounce'),
       },
       keyframes: {
         'fade-in': fadeIn,
@@ -79,6 +81,8 @@ export default {
         'panel-in': panelIn,
         'panel-out': exit(panelIn),
         'expand-in': expandIn,
+        // Count badges: a changed number pops back from 60%.
+        'count-pop': { from: { transform: 'scale(0.6)' } },
         'collapse-out': exit(expandIn),
         reveal: { from: { opacity: '0', filter: 'blur(6px)' } },
         'bubble-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.92)' } },
@@ -98,7 +102,7 @@ export default {
         'pop-up': 'pop-up var(--dur-base) var(--ease-out)',
         'dialog-in': 'dialog-in var(--dur-base) var(--ease-out)',
         'drawer-in': 'drawer-in var(--dur-sheet) var(--ease-snap)',
-        'toast-in': 'pop-in var(--dur-sheet) var(--ease-overshoot)',
+        'toast-in': 'pop-in var(--dur-sheet) var(--ease-spring-card)',
         // Exits (usePresence): 120ms; the phone drawer and its scrim take 200ms.
         'fade-out': out('fade-out'),
         'pop-out': out('pop-out'),
@@ -112,8 +116,12 @@ export default {
         // Rows, banners and list items open and close their height in 200ms.
         'expand-in': 'expand-in var(--dur-base) var(--ease-out)',
         'collapse-out': out('collapse-out', 'dur-base'),
+        // Composer attachments leave faster than they arrive.
+        'collapse-out-snap': out('collapse-out'),
         // Streamed text: each new piece sharpens out of a blur.
-        reveal: 'reveal var(--dur-base) cubic-bezier(.215, .61, .355, 1)',
+        // Storybook Grapheme Reveal: 90ms per piece; `both` keeps a piece blurred until it starts.
+        reveal: 'reveal 90ms cubic-bezier(.215, .61, .355, 1) both',
+        'count-pop': 'count-pop var(--dur-slow) var(--ease-spring-bounce)',
         'bubble-in': 'bubble-in var(--dur-slow) var(--ease-overshoot)',
         'fade-up': 'fade-up var(--dur-slow) var(--ease-out)',
         'quiet-dot': 'quiet-dot 1.9s cubic-bezier(.4, 0, .2, 1) infinite',

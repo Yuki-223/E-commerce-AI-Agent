@@ -54,6 +54,8 @@ export function ChatPage() {
   }
 
   const openProduct = (productId: string) => {
+    // Phones show detail as its own page; going there directly skips the ?product= redirect's blank frame.
+    if (narrow) return navigate(`/p/${productId}`)
     const next = new URLSearchParams(params)
     next.set('product', productId)
     setParams(next)

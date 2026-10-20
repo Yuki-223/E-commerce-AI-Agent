@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode, type TransitionEvent } from 'react'
 import { Link, useMatch, useNavigate } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
+import { useBump } from '../../hooks/useBump'
 import { usePresence } from '../../hooks/usePresence'
 import { useConversations } from '../../stores/conversations'
 import { useSidebar } from '../../stores/ui'
 import { IconCart, IconPlus, IconSearch, IconSidebar } from '../Icons'
 import { AccountButton } from './AccountButton'
-import { HistoryItem } from './HistoryItem'
+import { HistoryList } from './HistoryItem'
 import { SearchDialog } from './SearchDialog'
 
 /** Apple keyboards show ⌘K; everyone else gets Ctrl K. */
@@ -55,6 +56,7 @@ export function Sidebar() {
   const conversations = useConversations((s) => s.conversations)
   const { data: cart } = useCart()
   const cartCount = cart?.cart.item_count ?? 0
+  const bump = useBump(cartCount)
   const onCart = useMatch('/cart')
   const [searching, setSearching] = useState(false)
 
@@ -96,7 +98,7 @@ export function Sidebar() {
           <RailButton label={`购物车（${cartCount} 件）`} to="/cart">
             <span className="relative">
               <IconCart size={18} strokeWidth={2} />
-              {cartCount > 0 && <span className="absolute -right-1.5 -top-1.5 h-2 w-2 rounded-full bg-primary" />}
+              {cartCount > 0 && <span key={bump.key} className={`absolute -right-1.5 -top-1.5 h-2 w-2 rounded-full bg-primary ${bump.className}`} />}
             </span>
           </RailButton>
           <div className="grow" />
@@ -148,7 +150,9 @@ export function Sidebar() {
             <span className="grow">购物车</span>
             {cartCount > 0 && (
               // On /cart the row already has the active fill, so the count sits on surface instead.
-              <span className={`rounded-full px-1.5 text-xs font-semibold leading-5 text-ink-muted ${onCart ? 'bg-surface' : 'bg-sidebar-active'}`}>{cartCount}</span>
+              <span key={bump.key} className={`rounded-full px-1.5 text-xs font-semibold leading-5 text-ink-muted ${onCart ? 'bg-surface' : 'bg-sidebar-active'} ${bump.className}`}>
+                {cartCount}
+              </span>
             )}
           </Link>
         </nav>
@@ -160,9 +164,7 @@ export function Sidebar() {
               还没有历史对话。新对话会自动保存在这台设备上。
             </p>
           )}
-          {list.map((c) => (
-            <HistoryItem key={c.id} conv={c} dense />
-          ))}
+          <HistoryList conversations={list} dense />
         </nav>
 
         <div className="shrink-0 border-t border-line px-2.5 py-2">

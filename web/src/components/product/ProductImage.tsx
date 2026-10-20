@@ -1,8 +1,26 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
-/** Product photo with a quiet placeholder when the URL is missing or fails. */
-export function ProductImage({ src, alt, className = '', fit = 'contain' }: { src: string | null; alt: string; className?: string; fit?: 'contain' | 'cover' }) {
+/**
+ * Product photo. `src` undefined means the product is still loading: a plain
+ * field-coloured block, no text. null (or a failed load) is 暂无图片. A photo
+ * fades in over dur-base once it has loaded, unless it was already cached.
+ */
+export function ProductImage({ src, alt, className = '', fit = 'contain' }: { src: string | null | undefined; alt: string; className?: string; fit?: 'contain' | 'cover' }) {
   const [failed, setFailed] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const img = useRef<HTMLImageElement>(null)
+  const [shown, setShown] = useState(src)
+  if (src !== shown) {
+    setShown(src)
+    setLoaded(false)
+    setFailed(false)
+  }
+  // A cached photo is complete before paint: show it at once instead of fading.
+  useLayoutEffect(() => {
+    if (img.current?.complete && img.current.naturalWidth) setLoaded(true)
+  }, [src])
+
+  if (src === undefined) return <div className={`bg-field ${className}`} role="img" aria-label={alt} aria-busy="true" />
   if (!src || failed) {
     return (
       <div className={`flex items-center justify-center bg-field text-xs text-ink-subtle ${className}`} role="img" aria-label={alt}>
@@ -10,5 +28,18 @@ export function ProductImage({ src, alt, className = '', fit = 'contain' }: { sr
       </div>
     )
   }
-  return <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} className={`bg-white ${fit === 'contain' ? 'object-contain' : 'object-cover'} ${className}`} />
+  return (
+    <span className={`block overflow-hidden bg-field ${className}`}>
+      <img
+        ref={img}
+        key={src}
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+        className={`h-full w-full bg-white transition-opacity duration-base ease-out ${fit === 'contain' ? 'object-contain' : 'object-cover'} ${loaded ? '' : 'opacity-0'}`}
+      />
+    </span>
+  )
 }

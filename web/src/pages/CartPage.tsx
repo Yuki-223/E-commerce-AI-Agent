@@ -85,7 +85,7 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
         className="m-0 mt-[35px] h-[18px] w-[18px] accent-[var(--primary)] [@container(min-width:740px)]:mt-0"
       />
       <Link to={`?product=${line.product_id}`} className="block h-[88px] w-[88px] overflow-hidden rounded-[14px] border border-line">
-        <ProductImage src={product?.imageURL ?? null} alt={line.title} className="h-full w-full" fit="cover" />
+        <ProductImage src={product?.imageURL} alt={line.title} className="h-full w-full" fit="cover" />
       </Link>
       <div className={`min-w-0 ${COLS}`}>
         <div className="relative flex min-w-0 flex-col gap-1.5">
@@ -168,7 +168,7 @@ function MobileCartRow({ line, product, selected, onSelect }: { line: CartLine; 
         <input type="checkbox" checked={selected} onChange={(e) => onSelect(e.target.checked)} aria-label={`选择 ${line.title}`} className="m-0 h-5 w-5 accent-[var(--primary)]" />
       </label>
       <Link to={`/p/${line.product_id}`} className="block h-[76px] w-[76px] shrink-0 overflow-hidden rounded-[14px] border border-line">
-        <ProductImage src={product?.imageURL ?? null} alt={line.title} className="h-full w-full" fit="cover" />
+        <ProductImage src={product?.imageURL} alt={line.title} className="h-full w-full" fit="cover" />
       </Link>
       <div className="flex min-w-0 grow flex-col gap-1.5">
         <div className="flex gap-1">

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
+import { useBump } from '../hooks/useBump'
 import { usePresence } from '../hooks/usePresence'
 import { CartDropdown } from './CartDropdown'
 import { IconCart } from './Icons'
@@ -13,6 +14,7 @@ export function CartButton() {
   const location = useLocation()
   const count = data?.cart.item_count ?? 0
   const dropdown = usePresence(open)
+  const bump = useBump(count)
 
   useEffect(() => setOpen(false), [location.pathname])
   useEffect(() => {
@@ -43,7 +45,7 @@ export function CartButton() {
       >
         <IconCart size={20} strokeWidth={2} />
         {count > 0 && (
-          <span className="absolute right-px top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-bold text-bg">
+          <span key={bump.key} className={`absolute right-px top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-bold text-bg ${bump.className}`}>
             {count > 99 ? '99+' : count}
           </span>
         )}

@@ -33,7 +33,7 @@ export function CartDropdown({ data, onClose, presence }: { data: CartResponse |
           <div className="max-h-[360px] overflow-y-auto">
             {lines.map((l) => (
               <div key={l.cart_item_id} className="flex items-center gap-3 px-[18px] py-2.5">
-                <ProductImage src={byId.get(l.product_id)?.imageURL ?? null} alt={l.title} fit="cover" className="h-14 w-14 shrink-0 rounded-xl border border-line" />
+                <ProductImage src={byId.get(l.product_id)?.imageURL} alt={l.title} fit="cover" className="h-14 w-14 shrink-0 rounded-xl border border-line" />
                 <div className="flex min-w-0 grow flex-col gap-[3px]">
                   <div className="truncate text-[13px] font-semibold">{l.title}</div>
                   {Object.keys(l.options).length > 0 && (
