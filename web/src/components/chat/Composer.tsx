@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { usePresence } from '../../hooks/usePresence'
 import { useSpeech } from '../../hooks/useSpeech'
 import { compressImage, firstImage, IMAGE_ACCEPT } from '../../lib/image'
 import type { ProductRef } from '../../lib/productRef'
@@ -42,6 +43,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
   const [imageError, setImageError] = useState('')
   const [refProduct, setRefProduct] = useState<ProductRef | null>(null)
   const [menu, setMenu] = useState(false)
+  const menuPresence = usePresence(menu)
   const fileRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -168,8 +170,9 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
       >
         <IconPlus size={15} strokeWidth={2.2} className={`transition-transform duration-snap ease-snap ${menu ? 'rotate-45' : ''}`} />
       </button>
-      {menu && (
+      {menuPresence.mounted && (
         <ComposerMenu
+          presence={menuPresence.props}
           onClose={() => setMenu(false)}
           onImage={() => fileRef.current?.click()}
           onCamera={canCapture ? () => cameraRef.current?.click() : undefined}

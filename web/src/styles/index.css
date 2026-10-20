@@ -22,6 +22,8 @@ button:disabled { cursor: default; }
 a { color: var(--primary); }
 a:hover { color: var(--primary-hover); }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* An overlay playing its exit never catches clicks meant for what is under it. */
+[data-state=closed], [data-state=closed] * { pointer-events: none !important; }
 
 @layer components {
   .sr-only-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

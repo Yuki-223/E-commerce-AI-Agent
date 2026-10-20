@@ -1,20 +1,22 @@
 import { useState } from 'react'
+import { usePresence, type PresenceProps } from '../../hooks/usePresence'
 import { historyTime } from '../../lib/format'
 import { productCount, useConversations } from '../../stores/conversations'
 import { IconClose, IconPencil, IconTrash } from '../Icons'
 import { ClearHistoryDialog } from './ClearHistoryDialog'
 
 /** 管理历史对话 from the account menu: every conversation with rename / delete, plus clear all. */
-export function HistoryManagerDialog({ onClose }: { onClose: () => void }) {
+export function HistoryManagerDialog({ onClose, presence }: { onClose: () => void; presence?: PresenceProps }) {
   const conversations = useConversations((s) => Object.values(s.conversations).filter((c) => c.messages.length).sort((a, b) => b.updatedAt - a.updatedAt))
   const { rename, remove } = useConversations()
   const [editing, setEditing] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [confirm, setConfirm] = useState(false)
+  const confirmDialog = usePresence(confirm)
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={onClose}>
-      <div role="dialog" aria-modal="true" aria-label="管理历史对话" onMouseDown={(e) => e.stopPropagation()} className="flex max-h-[80vh] animate-dialog-in w-[480px] max-w-[calc(100vw-32px)] flex-col rounded-[18px] border border-line-strong bg-surface shadow-pop">
+    <div {...presence} className="fixed inset-0 z-50 flex animate-fade-in closing:animate-fade-out items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={onClose}>
+      <div role="dialog" aria-modal="true" aria-label="管理历史对话" onMouseDown={(e) => e.stopPropagation()} className="flex max-h-[80vh] animate-dialog-in closing-in:animate-dialog-out w-[480px] max-w-[calc(100vw-32px)] flex-col rounded-[18px] border border-line-strong bg-surface shadow-pop">
         <div className="flex items-center border-b border-line-faint px-5 py-4">
           <h2 className="m-0 grow text-base font-semibold">管理历史对话</h2>
           <button type="button" aria-label="关闭" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary p-0 text-ink-muted">
@@ -66,7 +68,7 @@ export function HistoryManagerDialog({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
-      {confirm && <ClearHistoryDialog onClose={() => setConfirm(false)} onCleared={onClose} />}
+      {confirmDialog.mounted && <ClearHistoryDialog presence={confirmDialog.props} onClose={() => setConfirm(false)} onCleared={onClose} />}
     </div>
   )
 }

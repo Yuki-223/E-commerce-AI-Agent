@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode, type TransitionEvent } from 'react'
 import { Link, useMatch, useNavigate } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
+import { usePresence } from '../../hooks/usePresence'
 import { useConversations } from '../../stores/conversations'
 import { useSidebar } from '../../stores/ui'
 import { IconCart, IconPlus, IconSearch, IconSidebar } from '../Icons'
@@ -76,7 +77,8 @@ export function Sidebar() {
         .sort((a, b) => b.updatedAt - a.updatedAt),
     [conversations],
   )
-  const dialog = searching && <SearchDialog onClose={() => setSearching(false)} />
+  const search = usePresence(searching)
+  const dialog = search.mounted && <SearchDialog presence={search.props} onClose={() => setSearching(false)} />
 
   if (collapsed) {
     return (

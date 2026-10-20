@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
+import { usePresence } from '../hooks/usePresence'
 import { CartDropdown } from './CartDropdown'
 import { IconCart } from './Icons'
 
@@ -11,6 +12,7 @@ export function CartButton() {
   const wrap = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const count = data?.cart.item_count ?? 0
+  const dropdown = usePresence(open)
 
   useEffect(() => setOpen(false), [location.pathname])
   useEffect(() => {
@@ -46,7 +48,7 @@ export function CartButton() {
           </span>
         )}
       </button>
-      {open && <CartDropdown data={data} onClose={() => setOpen(false)} />}
+      {dropdown.mounted && <CartDropdown data={data} presence={dropdown.props} onClose={() => setOpen(false)} />}
     </div>
   )
 }

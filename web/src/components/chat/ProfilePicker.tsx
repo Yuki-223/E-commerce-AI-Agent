@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { usePresence } from '../../hooks/usePresence'
 import { profileLabel, useActiveProfile } from '../../stores/profiles'
 import { IconChevronDown } from '../Icons'
 import { ProfilesView } from './ComposerMenu'
@@ -8,6 +9,7 @@ export function ProfilePicker({ className = '' }: { className?: string }) {
   const profile = useActiveProfile()
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
+  const menu = usePresence(open)
 
   useEffect(() => {
     if (!open) return
@@ -33,11 +35,12 @@ export function ProfilePicker({ className = '' }: { className?: string }) {
         <span className="truncate">档案：{profileLabel(profile)}</span>
         <IconChevronDown size={10} className={`shrink-0 transition-transform duration-snap ease-snap ${open ? 'rotate-180' : ''}`} />
       </button>
-      {open && (
+      {menu.mounted && (
         <div
+          {...menu.props}
           role="menu"
           aria-label="切换偏好档案"
-          className="absolute left-0 top-[calc(100%+6px)] z-40 flex w-[280px] max-w-[calc(100vw-32px)] origin-top-left animate-pop-up flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop"
+          className="absolute left-0 top-[calc(100%+6px)] z-40 flex w-[280px] max-w-[calc(100vw-32px)] origin-top-left animate-pop-up closing:animate-pop-up-out flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop"
         >
           <ProfilesView onDone={() => setOpen(false)} />
         </div>

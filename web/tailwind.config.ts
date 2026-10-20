@@ -1,6 +1,19 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 const v = (name: string) => `var(--${name})`
+
+// Entry keyframes. Each exit runs to its entry's starting frame, played forward
+// with the same tokens: ease-out starts moving at once, so a closing overlay
+// answers the click immediately (a reversed ease-out would sit still first).
+const fadeIn = { from: { opacity: '0' } }
+const popIn = { from: { opacity: '0', transform: 'translateY(4px) scale(0.97)' } }
+const popUp = { from: { opacity: '0', transform: 'translateY(-4px) scale(0.97)' } }
+const dialogIn = { from: { opacity: '0', transform: 'translateY(6px) scale(0.98)' } }
+const drawerIn = { from: { transform: 'translateX(-100%)' } }
+const exit = (entry: { from: Record<string, string> }) => ({ to: entry.from })
+/** Exit: 120ms, held on the last frame until usePresence unmounts it. */
+const out = (name: string, dur = 'dur-snap', ease = 'ease-out') => `${name} var(--${dur}) var(--${ease}) forwards`
 
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -50,11 +63,16 @@ export default {
         overshoot: v('ease-overshoot'),
       },
       keyframes: {
-        'fade-in': { from: { opacity: '0' } },
-        'pop-in': { from: { opacity: '0', transform: 'translateY(4px) scale(0.97)' } },
-        'pop-up': { from: { opacity: '0', transform: 'translateY(-4px) scale(0.97)' } },
-        'dialog-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.98)' } },
-        'drawer-in': { from: { transform: 'translateX(-100%)' } },
+        'fade-in': fadeIn,
+        'pop-in': popIn,
+        'pop-up': popUp,
+        'dialog-in': dialogIn,
+        'drawer-in': drawerIn,
+        'fade-out': exit(fadeIn),
+        'pop-out': exit(popIn),
+        'pop-up-out': exit(popUp),
+        'dialog-out': exit(dialogIn),
+        'drawer-out': exit(drawerIn),
         reveal: { from: { opacity: '0', filter: 'blur(6px)' } },
         'bubble-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.92)' } },
         'fade-up': { from: { opacity: '0', transform: 'translateY(10px)' } },
@@ -74,6 +92,13 @@ export default {
         'dialog-in': 'dialog-in var(--dur-base) var(--ease-out)',
         'drawer-in': 'drawer-in var(--dur-sheet) var(--ease-snap)',
         'toast-in': 'pop-in var(--dur-sheet) var(--ease-overshoot)',
+        // Exits (usePresence): 120ms; the phone drawer and its scrim take 200ms.
+        'fade-out': out('fade-out'),
+        'pop-out': out('pop-out'),
+        'pop-up-out': out('pop-up-out'),
+        'dialog-out': out('dialog-out'),
+        'drawer-out': out('drawer-out', 'dur-base', 'ease-snap'),
+        'drawer-scrim-out': out('fade-out', 'dur-base', 'ease-snap'),
         // Streamed text: each new piece sharpens out of a blur.
         reveal: 'reveal var(--dur-base) cubic-bezier(.215, .61, .355, 1)',
         'bubble-in': 'bubble-in var(--dur-slow) var(--ease-overshoot)',
@@ -82,5 +107,12 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // usePresence sets data-state="closed" while an overlay plays its exit.
+    // closing: styles that element; closing-in: anything inside a closing overlay.
+    plugin(({ addVariant }) => {
+      addVariant('closing', '&[data-state=closed]')
+      addVariant('closing-in', '[data-state=closed] &')
+    }),
+  ],
 } satisfies Config

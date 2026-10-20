@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
 import { preferenceSummary, usePreference } from '../../hooks/usePreference'
+import { usePresence } from '../../hooks/usePresence'
 import { yuan } from '../../lib/format'
 import { historyGroup } from '../../lib/format'
 import { useConversations, type Conversation } from '../../stores/conversations'
@@ -25,6 +26,7 @@ export function MobileDrawer() {
   const [query, setQuery] = useState('')
   const [hint, setHint] = useState(false)
   const openSettings = useSettings((s) => s.open)
+  const presence = usePresence(open)
 
   useEffect(() => set(false), [location.pathname, location.search, set])
   useEffect(() => {
@@ -44,13 +46,14 @@ export function MobileDrawer() {
     return out
   }, [conversations, query])
 
-  if (!open) return null
+  if (!presence.mounted) return null
   return (
-    <div className="fixed inset-0 z-50">
-      <button type="button" aria-label="关闭菜单" onClick={() => set(false)} className="absolute inset-0 animate-fade-in bg-[rgba(28,22,17,0.38)] p-0" />
+    <div data-state={presence.state} className="fixed inset-0 z-50">
+      <button type="button" aria-label="关闭菜单" onClick={() => set(false)} className="absolute inset-0 animate-fade-in closing-in:animate-drawer-scrim-out bg-[rgba(28,22,17,0.38)] p-0" />
       <nav
         aria-label="菜单"
-        className="absolute bottom-0 left-0 top-0 flex animate-drawer-in w-[304px] max-w-[85vw] flex-col gap-3.5 bg-sidebar px-3.5 pb-[max(14px,env(safe-area-inset-bottom))] pt-[calc(8px+env(safe-area-inset-top))] shadow-[8px_0_30px_rgba(28,22,17,0.18)]"
+        onAnimationEnd={presence.onAnimationEnd}
+        className="absolute bottom-0 left-0 top-0 flex animate-drawer-in closing-in:animate-drawer-out w-[304px] max-w-[85vw] flex-col gap-3.5 bg-sidebar px-3.5 pb-[max(14px,env(safe-area-inset-bottom))] pt-[calc(8px+env(safe-area-inset-top))] shadow-[8px_0_30px_rgba(28,22,17,0.18)]"
       >
         <div className="flex items-center pl-2 pr-1">
           <div className="grow">

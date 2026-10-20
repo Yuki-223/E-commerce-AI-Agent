@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useCart } from '../../hooks/useCart'
+import type { PresenceProps } from '../../hooks/usePresence'
 import { useProducts } from '../../hooks/useProducts'
 import type { ProductRef } from '../../lib/productRef'
 import { profileLabel, useActiveProfile, useProfiles } from '../../stores/profiles'
@@ -18,6 +19,8 @@ interface Props {
   onCamera?: () => void
   onProduct: (ref: ProductRef) => void
   onClose: () => void
+  /** From the parent's usePresence, so the menu can play its exit. */
+  presence?: PresenceProps
 }
 
 /** Submenu title; without onBack (a standalone popover) it drops the back arrow. */
@@ -133,7 +136,7 @@ export function ProfilesView({ onBack, onDone }: { onBack?: () => void; onDone: 
  * The composer's + menu: 添加图片 / 拍照 (touch only) / 引用商品 ▸ / 偏好档案 ▸.
  * Submenus replace the root list in place, like claude.ai's.
  */
-export function ComposerMenu({ onImage, onCamera, onProduct, onClose }: Props) {
+export function ComposerMenu({ onImage, onCamera, onProduct, onClose, presence }: Props) {
   const [view, setView] = useState<'root' | 'products' | 'profiles'>('root')
   const profile = useActiveProfile()
   const ref = useRef<HTMLDivElement>(null)
@@ -152,9 +155,10 @@ export function ComposerMenu({ onImage, onCamera, onProduct, onClose }: Props) {
   return (
     <div
       ref={ref}
+      {...presence}
       role="menu"
       aria-label="添加内容"
-      className="absolute bottom-[calc(100%+10px)] left-0 z-40 flex origin-bottom-left animate-pop-in w-[290px] max-w-[calc(100vw-32px)] flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop"
+      className="absolute bottom-[calc(100%+10px)] left-0 z-40 flex origin-bottom-left animate-pop-in closing:animate-pop-out w-[290px] max-w-[calc(100vw-32px)] flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop"
     >
       {view === 'root' && (
         <>

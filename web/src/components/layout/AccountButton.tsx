@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
+import { usePresence } from '../../hooks/usePresence'
 import { preferenceSummary, usePreference } from '../../hooks/usePreference'
 import { profileLabel, useActiveProfile, type Profile } from '../../stores/profiles'
 import { useSettings } from '../../stores/ui'
@@ -39,10 +40,14 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
   const [view, setView] = useState<'root' | 'profiles'>('root')
   const [history, setHistory] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
+  const menu = usePresence(open)
+  const historyDialog = usePresence(history)
 
-  const close = () => {
-    setOpen(false)
+  // The submenu resets on the next open, not on close, so the exit shows what was on screen.
+  const close = () => setOpen(false)
+  const show = () => {
     setView('root')
+    setOpen(true)
   }
 
   useEffect(() => {
@@ -59,11 +64,12 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
 
   return (
     <div ref={wrap} className="relative">
-      {open && (
+      {menu.mounted && (
         <div
+          {...menu.props}
           role="menu"
           aria-label="账户菜单"
-          className={`absolute bottom-[calc(100%+8px)] left-0 z-40 flex origin-bottom-left animate-pop-in ${compact ? 'w-[280px]' : 'right-0'} flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop`}
+          className={`absolute bottom-[calc(100%+8px)] left-0 z-40 flex origin-bottom-left animate-pop-in closing:animate-pop-out ${compact ? 'w-[280px]' : 'right-0'} flex-col rounded-2xl border border-line-strong bg-surface p-1.5 shadow-pop`}
         >
           {view === 'profiles' ? (
             <ProfilesView onBack={() => setView('root')} onDone={close} />
@@ -137,7 +143,7 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
         aria-expanded={open}
         aria-label={open ? '关闭账户菜单' : '打开账户菜单'}
         title={compact ? profileLabel(profile) : undefined}
-        onClick={() => (open ? close() : setOpen(true))}
+        onClick={() => (open ? close() : show())}
         className={
           compact
             ? `flex h-10 w-10 items-center justify-center rounded-lg p-0 hover:bg-sidebar-hover ${open ? 'bg-sidebar-active' : ''}`
@@ -152,7 +158,7 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
           </>
         )}
       </button>
-      {history && <HistoryManagerDialog onClose={() => setHistory(false)} />}
+      {historyDialog.mounted && <HistoryManagerDialog presence={historyDialog.props} onClose={() => setHistory(false)} />}
     </div>
   )
 }

@@ -9,6 +9,7 @@ import { ProductImage } from '../components/product/ProductImage'
 import { useCart, useCartMutation } from '../hooks/useCart'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useIsNarrow } from '../hooks/useIsNarrow'
+import { usePresence } from '../hooks/usePresence'
 import { BackButton, MenuButton, MobileHeader, MobileTitle } from '../components/layout/MobileHeader'
 import { shortSummary, useProducts } from '../hooks/useProducts'
 import { optionsText, yuan, yuan2 } from '../lib/format'
@@ -59,6 +60,7 @@ function QuantityInput({ line, onCommit, disabled }: { line: CartLine; onCommit:
 function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; product?: Product; selected: boolean; onSelect: (on: boolean) => void; last: boolean }) {
   const mutation = useCartMutation()
   const [specOpen, setSpecOpen] = useState(false)
+  const spec = usePresence(specOpen && !!product)
   const run = async (req: Parameters<typeof mutation.mutateAsync>[0]) => {
     try {
       await mutation.mutateAsync(req)
@@ -104,8 +106,9 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
                 </span>
                 {product && product.skus.length > 1 && (specOpen ? <IconChevronUp /> : <IconChevronDown />)}
               </button>
-              {specOpen && product && (
+              {spec.mounted && product && (
                 <SpecDialog
+                  presence={spec.props}
                   line={line}
                   product={product}
                   busy={mutation.isPending}
@@ -144,6 +147,7 @@ function CartRow({ line, product, selected, onSelect, last }: { line: CartLine; 
 function MobileCartRow({ line, product, selected, onSelect }: { line: CartLine; product?: Product; selected: boolean; onSelect: (on: boolean) => void }) {
   const mutation = useCartMutation()
   const [specOpen, setSpecOpen] = useState(false)
+  const spec = usePresence(specOpen && !!product)
   const run = async (req: Parameters<typeof mutation.mutateAsync>[0]) => {
     try {
       await mutation.mutateAsync(req)
@@ -180,8 +184,9 @@ function MobileCartRow({ line, product, selected, onSelect }: { line: CartLine; 
               {specName}：{optionsText(line.options)}
               {product && product.skus.length > 1 && <IconChevronDown />}
             </button>
-            {specOpen && product && (
+            {spec.mounted && product && (
               <SpecDialog
+                presence={spec.props}
                 line={line}
                 product={product}
                 busy={mutation.isPending}
