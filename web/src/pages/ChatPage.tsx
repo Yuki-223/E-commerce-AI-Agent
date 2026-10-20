@@ -117,8 +117,8 @@ export function ChatPage() {
                   onToggleCompare={toggleCompare}
                   onOpenProduct={openProduct}
                   busy={busy}
-                  onSpecSubmit={(chosen, phrase) => {
-                    patchMessage(conv.id, m.id, { specSelection: { ...m.specSelection!, chosen } })
+                  onSpecSubmit={(choice, phrase) => {
+                    patchMessage(conv.id, m.id, { specSelection: { ...m.specSelection!, chosen: choice.chosen, chosenQuantity: choice.quantity } })
                     setAtBottom(true)
                     void send(conv.id, { text: phrase, userId: profile.userId })
                   }}

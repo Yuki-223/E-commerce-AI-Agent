@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { retry } from '../../chat/engine'
+import { placeOrder, retry } from '../../chat/engine'
 import { useProducts } from '../../hooks/useProducts'
-import type { ChatMessage } from '../../stores/conversations'
+import type { ChatMessage, OrderChoice } from '../../stores/conversations'
 import { IconAlert, IconRetry } from '../Icons'
 import { InlineComparison } from '../compare/InlineComparison'
 import { ProductCard } from './ProductCard'
@@ -22,7 +22,8 @@ interface Props {
   compareIds: string[]
   onToggleCompare: (productId: string, checked: boolean) => void
   onOpenProduct: (productId: string) => void
-  onSpecSubmit: (chosen: Record<string, string>, phrase: string) => void
+  /** 加入购物车 on the order card: record the choice and send its phrase. */
+  onSpecSubmit: (choice: OrderChoice, phrase: string) => void
   busy: boolean
 }
 
@@ -106,7 +107,12 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, compar
 
       {done && message.specSelection && (
         <div className={rise}>
-          <SpecSelectionCard spec={message.specSelection} disabled={busy || !isLatest} onSubmit={onSpecSubmit} />
+          <SpecSelectionCard
+            spec={message.specSelection}
+            disabled={busy || !isLatest}
+            onAddToCart={onSpecSubmit}
+            onOrder={(choice) => placeOrder(convId, message.id, choice)}
+          />
         </div>
       )}
 

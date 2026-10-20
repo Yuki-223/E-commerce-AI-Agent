@@ -24,7 +24,7 @@ from agent.llm_actions import ActionSpec, dispatch_action
 from agent.session import AgentSession
 from agent.tools.base import ToolResult
 from agent.tools.resolve import resolve_one
-from agent.tools.reference import resolve_indices, resolve_by_name, extract_name_query
+from agent.tools.reference import resolve_indices, resolve_by_name, extract_name_query, parse_quantity
 from store.cart_store import CartNotFoundError, CartStore, DEFAULT_ADDRESS
 from store.product_store import ProductStore
 
@@ -154,7 +154,7 @@ class CartTool:
         product is never selected silently.
         """
         last_hits = session.recall_hits()
-        qty = _as_int(args.get("quantity"), default=1)
+        qty = _as_int(args.get("quantity"), default=None) or parse_quantity(query) or 1
 
         # An explicitly named brand in the raw utterance is more reliable than an index
         # inferred from rewritten context, so calculate brand matches first.
@@ -182,7 +182,7 @@ class CartTool:
             picked = resolve_one(query, self._enrich_candidates(subset))
             if picked is not None:
                 return self._begin_add(subset[picked]["product_id"], qty, session, query, source="semantic_context_match")
-            return self._ask_which_product(subset, session)
+            return self._ask_which_product(subset, session, qty)
 
         # 3. Search the full catalog: direct brand substring first, then extracted
         # model/category keywords against titles.
@@ -197,7 +197,7 @@ class CartTool:
             hits = [{"product_id": c.product_id, "title": c.title} for c in found]
             # Store catalog matches so subsequent turns can refer to them.
             session.set("last_hits", hits)
-            return self._ask_which_product(hits, session)
+            return self._ask_which_product(hits, session, qty)
 
         # 4. Use the focused product for an unnamed demonstrative request.
         focus = session.get("last_focus_product_id")
@@ -215,7 +215,7 @@ class CartTool:
         if len(last_hits) == 1:
             return self._begin_add(last_hits[0]["product_id"], qty, session, query, source="only_candidate")
         if last_hits:
-            return self._ask_which_product(last_hits, session)
+            return self._ask_which_product(last_hits, session, qty)
 
         return self._plain(
             "想把哪款加进来呀？可以说「把第一个加入购物车」，"
@@ -223,13 +223,13 @@ class CartTool:
         )
 
     def _ask_which_product(
-        self, hits: list[dict[str, Any]], session: AgentSession
+        self, hits: list[dict[str, Any]], session: AgentSession, qty: int = 1
     ) -> ToolResult:
         """List candidates when reference resolution cannot identify one product."""
         candidates = [
             {"product_id": h["product_id"], "title": h.get("title", "")} for h in hits
         ]
-        session.set("pending_add", {"candidates": candidates})
+        session.set("pending_add", {"candidates": candidates, "quantity": qty})
         lines = [f"{i + 1}. {c['title']}" for i, c in enumerate(candidates)]
         text = (
             "你想加入哪一款呢？\n"
@@ -274,6 +274,8 @@ class CartTool:
             return self._plain("好的，先不加了。还有什么我可以帮你的？")
 
         candidates: list[dict[str, Any]] = pending_add.get("candidates", [])
+        # A quantity in the answer ("第二个，两瓶") wins over the one asked with.
+        qty = parse_quantity(query) or _as_int(pending_add.get("quantity"), default=1)
         if not candidates:
             session.set("pending_add", None)
             return self._plain("想加哪款呢？先让我帮你推荐几款吧～")
@@ -289,10 +291,10 @@ class CartTool:
         picked = resolve_one(query, self._enrich_candidates(candidates))
         if picked is None:
             # Preserve candidates and ask again when unresolved.
-            return self._ask_which_product(candidates, session)
+            return self._ask_which_product(candidates, session, qty)
 
         session.set("pending_add", None)
-        return self._begin_add(candidates[picked]["product_id"], 1, session, query, source="pending_add")
+        return self._begin_add(candidates[picked]["product_id"], qty, session, query, source="pending_add")
 
     def _switch_intent(
         self, query: str, session: AgentSession, current_ids: list[str]
@@ -344,7 +346,7 @@ class CartTool:
             "spec_text": query,
             "resolution": resolution,
         })
-        return self._ask_spec(product_id, title, matched if matched else skus, resolution=resolution)
+        return self._ask_spec(product_id, title, matched if matched else skus, qty, resolution=resolution)
 
     def _build_resolution(self, product_id: str, query: str, source: str) -> dict[str, Any]:
         """Record the resolved product for diagnostics and confirmation copy."""
@@ -371,7 +373,8 @@ class CartTool:
             return switched
 
         product_id = pending["product_id"]
-        qty = _as_int(pending.get("quantity"), default=1)
+        # The spec card always restates the quantity ("我要 50ml，2 件").
+        qty = parse_quantity(query) or _as_int(pending.get("quantity"), default=1)
         skus = self._store.list_skus(product_id)
         if not skus:
             session.set("pending_cart", None)
@@ -395,12 +398,13 @@ class CartTool:
             )
 
         # Preserve accumulated terms and ask about remaining dimensions.
-        pending = {**pending, "spec_text": combined}
+        pending = {**pending, "spec_text": combined, "quantity": qty}
         session.set("pending_cart", pending)
         return self._ask_spec(
             product_id,
             pending["title"],
             matched if matched else skus,
+            qty,
             resolution=pending.get("resolution"),
         )
 
@@ -441,16 +445,23 @@ class CartTool:
         product_id: str,
         title: str,
         skus: list[dict[str, Any]],
+        qty: int = 1,
         resolution: dict[str, Any] | None = None,
     ) -> ToolResult:
-        """Ask for varying SKU dimensions instead of listing every combination."""
+        """Ask for varying SKU dimensions instead of listing every combination.
+
+        The payload carries the candidate SKUs with prices and the quantity taken
+        from the conversation, so the client can show a prefilled order card.
+        """
         dims = self._varying_dims(skus)
         if not dims:
             # Defensive fallback for multiple SKUs with no varying dimension.
-            return self._commit_add(product_id, skus[0]["sku_id"], 1)
+            return self._commit_add(product_id, skus[0]["sku_id"], qty)
 
         # Let the client render options; keep narrative copy concise.
         text = f"已理解为把「{title}」加入购物车。这款有多个规格可选，下面选一下你想要的款式吧～"
+        if qty > 1:
+            text = f"已理解为把「{title}」加入购物车，数量按你说的 {qty} 件。这款有多个规格，选好就能加购或直接下单～"
         # Ordered dimensions produce stable chips; retain ``options`` for compatibility.
         dimensions = [{"name": dim, "values": values} for dim, values in dims.items()]
         return ToolResult(
@@ -461,6 +472,11 @@ class CartTool:
                 "title": title,
                 "dimensions": dimensions,
                 "options": dims,
+                "quantity": qty,
+                "skus": [
+                    {"sku_id": k["sku_id"], "options": k["options"], "price": k["price"], "stock_qty": k.get("stock_qty")}
+                    for k in skus
+                ],
                 **({"resolution": resolution} if resolution else {}),
             },
             narrative_override=text,

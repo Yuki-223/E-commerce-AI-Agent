@@ -2,7 +2,7 @@ import type { ProductRef } from '../lib/productRef'
 import type { Thinking } from '../chat/thinking'
 import { create } from 'zustand'
 import { loadConversations, saveConversations } from '../lib/db'
-import type { ChatRequest, Comparison, ComposerJson, MemoryUpdateEventData, SpecDimension } from '../api/types'
+import type { ChatRequest, Comparison, ComposerJson, MemoryUpdateEventData, Order, SpecDimension, SpecSku } from '../api/types'
 
 export type MessageState = 'pending' | 'streaming' | 'done' | 'error'
 
@@ -10,8 +10,22 @@ export interface SpecSelection {
   product_id: string
   title: string
   dimensions: SpecDimension[]
+  /** Prefilled from the conversation ("两瓶"); 1 when nothing was said. */
+  quantity?: number
+  /** Candidate SKUs with prices; older backends send none and the card reads GET /products. */
+  skus?: SpecSku[]
   /** Set once the user confirmed a choice in the card. */
   chosen?: Record<string, string>
+  chosenQuantity?: number
+  /** Set when the card placed the order itself (直接下单); the card turns into the receipt. */
+  order?: Order
+}
+
+/** What the order card submits: the spec values, quantity and the SKU they name. */
+export interface OrderChoice {
+  chosen: Record<string, string>
+  quantity: number
+  skuId: string | null
 }
 
 export interface MemoryNotice extends MemoryUpdateEventData {

@@ -11,7 +11,7 @@ import type { CartResponse, ChatRequest, UserPreference } from '../api/types'
 import { CART_KEY } from '../hooks/useCart'
 import { withProductRef, type ProductRef } from '../lib/productRef'
 import { preferenceKey } from '../hooks/usePreference'
-import { useConversations, type ChatMessage } from '../stores/conversations'
+import { useConversations, type ChatMessage, type OrderChoice } from '../stores/conversations'
 import { toast } from '../stores/toast'
 import { finishThinking, onMeta, onStatus, onToolResult, startThinking } from './thinking'
 
@@ -112,7 +112,7 @@ async function run(convId: string, msgId: string, request: ChatRequest) {
               const effect = interpretToolResult(ev.data)
               if (effect.kind === 'products') patch({ productIds: effect.productIds })
               else if (effect.kind === 'specSelection') {
-                patch({ specSelection: { product_id: effect.productId, title: effect.title, dimensions: effect.dimensions } })
+                patch({ specSelection: { product_id: effect.productId, title: effect.title, dimensions: effect.dimensions, quantity: effect.quantity, skus: effect.skus } })
               } else if (effect.kind === 'comparison') patch({ comparison: effect.comparison })
               else if (effect.kind === 'cart') {
                 patch({ cartAction: effect.action })
@@ -178,6 +178,23 @@ async function reveal(convId: string, msgId: string, narrative: string) {
     await sleep(CHAR_DELAY)
   }
   patch({ state: 'done', status: undefined, composer, text: composer ? '' : full || '好的。' })
+}
+
+/** 直接下单 from the order card: POST /orders, then the card turns into the receipt. */
+export async function placeOrder(convId: string, msgId: string, choice: OrderChoice) {
+  const conv = store().conversations[convId]
+  const spec = conv?.messages.find((m) => m.id === msgId)?.specSelection
+  if (!spec) return
+  try {
+    const { order, cart } = await api.order({
+      items: [{ productID: spec.product_id, skuID: choice.skuId, quantity: choice.quantity }],
+      session_id: conv.sessionId ?? null,
+    })
+    store().patchMessage(convId, msgId, { specSelection: { ...spec, chosen: choice.chosen, chosenQuantity: choice.quantity, order } })
+    queryClient?.setQueryData<CartResponse>(CART_KEY, { cart })
+  } catch (err) {
+    toast({ tone: 'error', title: '下单失败', detail: err instanceof ApiError ? err.message : '请稍后再试' })
+  }
 }
 
 export function describeError(err: unknown): string {

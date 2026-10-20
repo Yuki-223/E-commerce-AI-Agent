@@ -1,13 +1,15 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../api/http'
-import type { CartLine, Product } from '../api/types'
+import { api } from '../api/endpoints'
+import type { CartLine, CartResponse, Product } from '../api/types'
 import { IconChevronDown, IconChevronUp, IconTrash } from '../components/Icons'
 import { CartEmpty } from '../components/cart/CartEmpty'
 import { CollapseBox } from '../components/Collapse'
 import { SpecDialog } from '../components/cart/SpecDialog'
 import { ProductImage } from '../components/product/ProductImage'
-import { useCart, useCartMutation } from '../hooks/useCart'
+import { CART_KEY, useCart, useCartMutation } from '../hooks/useCart'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useIsNarrow } from '../hooks/useIsNarrow'
 import { usePresence, usePresenceList } from '../hooks/usePresence'
@@ -241,6 +243,22 @@ export function CartPage() {
   // With everything ticked this is exactly cart.total; otherwise the sum of the ticked lines' subtotals.
   const selectedTotal = allSelected ? data!.cart.total : round2(selected.reduce((n, l) => n + l.subtotal, 0))
   const narrow = useIsNarrow()
+  const qc = useQueryClient()
+  const [checkingOut, setCheckingOut] = useState(false)
+
+  // POST /orders for the ticked lines; the backend removes them from the cart.
+  const checkout = async () => {
+    setCheckingOut(true)
+    try {
+      const { order, cart } = await api.order({ cartItemIDs: selected.map((l) => String(l.cart_item_id)) })
+      qc.setQueryData<CartResponse>(CART_KEY, { cart })
+      toast({ tone: 'success', title: '下单成功', detail: `订单号 ${order.order_id} · 共 ${order.item_count} 件 · 实付 ${yuan2(order.total)}` })
+    } catch (err) {
+      toast({ tone: 'error', title: '下单失败', detail: err instanceof ApiError ? err.message : '请稍后再试' })
+    } finally {
+      setCheckingOut(false)
+    }
+  }
 
   if (narrow) {
     return (
@@ -273,8 +291,8 @@ export function CartPage() {
                 <span className="text-xs text-ink-subtle">已选 {selectedQty} 件</span>
                 <span className="text-lg font-bold text-error-text" data-testid="cart-total">{yuan2(selectedTotal)}</span>
               </div>
-              <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-11 rounded-full bg-primary px-5 active:scale-[0.97] text-[15px] font-semibold text-on-primary disabled:opacity-50">
-                结算（{selectedQty}）
+              <button type="button" disabled={selectedQty === 0 || checkingOut} onClick={() => void checkout()} className="h-11 rounded-full bg-primary px-5 active:scale-[0.97] text-[15px] font-semibold text-on-primary disabled:opacity-50">
+                {checkingOut ? '正在下单…' : `结算（${selectedQty}）`}
               </button>
             </div>
           </>
@@ -337,9 +355,9 @@ export function CartPage() {
                 {yuan2(selectedTotal)}
               </span>
             </div>
-            {/* Checkout is a no-op, matching the iOS app (handoff doc: 不做真实下单). */}
-            <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-10 rounded-[10px] bg-primary text-[15px] font-semibold text-on-primary hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50">
-              结算（{selectedQty}）
+            {/* A demonstration order: POST /orders, no payment. */}
+            <button type="button" disabled={selectedQty === 0 || checkingOut} onClick={() => void checkout()} className="h-10 rounded-[10px] bg-primary text-[15px] font-semibold text-on-primary hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50">
+              {checkingOut ? '正在下单…' : `结算（${selectedQty}）`}
             </button>
             <p className="m-0 text-xs leading-[18px] text-ink-subtle">
               价格、规格和库存都以商品库为准，不由 AI 生成。在对话里说“把第一个删掉”也能修改购物车。

@@ -404,3 +404,100 @@ def test_add_ambiguous_name_llm_unavailable_asks(store: CartStore, monkeypatch):
     res = tool.run("把华为加进来", sess, {})
     assert res.payload["action"] == "ask_which_product"
     assert sess.get("pending_add") is not None
+
+
+# --------------------------- Quantity and the order card ---------------------------
+
+def _add_two_colour_phone(store: CartStore) -> None:
+    with sqlite3.connect(store.db_path) as conn:
+        conn.execute(
+            "INSERT INTO products(product_id,title,brand,category,sub_category,base_price) VALUES (?,?,?,?,?,?)",
+            ("p3", "测试旗舰手机", "测试", "数码电子", "智能手机", 3999),
+        )
+        conn.executemany(
+            "INSERT INTO product_skus(sku_id,product_id,properties_json,price) VALUES (?,?,?,?)",
+            [("p3_black", "p3", '{"颜色":"黑色"}', 3999), ("p3_white", "p3", '{"颜色":"白色"}', 4099)],
+        )
+        conn.commit()
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("我要 白色，2 件", 2),
+        ("就第一个，两瓶", 2),
+        ("我要十二瓶", 12),
+        ("×3", 3),
+        ("第一个", None),
+        ("把第二个加入购物车", None),
+        ("要 3 件装那个", None),
+        ("能用两个月吗", None),
+        ("256GB 黑色", None),
+    ],
+)
+def test_parse_quantity(text: str, expected: int | None):
+    assert cart_module.parse_quantity(text) == expected
+
+
+def test_ask_spec_carries_quantity_and_sku_prices(monkeypatch, store: CartStore):
+    """The spec question prefills the quantity from the utterance and lists SKU prices."""
+    _add_two_colour_phone(store)
+    monkeypatch.setattr(cart_module, "dispatch_action", _stub_dispatch("add"))
+    sess = AgentSession()
+    sess.set("last_focus_product_id", "p3")
+
+    r = CartTool(cart_store=store).run("把它加入购物车，要两台", sess, {})
+
+    assert r.payload["action"] == "ask_spec"
+    assert r.payload["quantity"] == 2
+    assert {k["sku_id"]: k["price"] for k in r.payload["skus"]} == {"p3_black": 3999, "p3_white": 4099}
+    assert sess.get("pending_cart")["quantity"] == 2
+
+
+def test_spec_answer_quantity_overrides_pending(monkeypatch, store: CartStore):
+    """「我要 白色，3 件」 from the order card adds three, not the quantity asked with."""
+    _add_two_colour_phone(store)
+    monkeypatch.setattr(cart_module, "dispatch_action", _stub_dispatch("add", quantity=2))
+    sess = AgentSession()
+    sess.set("last_focus_product_id", "p3")
+    tool = CartTool(cart_store=store)
+    tool.run("把它加入购物车", sess, {})
+
+    r = tool.run("我要 白色，3 件", sess, {})
+
+    assert r.payload["action"] == "add"
+    assert r.payload["added"]["sku_id"] == "p3_white"
+    assert r.payload["added"]["quantity"] == 3
+
+
+def test_pending_product_choice_keeps_quantity(monkeypatch, store: CartStore):
+    """The quantity from 「两个都行，加两件」 survives the which-product question."""
+    monkeypatch.setattr(cart_module, "dispatch_action", _stub_dispatch("add", quantity=2))
+    monkeypatch.setattr(cart_module, "resolve_one", lambda query, cands: None)
+    tool = CartTool(cart_store=store)
+    sess = _session_with_hits()
+    first = tool.run("加两件进购物车", sess, {})
+    assert first.payload["action"] == "ask_which_product"
+    assert sess.get("pending_add")["quantity"] == 2
+
+    monkeypatch.setattr(cart_module, "resolve_one", lambda query, cands: 0)
+    r = tool.run("第一个", sess, {})
+
+    assert r.payload["action"] == "add"
+    assert r.payload["added"]["quantity"] == 2
+
+
+def test_store_direct_order_leaves_cart(store: CartStore):
+    store.add_product("p1")
+    order = store.build_direct_order([("p2", None, 2)])
+    assert order.total == 1360
+    assert [line.product_id for line in order.lines] == ["p2"]
+    assert [line.product_id for line in store.list_items()] == ["p1"]
+
+
+def test_store_order_by_cart_item_ids(store: CartStore):
+    a = store.add_product("p1")
+    store.add_product("p2")
+    order = store.build_order(cart_item_ids=[a.cart_item_id])
+    assert [line.product_id for line in order.lines] == ["p1"]
+    assert [line.product_id for line in store.list_items()] == ["p2"]

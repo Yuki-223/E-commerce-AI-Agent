@@ -228,9 +228,18 @@ class CartStore:
         user_id: str = DEMO_USER_ID,
         address: str = DEFAULT_ADDRESS,
         clear_after: bool = True,
+        cart_item_ids: list[int] | None = None,
     ) -> OrderSummary:
-        """Build an order from selected lines and clear purchased items by default."""
-        lines = [line for line in self.list_items(user_id) if line.selected]
+        """Build an order from selected lines and clear purchased items by default.
+
+        ``cart_item_ids`` orders exactly those lines instead; the web cart keeps
+        its ticks on the client.
+        """
+        if cart_item_ids is not None:
+            wanted = set(cart_item_ids)
+            lines = [line for line in self.list_items(user_id) if line.cart_item_id in wanted]
+        else:
+            lines = [line for line in self.list_items(user_id) if line.selected]
         if not lines:
             raise CartNotFoundError("购物车里没有可下单的商品")
         total = round(sum(line.subtotal for line in lines), 2)
@@ -248,6 +257,39 @@ class CartStore:
                 )
                 conn.commit()
         return order
+
+    def build_direct_order(
+        self,
+        items: list[tuple[str, str | None, int]],
+        address: str = DEFAULT_ADDRESS,
+    ) -> OrderSummary:
+        """Order (product_id, sku_id, quantity) items straight away, leaving the cart as is."""
+        lines: list[CartLine] = []
+        with self._connect() as conn:
+            for product_id, sku_id, quantity in items:
+                sku = self._resolve_sku(conn, product_id, sku_id)
+                if sku is None:
+                    raise CartNotFoundError(f"商品 {product_id} 没有可购买的 SKU")
+                lines.append(
+                    CartLine(
+                        cart_item_id=0,
+                        product_id=product_id,
+                        sku_id=sku["sku_id"],
+                        title=self.product_title(product_id),
+                        options=load_json_text(sku["properties_json"]),
+                        quantity=max(1, int(quantity)),
+                        unit_price=float(sku["price"]),
+                        selected=True,
+                    )
+                )
+        if not lines:
+            raise CartNotFoundError("没有可下单的商品")
+        return OrderSummary(
+            order_id="ord_" + uuid.uuid4().hex[:12],
+            address=address,
+            lines=lines,
+            total=round(sum(line.subtotal for line in lines), 2),
+        )
 
     # ------------------------------ Internal ------------------------------
 

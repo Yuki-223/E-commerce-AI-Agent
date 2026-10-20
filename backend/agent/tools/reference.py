@@ -113,6 +113,39 @@ _ACTION_STOPWORDS = (
 )
 
 
+_CN_DIGITS = {"一": 1, "二": 2, "两": 2, "俩": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+_MEASURE = "件个瓶支盒套双台只份罐袋包条部副把块箱"
+# "2 件" / "两瓶" / "×3", but not "第一个", "3 件装" (a multipack spec) or "两个月".
+_QTY_RE = re.compile(
+    rf"(?<![第\d])(\d{{1,3}}|[一二两俩三四五六七八九十]{{1,3}})\s*[{_MEASURE}](?![装月])"
+    r"|[x×*]\s*(\d{1,3})(?![\d.])",
+    re.IGNORECASE,
+)
+
+
+def _cn_number(text: str) -> int | None:
+    """Parse 一 … 九十九; returns None for anything else."""
+    if text.isdigit():
+        return int(text)
+    if text == "十":
+        return 10
+    if "十" in text:
+        tens, _, ones = text.partition("十")
+        t = _CN_DIGITS.get(tens, 1 if not tens else 0)
+        o = _CN_DIGITS.get(ones, 0) if ones else 0
+        return t * 10 + o if t else None
+    return _CN_DIGITS.get(text) if len(text) == 1 else None
+
+
+def parse_quantity(text: str) -> int | None:
+    """Quantity stated in a cart utterance, or None when it names none."""
+    for m in _QTY_RE.finditer(text or ""):
+        n = _cn_number(m.group(1) or m.group(2))
+        if n and 0 < n <= 999:
+            return n
+    return None
+
+
 def extract_name_query(query: str) -> str:
     """Extract catalog-search keywords from an add-to-cart utterance.
 
@@ -123,13 +156,15 @@ def extract_name_query(query: str) -> str:
     text = (query or "").strip()
     if not text:
         return ""
+    # "两瓶" / "×2" say how many, not which product.
+    text = _QTY_RE.sub(" ", text)
     for word in _ACTION_STOPWORDS:
         text = text.replace(word, " ")
     # Collapse whitespace and remove residual punctuation.
     cleaned = re.sub(r"[\s，。、!！?？~]+", " ", text).strip()
     # Ordinal-only references are not product keywords either.
     if not cleaned or _ORDINAL_RE.fullmatch(cleaned) or cleaned in (
-        "前", "俩", "两个", "两款", "全部", "所有", "都",
+        "前", "俩", "两个", "两款", "全部", "所有", "都", "要", "进",
     ):
         return ""
     return cleaned

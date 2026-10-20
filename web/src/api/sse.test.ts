@@ -82,7 +82,12 @@ describe('interpretToolResult', () => {
   })
   it('prefers spec selection for cart ask_spec', () => {
     const effect = interpretToolResult(tr('cart', { action: 'ask_spec', product_id: 'p', title: 't', dimensions: [{ name: '规格', values: ['a', 'b'] }], options: {} }))
-    expect(effect).toMatchObject({ kind: 'specSelection', productId: 'p' })
+    expect(effect).toMatchObject({ kind: 'specSelection', productId: 'p', quantity: 1 })
+  })
+  it('carries the prefilled quantity and candidate SKUs of ask_spec', () => {
+    const skus = [{ sku_id: 's1', options: { 规格: 'a' }, price: 99 }]
+    const effect = interpretToolResult(tr('cart', { action: 'ask_spec', product_id: 'p', title: 't', dimensions: [{ name: '规格', values: ['a', 'b'] }], options: {}, quantity: 2, skus }))
+    expect(effect).toMatchObject({ kind: 'specSelection', quantity: 2, skus })
   })
   it('returns the cart snapshot for add / view and an empty cart for checkout', () => {
     expect(interpretToolResult(tr('cart', { action: 'add', added: { quantity: 1 }, cart }))).toEqual({ kind: 'cart', action: 'add', cart, added: { quantity: 1 } })

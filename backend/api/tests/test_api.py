@@ -478,3 +478,45 @@ class TestTitleEndpoint:
             r = c.post("/title", json={"user_text": "推荐油皮洗面奶", "assistant_text": "给你推荐几款"})
         assert r.status_code == 200
         assert r.json()["title"] == "油皮洗面奶"
+
+
+class TestOrders:
+    def test_direct_order_closes_pending_spec_question(self, client):
+        c, api_main = client
+        from agent.session import AgentSession
+        from store.cart_store import CartLine, OrderSummary
+
+        line = CartLine(0, "p1", "p1_s1", "精华", {}, 2, 129.0, True)
+        session = AgentSession(session_id="s1")
+        session.set("pending_cart", {"product_id": "p1"})
+
+        with patch("api.main.CartStore") as MockStore, patch.object(api_main, "_sessions") as sessions:
+            store = MockStore.return_value
+            store.build_direct_order.return_value = OrderSummary("ord_1", "addr", [line], 258.0)
+            store.list_items.return_value = []
+            sessions.get_or_create.return_value = session
+            r = c.post("/orders", json={"items": [{"productID": "p1", "skuID": "p1_s1", "quantity": 2}], "session_id": "s1"})
+
+        assert r.status_code == 200
+        assert r.json()["order"]["total"] == 258.0
+        store.build_direct_order.assert_called_once()
+        assert session.get("pending_cart") is None
+        sessions.save.assert_called_once_with(session)
+
+    def test_cart_checkout_orders_given_lines(self, client):
+        c, _ = client
+        from store.cart_store import OrderSummary
+
+        with patch("api.main.CartStore") as MockStore:
+            store = MockStore.return_value
+            store.build_order.return_value = OrderSummary("ord_2", "addr", [], 0)
+            store.list_items.return_value = []
+            r = c.post("/orders", json={"cartItemIDs": ["3", "5"]})
+
+        assert r.status_code == 200
+        assert store.build_order.call_args.kwargs["cart_item_ids"] == [3, 5]
+
+    def test_empty_order_rejected(self, client):
+        c, _ = client
+        r = c.post("/orders", json={})
+        assert r.status_code == 400

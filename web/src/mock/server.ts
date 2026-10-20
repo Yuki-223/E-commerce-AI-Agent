@@ -3,11 +3,11 @@
  * paths, status codes and JSON bodies as FastAPI, and /chat/stream returns a real
  * text/event-stream body, so the client parses mock and real responses identically.
  */
-import type { CartMutationRequest, ChatRequest, CompareRequest, TitleRequest } from '../api/types'
+import type { CartMutationRequest, ChatRequest, CompareRequest, OrderRequest, TitleRequest } from '../api/types'
 import { scriptTurn } from './agent'
 import { buildComparison, catalog, getProductDetail, productPayload, type ProductDetail } from './catalog'
 import { mockCtl } from './controls'
-import { CartNotFoundError, cartStore, preferenceFromDict, preferenceStore } from './state'
+import { CartNotFoundError, cartStore, preferenceFromDict, preferenceStore, sessionStore } from './state'
 
 const sleep = (ms: number, signal?: AbortSignal | null) =>
   new Promise<void>((resolve, reject) => {
@@ -31,6 +31,33 @@ const internalError = () => new Response('Internal Server Error', { status: 500,
 function cartItemId(value: string | null | undefined): number | Response {
   const n = Number(String(value ?? ''))
   return Number.isInteger(n) && String(value ?? '').trim() !== '' ? n : httpError(400, 'cartItemID 无效')
+}
+
+/** POST /orders in api/main.py: items order now, cartItemIDs check out those lines. */
+function placeOrder(req: OrderRequest): Response {
+  try {
+    let order
+    if (req.items?.length) {
+      order = cartStore.order(req.items.map((i) => cartStore.directLine(i.productID, i.skuID, i.quantity)))
+    } else if (req.cartItemIDs?.length) {
+      const ids = new Set(req.cartItemIDs.map(Number))
+      const lines = cartStore.listItems().filter((l) => ids.has(l.cart_item_id))
+      if (!lines.length) return httpError(404, '购物车里没有可下单的商品')
+      for (const l of lines) cartStore.removeItem(l.cart_item_id)
+      order = cartStore.order(lines)
+    } else {
+      return httpError(400, 'items 和 cartItemIDs 不能都为空')
+    }
+    if (req.session_id) {
+      const session = sessionStore.getOrCreate(req.session_id)
+      session.pending_add = undefined
+      sessionStore.save(session)
+    }
+    return json({ order, ...cartStore.snapshot() })
+  } catch (err) {
+    if (err instanceof CartNotFoundError) return httpError(404, err.message)
+    throw err
+  }
 }
 
 function mutateCart(req: CartMutationRequest): Response {
@@ -149,6 +176,7 @@ export async function mockFetch(path: string, init: RequestInit = {}): Promise<R
 
   if (method === 'GET' && p === '/cart') return json(cartStore.snapshot())
   if (method === 'POST' && p === '/cart/mutate') return mutateCart(await readBody<CartMutationRequest>(init))
+  if (method === 'POST' && p === '/orders') return placeOrder(await readBody<OrderRequest>(init))
   if (method === 'POST' && p === '/cart/reset') return json({ status: 'cleared', removed: cartStore.clear() })
 
   if (method === 'POST' && p === '/compare') {

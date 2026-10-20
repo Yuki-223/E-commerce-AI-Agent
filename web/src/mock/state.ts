@@ -2,7 +2,7 @@
  * Mock persistence in localStorage, ported from store/cart_store.py and
  * store/user_memory_store.py so mutations behave like the SQLite stores.
  */
-import type { CartLine, CartSnapshot, UserPreference } from '../api/types'
+import type { CartLine, CartSnapshot, Order, UserPreference } from '../api/types'
 import { getProductDetail } from './catalog'
 
 const KEY = 'cartpilot.mock.'
@@ -47,6 +47,9 @@ interface StoredCart {
 }
 
 export class CartNotFoundError extends Error {}
+
+/** store/cart_store.py DEFAULT_ADDRESS. */
+export const DEFAULT_ADDRESS = '默认地址（北京市朝阳区示例路 1 号 · 收货人：Demo User · 138****0000）'
 
 const readCart = () => load<StoredCart>('cart', { next_id: 1, lines: [] })
 const writeCart = (c: StoredCart) => save('cart', c)
@@ -124,6 +127,27 @@ export const cartStore = {
     const n = cart.lines.length
     writeCart({ ...cart, lines: [] })
     return n
+  },
+
+  /** A line for build_direct_order: the SKU at its price, never written to the cart. */
+  directLine(productId: string, skuId: string | null | undefined, quantity: number): CartLine {
+    const detail = getProductDetail(productId)
+    const sku = skuId ? detail?.skus.find((s) => s.sku_id === skuId) : detail?.skus[0]
+    if (!detail || !sku) throw new CartNotFoundError(`商品 ${productId} 没有可购买的 SKU`)
+    const unit = sku.price
+    const qty = Math.max(1, quantity)
+    return toLine({ cart_item_id: 0, product_id: productId, sku_id: sku.sku_id, options: { ...sku.properties }, quantity: qty, unit_price: unit, selected: true })
+  },
+
+  /** build_order(cart_item_ids=…) and build_direct_order: an order id plus the lines bought. */
+  order(lines: CartLine[]): Order {
+    return {
+      order_id: `ord_${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`,
+      address: DEFAULT_ADDRESS,
+      lines,
+      item_count: lines.reduce((n, l) => n + l.quantity, 0),
+      total: round2(lines.reduce((n, l) => n + l.subtotal, 0)),
+    }
   },
 
   snapshot(): { cart: CartSnapshot } {
@@ -272,7 +296,7 @@ export const preferenceStore = {
 export interface MockSession {
   session_id: string
   last_products: { product_id: string; title: string }[]
-  pending_add?: { product_id: string; title: string }
+  pending_add?: { product_id: string; title: string; quantity?: number }
 }
 
 export const sessionStore = {

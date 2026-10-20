@@ -197,6 +197,29 @@ function varyingDims(d: ProductDetail): Record<string, string[]> {
   return out
 }
 
+/** agent/tools/reference.py parse_quantity: "2 件" / "两瓶" / "×3", not "第一个" or "3 件装". */
+const QTY_RE = /(?<![第\d])(\d{1,3}|[一二两俩三四五六七八九十]{1,3})\s*[件个瓶支盒套双台只份罐袋包条部副把块箱](?![装月])|[x×*]\s*(\d{1,3})(?![\d.])/gi
+const CN: Record<string, number> = { 一: 1, 二: 2, 两: 2, 俩: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 }
+
+function cnNumber(t: string): number | null {
+  if (/^\d+$/.test(t)) return Number(t)
+  if (t === '十') return 10
+  if (t.includes('十')) {
+    const [tens, ones] = t.split('十')
+    const n = (tens ? CN[tens] ?? 0 : 1) * 10 + (ones ? CN[ones] ?? 0 : 0)
+    return n >= 10 ? n : null
+  }
+  return t.length === 1 ? CN[t] ?? null : null
+}
+
+export function parseQuantity(text: string): number | null {
+  for (const m of text.matchAll(QTY_RE)) {
+    const n = cnNumber(m[1] ?? m[2])
+    if (n && n > 0 && n <= 999) return n
+  }
+  return null
+}
+
 function commitAdd(d: ProductDetail, skuId: string, qty = 1): ToolOutcome {
   const line = cartStore.addProduct(d.product_id, skuId, qty)
   const snapshot = cartStore.snapshot()
@@ -219,13 +242,14 @@ function addToCart(query: string, session: MockSession): ToolOutcome {
     return cartResult({ action: 'noop' }, '想把哪款加进来呀？可以说「把第一个加入购物车」，或者先让我推荐几款。')
   }
   const d = getProductDetail(target.product_id)!
+  const qty = parseQuantity(query) ?? 1
   const dims = varyingDims(d)
   const chosen = d.skus.filter((s) => Object.entries(s.properties).every(([k, v]) => !dims[k] || query.includes(v)))
   if (Object.keys(dims).length === 0 || chosen.length === 1) {
     session.pending_add = undefined
-    return commitAdd(d, (chosen[0] ?? d.skus[0]).sku_id)
+    return commitAdd(d, (chosen[0] ?? d.skus[0]).sku_id, qty)
   }
-  session.pending_add = { product_id: d.product_id, title: d.title }
+  session.pending_add = { product_id: d.product_id, title: d.title, quantity: qty }
   return cartResult(
     {
       action: 'ask_spec',
@@ -233,8 +257,12 @@ function addToCart(query: string, session: MockSession): ToolOutcome {
       title: d.title,
       dimensions: Object.entries(dims).map(([name, values]) => ({ name, values })),
       options: dims,
+      quantity: qty,
+      skus: d.skus.map((s) => ({ sku_id: s.sku_id, options: s.properties, price: s.price, stock_qty: s.stock_qty })),
     },
-    `已理解为把「${d.title}」加入购物车。这款有多个规格可选，下面选一下你想要的款式吧～`,
+    qty > 1
+      ? `已理解为把「${d.title}」加入购物车，数量按你说的 ${qty} 件。这款有多个规格，选好就能加购或直接下单～`
+      : `已理解为把「${d.title}」加入购物车。这款有多个规格可选，下面选一下你想要的款式吧～`,
   )
 }
 
@@ -247,7 +275,7 @@ function resolvePendingSpec(query: string, session: MockSession): ToolOutcome | 
   const matched = d.skus.filter((s) => Object.entries(s.properties).every(([k, v]) => !dims[k] || query.includes(v)))
   if (matched.length !== 1) return null
   session.pending_add = undefined
-  return commitAdd(d, matched[0].sku_id)
+  return commitAdd(d, matched[0].sku_id, parseQuantity(query) ?? pending.quantity ?? 1)
 }
 
 function compare(query: string, session: MockSession): ToolOutcome {

@@ -29,7 +29,7 @@ from pydantic import BaseModel, Field
 
 from agent.memory_extractor import extract_preference_updates
 from api import products as products_router
-from store.cart_store import CartStore
+from store.cart_store import DEFAULT_ADDRESS, CartNotFoundError, CartStore
 from store.session_store import SqliteSessionStore
 from store.user_memory_store import UserMemoryStore, UserPreference
 
@@ -80,6 +80,21 @@ class CartMutationRequest(BaseModel):
     selectedOptions: dict[str, str] = Field(default_factory=dict)
     quantity: int | None = None
     selectedCartItemIDs: list[str] = Field(default_factory=list)
+
+
+class OrderItem(BaseModel):
+    productID: str
+    skuID: str | None = None
+    quantity: int = Field(1, ge=1, le=999)
+
+
+class OrderRequest(BaseModel):
+    """Either ``items`` (order now, cart untouched) or ``cartItemIDs`` (check out those lines)."""
+
+    items: list[OrderItem] = Field(default_factory=list)
+    cartItemIDs: list[str] = Field(default_factory=list)
+    address: str | None = None
+    session_id: str | None = Field(None, description="Chat session whose pending spec question this order answers")
 
 
 class PreferenceRequest(BaseModel):
@@ -427,6 +442,38 @@ def mutate_cart(req: CartMutationRequest) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="不支持的购物车操作")
 
     return _cart_response(store)
+
+
+@app.post("/orders")
+def place_order(req: OrderRequest) -> dict[str, Any]:
+    """Place a demonstration order and return it with the latest cart snapshot.
+
+    The chat's order card sends ``items`` with the session it came from, so the
+    pending spec question is closed and the next message is not read as an answer.
+    """
+    store = CartStore()
+    address = req.address or DEFAULT_ADDRESS
+    try:
+        if req.items:
+            order = store.build_direct_order(
+                [(i.productID, i.skuID, i.quantity) for i in req.items], address=address
+            )
+        elif req.cartItemIDs:
+            order = store.build_order(
+                address=address, cart_item_ids=[_cart_item_id(c) for c in req.cartItemIDs]
+            )
+        else:
+            raise HTTPException(status_code=400, detail="items 和 cartItemIDs 不能都为空")
+    except CartNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    if req.session_id:
+        session = _sessions.get_or_create(req.session_id)
+        session.set("pending_cart", None)
+        session.set("pending_add", None)
+        _sessions.save(session)
+
+    return {"order": order.to_dict(), **_cart_response(store)}
 
 
 @app.get("/cart")

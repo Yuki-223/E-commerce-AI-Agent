@@ -309,18 +309,52 @@ export interface RecommendPayload {
   debug?: Record<string, unknown>
 }
 
+/** OrderSummary.to_dict() in store/cart_store.py. */
+export interface Order {
+  order_id: string
+  address: string
+  lines: CartLine[]
+  item_count: number
+  total: number
+}
+
+/** POST /orders: `items` orders now and leaves the cart; `cartItemIDs` checks out those lines. */
+export interface OrderRequest {
+  items?: { productID: string; skuID: string | null; quantity: number }[]
+  cartItemIDs?: string[]
+  address?: string | null
+  session_id?: string | null
+}
+
+export interface OrderResponse extends CartResponse {
+  order: Order
+}
+
+/** One candidate SKU of an ask_spec question, with its SQLite price. */
+export interface SpecSku {
+  sku_id: string
+  options: Record<string, string>
+  price: number
+  stock_qty?: number | null
+}
+
 export interface SpecDimension {
   name: string
   values: string[]
 }
 
 export type CartToolPayload =
-  | { action: 'ask_spec'; product_id: string; title: string; dimensions: SpecDimension[]; options: Record<string, string[]>; resolution?: unknown }
+  | {
+      action: 'ask_spec'; product_id: string; title: string; dimensions: SpecDimension[]; options: Record<string, string[]>; resolution?: unknown
+      /** Quantity taken from the conversation; absent from older backends. */
+      quantity?: number
+      skus?: SpecSku[]
+    }
   | { action: 'add'; added: CartLine; cart: CartSnapshot; resolution?: unknown }
   | { action: 'set_quantity'; cart: CartSnapshot }
   | { action: 'remove'; removed: CartLine; cart: CartSnapshot }
   | { action: 'view'; cart: CartSnapshot }
-  | { action: 'checkout'; order: { order_id: string; address: string; lines: CartLine[]; item_count: number; total: number } }
+  | { action: 'checkout'; order: Order }
   | { action: 'ask_which_product'; candidates: { product_id: string; title: string }[] }
   | { action: 'noop' }
 

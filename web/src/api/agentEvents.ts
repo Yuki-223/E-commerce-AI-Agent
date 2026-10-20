@@ -4,11 +4,11 @@
  * spec selection first, then comparison, then cart snapshot, then product IDs.
  */
 import type {
-  CartLine, CartSnapshot, CartToolPayload, Comparison, ComparePayload, ComposerJson, RecommendPayload, SpecDimension, ToolResultEventData,
+  CartLine, CartSnapshot, CartToolPayload, Comparison, ComparePayload, ComposerJson, RecommendPayload, SpecDimension, SpecSku, ToolResultEventData,
 } from './types'
 
 export type ToolEffect =
-  | { kind: 'specSelection'; productId: string; title: string; dimensions: SpecDimension[] }
+  | { kind: 'specSelection'; productId: string; title: string; dimensions: SpecDimension[]; quantity: number; skus?: SpecSku[] }
   | { kind: 'comparison'; comparison: Comparison }
   | { kind: 'cart'; action: CartToolPayload['action']; cart: CartSnapshot | null; added?: CartLine }
   | { kind: 'products'; productIds: string[] }
@@ -21,7 +21,9 @@ export function interpretToolResult(tr: ToolResultEventData): ToolEffect {
     const p = tr.payload as CartToolPayload
     if (p.action === 'ask_spec') {
       const dims = (p.dimensions ?? []).filter((d) => d.name && d.values?.length)
-      if (p.product_id && dims.length) return { kind: 'specSelection', productId: p.product_id, title: p.title ?? '', dimensions: dims }
+      if (p.product_id && dims.length) {
+        return { kind: 'specSelection', productId: p.product_id, title: p.title ?? '', dimensions: dims, quantity: Math.max(1, p.quantity ?? 1), skus: p.skus }
+      }
     }
     if (p.action === 'checkout') return { kind: 'cart', action: p.action, cart: EMPTY_CART }
     if ('cart' in p && p.cart && Array.isArray(p.cart.lines)) {
