@@ -170,6 +170,11 @@ class RecommendTool:
         slots: dict[str, Any],
     ) -> ToolResult:
         top_k = int(slots.get("top_k", DEFAULT_TOP_K))
+        # A removed condition chip reruns the previous search exactly, minus that condition.
+        override = slots.get("parsed_override")
+        if isinstance(override, ParsedQuery):
+            return self._run_single(query, session, top_k=top_k, base=None, parsed=override)
+
         # RefineTool injects ``base_parsed`` so current constraints merge with prior intent.
         base = slots.get("base_parsed")
 
@@ -388,6 +393,7 @@ class RecommendTool:
         session: AgentSession,
         top_k: int,
         base: Any,
+        parsed: ParsedQuery | None = None,
     ) -> ToolResult:
         # Retrieve a wider pool for broad browsing; keep focused refinements unchanged.
         want_diversity = base is None
@@ -398,6 +404,7 @@ class RecommendTool:
             session,
             top_k_products=pool_k,
             base=base,
+            **({"parsed": parsed} if parsed is not None else {}),
         )
 
         # Apply diversity only when the user did not specify a brand.

@@ -50,6 +50,7 @@ from agent.tools.product_detail import ProductDetailTool, is_detail_selection_re
 from agent.tools.reference import resolve_by_name, resolve_indices
 from agent.tools.recommend import RecommendTool
 from agent.tools.refine import RefineTool
+from search.query_understanding import ParsedQuery, drop_conditions
 
 
 logger = logging.getLogger(__name__)
@@ -199,8 +200,13 @@ class Agent:
         self,
         query: str,
         session: AgentSession,
+        drop_conditions: list[str] | None = None,
     ) -> Iterator[dict[str, Any]]:
-        """Yield meta, tool result, text chunks, and completion in order."""
+        """Yield meta, tool result, text chunks, and completion in order.
+
+        ``drop_conditions`` (the web's condition chips) reruns the previous search
+        without those constraints instead of routing the query text.
+        """
         trace: dict[str, Any] = {"timings": {}}
         query = (query or "").strip()
 
@@ -218,9 +224,21 @@ class Agent:
 
         session.add_user(query)
 
-        # Route.
+        # Route, unless the turn removes conditions from the previous search.
         yield {"type": "status", "data": {"phase": "routing", "message": "识别意图中…"}}
-        decision = self._safe_route(query, session, trace)
+        override = _parsed_without(session, drop_conditions)
+        if override is not None:
+            session.set("pending_cart", None)
+            session.set("pending_add", None)
+            decision = IntentDecision(
+                tool="recommend",
+                rewritten_query=override.retrieval_query or query,
+                confidence="high",
+                reasoning="按你去掉的条件重新检索，其余条件保持不变。",
+            )
+            trace["decision"] = decision.to_dict()
+        else:
+            decision = self._safe_route(query, session, trace)
         yield {"type": "meta", "data": {
             "decision": decision.to_dict(),
             "trace": {k: v for k, v in trace.items() if k != "timings"} | {"timings": dict(trace["timings"])},
@@ -232,7 +250,10 @@ class Agent:
             "tool": decision.tool,
             "message": _TOOL_WORKING_HINT.get(decision.tool, "处理中…"),
         }}
-        tool_result = self._safe_run_tool(decision, session, trace, raw_query=query)
+        tool_result = self._safe_run_tool(
+            decision, session, trace, raw_query=query,
+            slots={"parsed_override": override} if override is not None else None,
+        )
         yield {"type": "tool_result", "data": tool_result.to_dict()}
 
         # Stream the composed response.
@@ -505,6 +526,7 @@ class Agent:
         session: AgentSession,
         trace: dict[str, Any],
         raw_query: str = "",
+        slots: dict[str, Any] | None = None,
     ) -> ToolResult:
         tool = self._tools[decision.tool]
         t1 = time.perf_counter()
@@ -512,7 +534,7 @@ class Agent:
             # Tools that resolve ordinals or demonstratives must receive the raw query;
             # a rewritten product name could otherwise change the referenced item.
             tool_query = raw_query if decision.tool in {"compare", "product_detail"} else decision.rewritten_query
-            tool_result = tool.run(tool_query, session, slots={})
+            tool_result = tool.run(tool_query, session, slots=dict(slots or {}))
         except Exception as exc:  # noqa: BLE001
             logger.exception("Tool %s failed", decision.tool)
             trace["tool_error"] = repr(exc)
@@ -553,6 +575,19 @@ class Agent:
             titles = "、".join(h.get("title", "") for h in hits[:3])
             return f"为你找到 {len(hits)} 款商品，包括：{titles}。"
         return tool_result.narrative_override or "好的。"
+
+
+def _parsed_without(session: AgentSession, keys: list[str] | None) -> ParsedQuery | None:
+    """The previous search's intent minus ``keys``, or None when there is nothing to rerun."""
+    if not keys:
+        return None
+    last = session.recall_parsed()
+    if not isinstance(last, dict):
+        return None
+    try:
+        return drop_conditions(ParsedQuery.from_dict(last), keys)
+    except TypeError:
+        return None
 
 
 def _guard_attribute_followup(

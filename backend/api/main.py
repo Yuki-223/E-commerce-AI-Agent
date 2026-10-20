@@ -52,6 +52,10 @@ class ChatRequest(BaseModel):
     image_url: str | None = Field(
         None, description="Remote image-search URL; mutually exclusive with image_base64"
     )
+    drop_conditions: list[str] = Field(
+        default_factory=list,
+        description="Condition chips removed by the user (price, neg:<x>, brand:<x>, nobrand:<x>, soft:<x>); reruns the previous search without them",
+    )
 
 
 class ChatResponse(BaseModel):
@@ -345,10 +349,12 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
                     image, session, hint_text=req.query
                 )
             else:
-                stream = agent.handle_turn_stream(req.query, session)
+                extra = {"drop_conditions": req.drop_conditions} if req.drop_conditions else {}
+                stream = agent.handle_turn_stream(req.query, session, **extra)
             for ev in stream:
                 # Emit preference updates before done for the client banner.
-                if ev["type"] == "done":
+                # A removed chip's text is a command, not something to learn from.
+                if ev["type"] == "done" and not req.drop_conditions:
                     for memory_event in _apply_realtime_preference_updates(req.query, session):
                         yield _format_sse("memory_update", memory_event)
                 yield _format_sse(ev["type"], ev["data"])

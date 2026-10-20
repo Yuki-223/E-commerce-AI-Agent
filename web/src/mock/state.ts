@@ -297,6 +297,8 @@ export interface MockSession {
   session_id: string
   last_products: { product_id: string; title: string }[]
   pending_add?: { product_id: string; title: string; quantity?: number }
+  /** Text of the last recommendation, rerun by drop_conditions. */
+  last_query?: string
 }
 
 export const sessionStore = {

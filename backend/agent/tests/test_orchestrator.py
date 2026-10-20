@@ -1115,3 +1115,33 @@ class TestOrchestratorStreaming:
             list(agent.handle_turn_stream("hi", sess))
         assert len(sess.history) == 2
         assert sess.history[-1].content == "回答"
+
+
+def test_drop_conditions_reruns_previous_search_without_router(monkeypatch):
+    """A removed chip skips the router and hands recommend the previous intent minus it."""
+    from agent import orchestrator as orch_module
+
+    seen = {}
+
+    class _Recommend:
+        name = "recommend"
+
+        def run(self, query, session, slots):
+            seen["parsed"] = slots.get("parsed_override")
+            return ToolResult(tool_name="recommend", payload={"products": []}, narrative_override="ok", needs_composer=False)
+
+    def _no_router(*a, **kw):
+        raise AssertionError("router must not run for a removed chip")
+
+    monkeypatch.setattr(orch_module, "route", _no_router)
+    agent = _make_agent()
+    agent._tools["recommend"] = _Recommend()
+    session = AgentSession()
+    session.remember_search(ParsedQuery(original_query="q", sub_category="防晒", max_price=300.0).to_dict(), [])
+
+    events = list(agent.handle_turn_stream("去掉「≤ ¥300」重新推荐", session, drop_conditions=["price"]))
+
+    meta = next(e for e in events if e["type"] == "meta")
+    assert meta["data"]["decision"]["tool"] == "recommend"
+    assert seen["parsed"].sub_category == "防晒"
+    assert seen["parsed"].max_price is None

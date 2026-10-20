@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { conditionsOf, finishThinking, onMeta, onStatus, onToolResult, queryWithout, startThinking } from './thinking'
+import { conditionsOf, finishThinking, onMeta, onStatus, onToolResult, startThinking } from './thinking'
 
 const parsed = { category: '美妆护肤', sub_category: '防晒', max_price: 300, negative_ingredients: ['酒精'], soft_terms: ['清爽'], brand_exclude: ['某牌'] }
 
@@ -19,6 +19,12 @@ describe('thinking', () => {
     expect(t.finishedAt).toBeGreaterThanOrEqual(t.startedAt)
   })
 
+  it('drops the clause that names the tool', () => {
+    const reasoning = '用户有明确品类（防晒）、预算（300元以内）和属性要求（不含酒精、清爽），属于选购需求，走 recommend。'
+    const t = onMeta(startThinking(), { decision: { tool: 'recommend', rewritten_query: 'q', confidence: 'high', reasoning }, trace: {} })
+    expect(t.reason).toBe('用户有明确品类（防晒）、预算（300元以内）和属性要求（不含酒精、清爽），属于选购需求。')
+  })
+
   it('hides diagnostic router reasoning', () => {
     const t = onMeta(startThinking(), { decision: { tool: 'compare', rewritten_query: '', confidence: 'high', reasoning: 'post-route guard: compare intent detected; original=recommend' }, trace: {} })
     expect(t.reason).toBeUndefined()
@@ -26,11 +32,5 @@ describe('thinking', () => {
 
   it('lists the applied conditions as chips', () => {
     expect(conditionsOf(parsed).map((c) => c.label)).toEqual(['防晒', '≤ ¥300', '不含酒精', '不要某牌', '清爽'])
-  })
-
-  it('restates the search without the removed condition', () => {
-    expect(queryWithout(parsed, 'price')).toBe('重新推荐 不含酒精的清爽防晒，不要某牌')
-    expect(queryWithout(parsed, 'neg:酒精')).toBe('重新推荐 300 元以内的清爽防晒，不要某牌')
-    expect(queryWithout({ max_price: 300 }, 'price')).toBeNull()
   })
 })

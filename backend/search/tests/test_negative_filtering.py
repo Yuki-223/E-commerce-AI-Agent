@@ -193,3 +193,41 @@ def test_regex_no_false_positive_on_plain_request():
     # Never extract a category without both a negative trigger and a category reference.
     assert _regex_extract_excludes("随便推荐点东西") == ([], [])
     assert _regex_extract_excludes("推荐无糖饮料") == ([], [])
+
+
+# --------------------------- Removing a condition chip ---------------------------
+
+def test_drop_conditions_removes_only_the_named_chips():
+    from search.query_understanding import ParsedQuery, drop_conditions
+
+    parsed = ParsedQuery(
+        original_query="q",
+        sub_category="防晒",
+        max_price=300.0,
+        negative_ingredients=["酒精"],
+        brand_exclude=["某牌"],
+        soft_terms=["清爽", "适合妈妈"],
+        retrieval_query="清爽防晒 适合妈妈",
+    )
+    out = drop_conditions(parsed, ["price", "soft:适合妈妈"])
+    assert out.max_price is None
+    assert out.sub_category == "防晒"
+    assert out.negative_ingredients == ["酒精"]
+    assert out.brand_exclude == ["某牌"]
+    assert out.soft_terms == ["清爽"]
+    assert out.retrieval_query == "清爽防晒"
+
+
+def test_drop_conditions_scrubs_the_wording_from_retrieval_text():
+    from search.query_understanding import ParsedQuery, drop_conditions
+
+    parsed = ParsedQuery(
+        original_query="q",
+        sub_category="防晒",
+        max_price=300.0,
+        negative_ingredients=["酒精"],
+        retrieval_query="300元以内不含酒精的清爽防晒霜（适合妈妈使用）",
+    )
+    assert "300" not in drop_conditions(parsed, ["price"]).retrieval_query
+    assert "酒精" not in drop_conditions(parsed, ["neg:酒精"]).retrieval_query
+    assert "300元以内" in drop_conditions(parsed, ["neg:酒精"]).retrieval_query

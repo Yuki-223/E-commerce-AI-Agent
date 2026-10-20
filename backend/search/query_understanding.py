@@ -20,7 +20,7 @@ import logging
 import os
 import re
 import sqlite3
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields, replace
 from functools import lru_cache
 from pathlib import Path
 
@@ -235,6 +235,48 @@ INGREDIENT_BLOCKLIST: tuple[str, ...] = (
 # ---------------------------------------------------------------------------
 # 4. Orchestration entry point
 # ---------------------------------------------------------------------------
+
+_PRICE_WORDING_RE = re.compile(
+    r"(?:预算)?\d{1,6}(?:\.\d+)?\s*(?:元|块|rmb|RMB)?\s*(?:以内|以下|之内|以上|左右|上下)"
+    r"|(?:预算)?\d{1,6}(?:\.\d+)?\s*(?:元|块)"
+)
+
+
+def drop_conditions(parsed: ParsedQuery, keys: list[str]) -> ParsedQuery:
+    """Return ``parsed`` without the named constraints, for the web's condition chips.
+
+    Keys match the chips: ``price``, ``neg:<ingredient>``, ``brand:<brand>``,
+    ``nobrand:<brand>`` and ``soft:<term>``. Refinement merges can only add
+    constraints, so a removed chip reruns the previous search through this instead.
+    """
+    drop = set(keys)
+
+    def keep(prefix: str, values: list[str]) -> list[str]:
+        return [v for v in values if f"{prefix}:{v}" not in drop]
+
+    # The retrieval text still carries the wording ("300元以内", "不含酒精"); the composer
+    # and the vector search both read it, so the dropped condition goes from there too.
+    retrieval = parsed.retrieval_query
+    if "price" in drop:
+        retrieval = _PRICE_WORDING_RE.sub(" ", retrieval)
+    for v in parsed.negative_ingredients:
+        if f"neg:{v}" in drop:
+            retrieval = re.sub(rf"(?:不要|不想要|不含|不带|没有|无)\s*含?\s*{re.escape(v)}的?", " ", retrieval)
+    for v in parsed.soft_terms:
+        if f"soft:{v}" in drop:
+            retrieval = retrieval.replace(v, " ")
+    retrieval = re.sub(r"^[\s、，,]+|[\s、，,]+$", "", re.sub(r"\s*[、，,]\s*(?=[、，,]|$)", "", retrieval))
+    return replace(
+        parsed,
+        max_price=None if "price" in drop else parsed.max_price,
+        min_price=None if "price" in drop else parsed.min_price,
+        negative_ingredients=keep("neg", parsed.negative_ingredients),
+        brand_include=keep("brand", parsed.brand_include),
+        brand_exclude=keep("nobrand", parsed.brand_exclude),
+        soft_terms=keep("soft", parsed.soft_terms),
+        retrieval_query=" ".join(retrieval.split()),
+    )
+
 
 def normalize_query(query: str) -> str:
     return " ".join(query.strip().split())

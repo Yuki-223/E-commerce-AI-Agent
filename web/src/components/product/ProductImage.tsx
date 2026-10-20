@@ -23,8 +23,9 @@ export function ProductImage({ src, alt, className = '', fit = 'contain' }: { sr
   if (src === undefined) return <div className={`bg-field ${className}`} role="img" aria-label={alt} aria-busy="true" />
   if (!src || failed) {
     return (
-      <div className={`flex items-center justify-center bg-field text-xs text-ink-subtle ${className}`} role="img" aria-label={alt}>
-        暂无图片
+      // Thumbnails too narrow for the words (order receipt, spec card) stay a plain block.
+      <div className={`flex items-center justify-center bg-field text-xs text-ink-subtle [container-type:inline-size] ${className}`} role="img" aria-label={alt}>
+        <span className="whitespace-nowrap [@container(max-width:63px)]:hidden">暂无图片</span>
       </div>
     )
   }

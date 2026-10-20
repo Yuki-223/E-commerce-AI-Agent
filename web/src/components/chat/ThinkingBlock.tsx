@@ -1,20 +1,21 @@
 import { useEffect, useId, useState } from 'react'
-import { conditionsOf, elapsed, queryWithout, type Thinking } from '../../chat/thinking'
+import { conditionsOf, elapsed, type Thinking, type ThinkingCondition } from '../../chat/thinking'
 import { IconCheck, IconChevronDown, IconClose } from '../Icons'
 
 interface Props {
   thinking: Thinking
   /** Chips can drop a condition only under the latest finished answer. */
   editable: boolean
-  onRefine: (query: string) => void
+  /** Removes one condition and reruns the previous search without it. */
+  onDropCondition: (condition: ThinkingCondition) => void
 }
 
 /**
  * 思考过程 above an answer: open and growing while the turn works, folded to
  * 「已思考 · 2.3s · 防晒 · ≤ ¥300」 once the answer starts. Removing a condition
- * chip restates the search without it.
+ * chip reruns the previous search without it (drop_conditions on /chat/stream).
  */
-export function ThinkingBlock({ thinking, editable, onRefine }: Props) {
+export function ThinkingBlock({ thinking, editable, onDropCondition }: Props) {
   const running = !thinking.finishedAt
   const [open, setOpen] = useState<boolean | null>(null)
   const expanded = open ?? running
@@ -74,7 +75,7 @@ export function ThinkingBlock({ thinking, editable, onRefine }: Props) {
               {s.phase === 'tool' && conditions.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1.5 pl-[21px]" aria-label="本次检索条件">
                   {conditions.map((c) => {
-                    const drop = editable && c.removable && thinking.parsed ? queryWithout(thinking.parsed, c.key) : null
+                    const drop = editable && c.removable
                     return (
                       <span key={c.key} className="flex h-6 items-center gap-1 rounded-full bg-chip pl-2.5 pr-2.5 text-xs text-ink has-[button]:pr-1">
                         {c.label}
@@ -83,7 +84,7 @@ export function ThinkingBlock({ thinking, editable, onRefine }: Props) {
                             type="button"
                             title={`去掉「${c.label}」重新推荐`}
                             aria-label={`去掉条件 ${c.label}，重新推荐`}
-                            onClick={() => onRefine(drop)}
+                            onClick={() => onDropCondition(c)}
                             className="flex h-4 w-4 items-center justify-center rounded-full bg-transparent p-0 text-ink-subtle hover:bg-line-strong hover:text-ink"
                           >
                             <IconClose size={8} />

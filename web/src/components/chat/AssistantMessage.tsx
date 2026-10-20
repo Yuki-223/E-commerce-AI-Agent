@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { placeOrder, retry } from '../../chat/engine'
 import { useProducts } from '../../hooks/useProducts'
+import type { ThinkingCondition } from '../../chat/thinking'
 import type { ChatMessage, OrderChoice } from '../../stores/conversations'
 import { IconAlert, IconRetry } from '../Icons'
 import { InlineComparison } from '../compare/InlineComparison'
@@ -16,8 +17,8 @@ interface Props {
   message: ChatMessage
   /** Follow-up chips only under the latest answer. */
   isLatest: boolean
-  /** Sends a follow-up chip, or a search restated without one condition. */
   onFollowup: (text: string) => void
+  onDropCondition: (condition: ThinkingCondition) => void
   /** Cards ticked 加入对比 anywhere in the conversation. */
   compareIds: string[]
   onToggleCompare: (productId: string, checked: boolean) => void
@@ -27,7 +28,7 @@ interface Props {
   busy: boolean
 }
 
-export function AssistantMessage({ convId, message, isLatest, onFollowup, compareIds, onToggleCompare, onOpenProduct, onSpecSubmit, busy }: Props) {
+export function AssistantMessage({ convId, message, isLatest, onFollowup, onDropCondition, compareIds, onToggleCompare, onOpenProduct, onSpecSubmit, busy }: Props) {
   const [params] = useSearchParams()
   const viewing = params.get('product')
   const { data: products } = useProducts(message.productIds)
@@ -64,7 +65,7 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, compar
   const opening = message.composer?.opening ?? message.text
   const working = message.state === 'pending' || (message.state === 'streaming' && !opening)
   const thinking = message.thinking && (
-    <ThinkingBlock thinking={message.thinking} editable={isLatest && message.state === 'done' && !busy} onRefine={onFollowup} />
+    <ThinkingBlock thinking={message.thinking} editable={isLatest && message.state === 'done' && !busy} onDropCondition={onDropCondition} />
   )
   if (working) return message.retryAttempt || !message.thinking ? <StatusBubble text={message.status} retryAttempt={message.retryAttempt} /> : thinking
 

@@ -125,6 +125,7 @@ function itemDescription(d: ProductDetail): string {
 }
 
 function recommend(query: string, session: MockSession, userId: string | null | undefined): ToolOutcome {
+  session.last_query = query
   const { hits, maxPrice, noAlcohol } = search(query, userId)
   session.last_products = hits.map((d) => ({ product_id: d.product_id, title: d.title }))
   const sub = hits[0]?.sub_category ?? ''
@@ -354,6 +355,20 @@ function visualSearch(req: ChatRequest, session: MockSession, userId: string | n
   return outcome
 }
 
+/**
+ * drop_conditions: the backend reruns the previous ParsedQuery minus those
+ * fields; the mock searches by text, so it strips them from the last query.
+ */
+function withoutConditions(query: string, keys: string[]): string {
+  let q = query
+  for (const k of keys) {
+    if (k === 'price') q = q.replace(/\d{2,6}\s*(?:元|块)?\s*(?:以内|以下|之内)/g, '')
+    else if (k.startsWith('neg:')) q = q.replace(new RegExp(`(?:不要|不含|无|没有)\\s*含?\\s*${k.slice(4)}`, 'g'), '')
+    else if (k.startsWith('soft:')) q = q.replaceAll(k.slice(5), '')
+  }
+  return q
+}
+
 /** Build the full scripted event list for one /chat/stream request. */
 export function scriptTurn(req: ChatRequest): Step[] {
   const session = sessionStore.getOrCreate(req.session_id)
@@ -378,7 +393,12 @@ export function scriptTurn(req: ChatRequest): Step[] {
   } else {
     steps.push({ delay: 200, event: { event: 'status', data: { phase: 'routing', message: '识别意图中…' } } })
     try {
-      outcome = route(query, session, userId)
+      if (req.drop_conditions?.length && session.last_query) {
+        outcome = recommend(withoutConditions(session.last_query, req.drop_conditions), session, userId)
+        outcome.decision = { ...outcome.decision, reasoning: '按你去掉的条件重新检索，其余条件保持不变。' }
+      } else {
+        outcome = route(query, session, userId)
+      }
     } catch (err) {
       if (!(err instanceof CartNotFoundError)) throw err
       outcome = cartResult({ action: 'noop' }, err.message)
@@ -397,7 +417,7 @@ export function scriptTurn(req: ChatRequest): Step[] {
   // compose_stream buffers the model output and yields one normalized chunk.
   steps.push({ delay: outcome.result.needs_composer ? 1100 : 60, event: { event: 'token', data: outcome.narrative } })
 
-  if (!image || query) {
+  if ((!image || query) && !req.drop_conditions?.length) {
     for (const update of extractPreferenceUpdates(query, userId)) {
       const ev = preferenceStore.applyUpdate(userId!, update)
       if (ev) steps.push({ delay: 20, event: { event: 'memory_update', data: ev } })

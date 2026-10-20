@@ -125,39 +125,13 @@ export function conditionsOf(p: Parsed): ThinkingCondition[] {
   return out
 }
 
-/**
- * The refine tool merges new constraints into the old ones and cannot drop any,
- * so removing a condition restates the whole search without it, e.g.
- * 「重新推荐 300 元以内、不含酒精的清爽防晒」.
- */
-export function queryWithout(p: Parsed, key: string): string | null {
-  const subject = p.sub_category || p.category || p.retrieval_query?.trim()
-  if (!subject) return null
-  const keep = (k: string) => k !== key
-  const price = !keep('price')
-    ? ''
-    : p.max_price != null && p.min_price != null
-      ? `${p.min_price}–${p.max_price} 元`
-      : p.max_price != null
-        ? `${p.max_price} 元以内`
-        : p.min_price != null
-          ? `${p.min_price} 元以上`
-          : ''
-  const limits = [price, ...(p.negative_ingredients ?? []).filter((n) => keep(`neg:${n}`)).map((n) => `不含${n}`)].filter(Boolean)
-  const soft = (p.soft_terms ?? []).filter((s) => keep(`soft:${s}`)).join('')
-  const brands = [
-    ...(p.brand_include ?? []).filter((b) => keep(`brand:${b}`)).map((b) => `只看${b}`),
-    ...(p.brand_exclude ?? []).filter((b) => keep(`nobrand:${b}`)).map((b) => `不要${b}`),
-  ]
-  const head = `重新推荐${limits.length ? ` ${limits.join('、')}的` : ''}${soft}${subject}`
-  return brands.length ? `${head}，${brands.join('，')}` : head
-}
-
 /** The router's sentence, unless it is one of the English diagnostic strings. */
 function peopleReason(d: IntentDecision): string | undefined {
   const r = d.reasoning?.trim()
   if (!r || !/[一-鿿]/.test(r) || /guard|fallback|mock|router|pending/i.test(r)) return undefined
-  return r
+  // The router often ends with 「…，走 recommend。」; drop clauses that name a tool.
+  const clauses = r.split(/[，,。；;]/).map((c) => c.trim()).filter((c) => c && !/[a-z_]{3,}/i.test(c))
+  return clauses.length ? `${clauses.join('，')}。` : undefined
 }
 
 export function elapsed(t: Thinking): string {

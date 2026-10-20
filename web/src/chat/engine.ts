@@ -45,6 +45,8 @@ export interface SendInput {
   image?: string
   refProduct?: ProductRef
   userId: string
+  /** Chip keys from the 思考过程 block, e.g. `price` or `neg:酒精`. */
+  dropConditions?: string[]
 }
 
 /** Append a user turn plus a pending assistant turn, then stream the answer. */
@@ -62,6 +64,7 @@ export async function send(convId: string, input: SendInput) {
     session_id: conv.sessionId ?? null,
     user_id: input.userId,
     image_base64: input.image ?? null,
+    ...(input.dropConditions?.length ? { drop_conditions: input.dropConditions } : {}),
   }
   const assistantId = uid()
   s.upsertMessage(convId, { id: assistantId, role: 'assistant', createdAt: Date.now(), text: '', state: 'pending', request, thinking: startThinking() })

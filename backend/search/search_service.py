@@ -244,20 +244,24 @@ class SearchService:
         top_k_products: int = 10,
         base: ParsedQuery | None = None,
         user_profile: dict[str, Any] | None = None,
+        parsed: ParsedQuery | None = None,
     ) -> SearchResult:
         """Run the end-to-end search pipeline.
 
         ``top_k_chunks`` controls the reranking candidate pool and ``top_k_products`` the
         final product count. ``base`` contains prior structured intent for refinement.
+        ``parsed`` skips understanding altogether and searches with exactly that intent
+        (a previous search with some conditions removed).
         """
-        # 1. Understand intent with caching.
-        parsed = understand_query(user_query)
+        if parsed is None:
+            # 1. Understand intent with caching.
+            parsed = understand_query(user_query)
 
-        # 1.5. Merge current constraints with prior intent before clarification checks.
-        if base is not None:
-            parsed = parsed.merge_base(base)
+            # 1.5. Merge current constraints with prior intent before clarification checks.
+            if base is not None:
+                parsed = parsed.merge_base(base)
 
-        parsed = _apply_user_profile(parsed, user_profile)
+            parsed = _apply_user_profile(parsed, user_profile)
 
         if parsed.needs_clarification:
             return SearchResult(parsed=parsed, hits=[], raw_chunk_count=0, filtered_chunk_count=0)

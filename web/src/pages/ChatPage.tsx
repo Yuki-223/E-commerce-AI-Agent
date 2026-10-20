@@ -113,6 +113,10 @@ export function ChatPage() {
                   message={m}
                   isLatest={i === messages.length - 1}
                   onFollowup={sendText}
+                  onDropCondition={(c) => {
+                    setAtBottom(true)
+                    void send(conv.id, { text: `去掉「${c.label}」重新推荐`, userId: profile.userId, dropConditions: [c.key] })
+                  }}
                   compareIds={compareIds}
                   onToggleCompare={toggleCompare}
                   onOpenProduct={openProduct}

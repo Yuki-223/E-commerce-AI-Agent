@@ -219,6 +219,8 @@ export interface ChatRequest {
   user_id?: string | null
   image_base64?: string | null
   image_url?: string | null
+  /** Condition chips removed in the 思考过程 block; reruns the previous search without them. */
+  drop_conditions?: string[]
 }
 
 export type StatusPhase = 'routing' | 'tool' | 'compose' | 'vision' | 'done'
