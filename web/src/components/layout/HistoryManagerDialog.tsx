@@ -66,7 +66,7 @@ export function HistoryManagerDialog({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
-      {confirm && <ClearHistoryDialog onClose={() => (setConfirm(false), onClose())} />}
+      {confirm && <ClearHistoryDialog onClose={() => setConfirm(false)} onCleared={onClose} />}
     </div>
   )
 }

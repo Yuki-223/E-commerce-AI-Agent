@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { useConversations } from '../../stores/conversations'
 
-/** WebStates ⑥ 清空全部历史对话 confirmation. */
-export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
+/** WebStates ⑥ 清空全部历史对话 confirmation. `onCleared` runs only after a confirmed clear, not on 取消. */
+export function ClearHistoryDialog({ onClose, onCleared }: { onClose: () => void; onCleared?: () => void }) {
   const navigate = useNavigate()
   const count = useConversations((s) => Object.values(s.conversations).filter((c) => c.messages.length).length)
   const clear = useConversations((s) => s.clear)
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={(e) => (e.stopPropagation(), onClose())}>
       <div
         role="alertdialog"
         aria-label="确认清空"
@@ -27,6 +27,7 @@ export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
             onClick={() => {
               clear()
               onClose()
+              onCleared?.()
               navigate('/')
             }}
             className="h-8 grow-[2] rounded-lg active:scale-[0.97] bg-error-text text-[13px] font-semibold text-on-primary disabled:opacity-50"
