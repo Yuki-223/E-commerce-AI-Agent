@@ -1,0 +1,94 @@
+{
+  "product_id": "p_period_002",
+  "title": "月知导管式卫生棉条 游泳运动经期可用 普通/大流量 16支",
+  "brand": "月知 Lunara",
+  "category": "经期关怀",
+  "sub_category": "卫生棉条",
+  "base_price": 69.0,
+  "image_path": "3_经期关怀/images/p_period_002.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_period_002_1",
+      "properties": {
+        "型号": "普通流量",
+        "规格": "16支"
+      },
+      "price": 69.0
+    },
+    {
+      "sku_id": "s_p_period_002_2",
+      "properties": {
+        "型号": "大流量",
+        "规格": "16支"
+      },
+      "price": 72.0
+    },
+    {
+      "sku_id": "s_p_period_002_3",
+      "properties": {
+        "型号": "混合装",
+        "规格": "普通8+大8"
+      },
+      "price": 72.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "棉",
+      "人造丝",
+      "塑料导管"
+    ],
+    "allergens": [],
+    "pregnancy": "avoid",
+    "pregnancy_note": "孕期没有月经，产后恶露期不建议使用内置式用品",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "游泳可用",
+      "运动"
+    ],
+    "cycle_phases": [
+      "menstrual"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "导管式设计，新手更容易放置。经期依然要训练、游泳、比赛时，棉条让活动更自由，不会有卫生巾的摩擦感。无香型。【配料与安全】主要成分：棉、人造丝、塑料导管；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：不建议；适合的周期阶段：经期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "不建议。孕期没有月经，产后恶露期不建议使用内置式用品。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "每4-6小时更换，最长不超过8小时；按经量选择最小够用的吸收量，以降低中毒性休克综合征（TSS）风险。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有型号：普通流量，规格：16支（¥69）；型号：大流量，规格：16支（¥72）；型号：混合装，规格：普通8+大8（¥72）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "第一次用棉条有什么建议？",
+        "answer": "选普通流量、在经量较多的日子尝试会更容易放入；放松身体，沿着向后上方的角度推入，感觉到异物感说明放得不够深。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "游泳队",
+        "rating": 5,
+        "content": "经期比赛全靠它。"
+      },
+      {
+        "nickname": "新手小白",
+        "rating": 4,
+        "content": "导管很好用，第二次就学会了。"
+      },
+      {
+        "nickname": "跑者",
+        "rating": 5,
+        "content": "跑步完全没感觉。"
+      }
+    ]
+  }
+}

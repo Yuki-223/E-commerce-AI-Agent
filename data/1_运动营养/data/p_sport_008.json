@@ -1,0 +1,82 @@
+{
+  "product_id": "p_sport_008",
+  "title": "力格支链氨基酸BCAA 2:1:1 训练中饮用 无糖 含电解质 30份",
+  "brand": "力格 Forma",
+  "category": "运动营养",
+  "sub_category": "BCAA",
+  "base_price": 139.0,
+  "image_path": "1_运动营养/images/p_sport_008.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_sport_008_1",
+      "properties": {
+        "口味": "西瓜",
+        "规格": "300g 罐装"
+      },
+      "price": 139.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "L-亮氨酸",
+      "L-异亮氨酸",
+      "L-缬氨酸",
+      "柠檬酸钠",
+      "三氯蔗糖",
+      "西瓜香料"
+    ],
+    "allergens": [],
+    "pregnancy": "avoid",
+    "pregnancy_note": "孕期没有补充BCAA的必要，建议通过正常饮食获取蛋白质",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "无糖",
+      "训练中"
+    ],
+    "cycle_phases": [
+      "follicular",
+      "ovulatory"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "亮氨酸、异亮氨酸、缬氨酸2:1:1比例，并添加少量电解质，适合空腹晨练或训练时间较长时饮用。如果日常蛋白质已经吃够，BCAA带来的额外收益有限，这一点我们如实说明。【配料与安全】主要成分：L-亮氨酸、L-异亮氨酸、L-缬氨酸、柠檬酸钠、三氯蔗糖、西瓜香料；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：不建议；适合的周期阶段：卵泡期、排卵期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "不建议。孕期没有补充BCAA的必要，建议通过正常饮食获取蛋白质。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "训练中1勺兑500ml水，小口饮用。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有口味：西瓜，规格：300g 罐装（¥139）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "已经喝蛋白粉了还需要BCAA吗？",
+        "answer": "多数情况下不需要。蛋白粉本身就含有BCAA；只有在空腹训练或训练时间很长、不方便吃东西时，BCAA才更有用。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "晨跑党",
+        "rating": 4,
+        "content": "空腹跑带一壶，后半程不那么虚。"
+      },
+      {
+        "nickname": "理性消费",
+        "rating": 3,
+        "content": "说明写得很诚实，确实蛋白够了就不用买。"
+      },
+      {
+        "nickname": "西瓜控",
+        "rating": 5,
+        "content": "味道像西瓜糖。"
+      }
+    ]
+  }
+}

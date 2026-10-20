@@ -1,0 +1,170 @@
+{
+  "product_id": "p_wear_001",
+  "title": "轻跃高强度运动内衣 跑步跳绳防震 前拉链 可调肩带 包裹固定",
+  "brand": "轻跃 LeapLite",
+  "category": "运动服饰",
+  "sub_category": "运动内衣",
+  "base_price": 239.0,
+  "image_path": "4_运动服饰/images/p_wear_001.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_wear_001_1",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "70B"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_2",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "75B"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_3",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "75C"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_4",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "80B"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_5",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "80C"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_6",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "85C"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_7",
+      "properties": {
+        "颜色": "雾蓝",
+        "尺码": "70B"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_8",
+      "properties": {
+        "颜色": "雾蓝",
+        "尺码": "75B"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_9",
+      "properties": {
+        "颜色": "雾蓝",
+        "尺码": "75C"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_10",
+      "properties": {
+        "颜色": "雾蓝",
+        "尺码": "80B"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_11",
+      "properties": {
+        "颜色": "雾蓝",
+        "尺码": "80C"
+      },
+      "price": 239.0
+    },
+    {
+      "sku_id": "s_p_wear_001_12",
+      "properties": {
+        "颜色": "雾蓝",
+        "尺码": "85C"
+      },
+      "price": 239.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "锦纶",
+      "氨纶",
+      "海绵衬垫"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "孕期胸围变化快，请按当前尺寸选择，避免过紧",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "高支撑",
+      "防震",
+      "前拉链"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "follicular",
+      "ovulatory",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "针对跑步、跳绳、HIIT等高冲击运动，压缩+包裹双重结构减少胸部晃动。运动内衣研究中常提到，胸部晃动带来的不适是许多女性运动时的困扰之一，合适的高支撑内衣能明显改善。前拉链方便穿脱，肩带可调。【配料与安全】主要成分：锦纶、氨纶、海绵衬垫；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、卵泡期、排卵期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。孕期胸围变化快，请按当前尺寸选择，避免过紧。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "按下胸围和罩杯选择尺码；穿上后抬手、跳跃，胸部不应明显晃动，下围不应上移。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有颜色：黑色，尺码：70B（¥239）；颜色：黑色，尺码：75B（¥239）；颜色：黑色，尺码：75C（¥239）；颜色：黑色，尺码：80B（¥239）；颜色：黑色，尺码：80C（¥239）；颜色：黑色，尺码：85C（¥239）；颜色：雾蓝，尺码：70B（¥239）；颜色：雾蓝，尺码：75B（¥239）等共12个规格。按下胸围和罩杯选择尺码；穿上后抬手、跳跃，胸部不应明显晃动，下围不应上移。"
+      },
+      {
+        "question": "经前胸部胀痛时尺码要换吗？",
+        "answer": "黄体期不少人会胸部胀痛、尺寸略大，可调肩带和前拉链能留出余量；如果每月变化明显，可以另备一件大一码。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "跳绳一万下",
+        "rating": 5,
+        "content": "终于不疼了，跳绳不用按着胸。"
+      },
+      {
+        "nickname": "C杯跑者",
+        "rating": 5,
+        "content": "支撑力很强，拉链好穿。"
+      },
+      {
+        "nickname": "小个子",
+        "rating": 4,
+        "content": "70B稍微有点长，下围合适。"
+      }
+    ]
+  }
+}

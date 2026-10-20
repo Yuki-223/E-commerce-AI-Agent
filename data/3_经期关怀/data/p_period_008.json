@@ -1,0 +1,89 @@
+{
+  "product_id": "p_period_008",
+  "title": "月知弱酸性私护清洁慕斯 无皂基 运动后/经期外阴清洁 150ml",
+  "brand": "月知 Lunara",
+  "category": "经期关怀",
+  "sub_category": "私护清洁",
+  "base_price": 59.0,
+  "image_path": "3_经期关怀/images/p_period_008.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_period_008_1",
+      "properties": {
+        "香型": "无香",
+        "规格": "150ml"
+      },
+      "price": 59.0
+    },
+    {
+      "sku_id": "s_p_period_008_2",
+      "properties": {
+        "香型": "淡雅白茶",
+        "规格": "150ml"
+      },
+      "price": 59.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "月桂酰谷氨酸钠",
+      "乳酸",
+      "甘油",
+      "香精（白茶款）"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "外用温和配方，孕期可用于外阴清洁，避免内部冲洗",
+    "caffeine": false,
+    "fragrance": true,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "弱酸性",
+      "无皂基",
+      "有无香款"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "pH约4.5的弱酸性配方，无皂基，仅用于外阴清洁，不用于阴道内冲洗。适合运动大量出汗后、经期需要清爽感时使用。敏感肌建议选无香款。【配料与安全】主要成分：月桂酰谷氨酸钠、乳酸、甘油、香精（白茶款）；过敏原：无常见过敏原；不含咖啡因；含香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。外用温和配方，孕期可用于外阴清洁，避免内部冲洗。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "取适量泡沫清洁外阴后用清水冲净，每日1次即可，过度清洁反而破坏屏障。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有香型：无香，规格：150ml（¥59）；香型：淡雅白茶，规格：150ml（¥59）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "每天都要用吗？",
+        "answer": "不需要每次如厕都用，一天一次足够；平时用清水冲洗也可以。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "健身后",
+        "rating": 5,
+        "content": "泡沫很细，洗完不干涩。"
+      },
+      {
+        "nickname": "敏感体质",
+        "rating": 5,
+        "content": "选的无香款，很温和。"
+      },
+      {
+        "nickname": "小米粒",
+        "rating": 4,
+        "content": "白茶味很淡很好闻。"
+      }
+    ]
+  }
+}

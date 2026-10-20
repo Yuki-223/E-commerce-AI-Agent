@@ -1,0 +1,88 @@
+{
+  "product_id": "p_food_005",
+  "title": "谷野85%黑巧克力 富含铁镁 低糖 独立小片 经期小确幸 100g",
+  "brand": "谷野 GrainWild",
+  "category": "功能轻食",
+  "sub_category": "巧克力",
+  "base_price": 39.0,
+  "image_path": "6_功能轻食/images/p_food_005.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_food_005_1",
+      "properties": {
+        "规格": "100g（20小片）"
+      },
+      "price": 39.0
+    },
+    {
+      "sku_id": "s_p_food_005_2",
+      "properties": {
+        "规格": "300g 三盒装"
+      },
+      "price": 99.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "可可液块",
+      "可可脂",
+      "白砂糖",
+      "乳粉"
+    ],
+    "allergens": [
+      "乳制品"
+    ],
+    "pregnancy": "caution",
+    "pregnancy_note": "含咖啡因，孕期适量",
+    "caffeine": true,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": false,
+    "tags": [
+      "低糖",
+      "富铁镁"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "85%可可含量，每份含一定量的铁和镁，糖分较低。经期想吃甜的时候，几片黑巧比奶茶更友好。含咖啡因与少量乳制品。【配料与安全】主要成分：可可液块、可可脂、白砂糖、乳粉；过敏原：乳制品；含咖啡因；无香精；含动物来源成分；孕期哺乳期：谨慎使用；适合的周期阶段：经期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "需要谨慎。含咖啡因，孕期适量。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "每日2-4小片。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有规格：100g（20小片）（¥39）；规格：300g 三盒装（¥99）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "吃黑巧能补铁吗？",
+        "answer": "黑巧含有一定的铁，但量有限，不能替代铁剂；它更适合作为健康一点的零食。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "经期必吃",
+        "rating": 5,
+        "content": "不太苦，吃两片心情就好了。"
+      },
+      {
+        "nickname": "小乔",
+        "rating": 4,
+        "content": "独立包装不会多吃。"
+      },
+      {
+        "nickname": "苦味爱好者",
+        "rating": 5,
+        "content": "85%刚刚好。"
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "product_id": "p_nutri_004",
+  "title": "静夜甘氨酸镁 经前不适与睡眠 温和不腹泻 每份镁200mg 120粒",
+  "brand": "静夜 Calmia",
+  "category": "女性营养素",
+  "sub_category": "镁",
+  "base_price": 129.0,
+  "image_path": "2_女性营养素/images/p_nutri_004.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_nutri_004_1",
+      "properties": {
+        "规格": "120粒"
+      },
+      "price": 129.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "甘氨酸镁",
+      "羟丙基甲基纤维素胶囊"
+    ],
+    "allergens": [],
+    "pregnancy": "caution",
+    "pregnancy_note": "孕期抽筋较常见，但补镁剂量请先咨询医生",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "经前",
+      "睡眠",
+      "温和"
+    ],
+    "cycle_phases": [
+      "luteal",
+      "menstrual"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "镁参与肌肉放松与神经功能，一些研究探讨了补镁与经前不适的关系。甘氨酸镁对胃肠更温和，不像氧化镁容易导致腹泻，适合黄体期睡不好、腿容易抽筋的女性。【配料与安全】主要成分：甘氨酸镁、羟丙基甲基纤维素胶囊；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：谨慎使用；适合的周期阶段：黄体期、经期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "需要谨慎。孕期抽筋较常见，但补镁剂量请先咨询医生。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "每日2粒，晚餐后或睡前服用。肾功能不全者请勿服用。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有规格：120粒（¥129）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "什么时候开始吃比较好？",
+        "answer": "可以每天规律服用；如果主要针对经前不适，很多人会在预计经期前一两周开始，但规律补充一般比临时吃更稳定。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "PMS受害者",
+        "rating": 5,
+        "content": "经前那几天没那么暴躁了，睡得也沉。"
+      },
+      {
+        "nickname": "跑者小葵",
+        "rating": 4,
+        "content": "夜里抽筋少了。"
+      },
+      {
+        "nickname": "理性派",
+        "rating": 3,
+        "content": "效果因人而异，至少不拉肚子。"
+      }
+    ]
+  }
+}

@@ -211,13 +211,13 @@ def test_sub_category_exclude_postfilter_fallback(monkeypatch):
 def test_synonym_negative_normalized_then_excludes(monkeypatch):
     """Normalize a user or LLM synonym before excluding the matching catalog category."""
     chunks = [
-        _drink_chunk("rb", "user_review", "提神效果好", "红牛 250ml", "功能饮料"),
-        _drink_chunk("tea", "marketing", "清爽乌龙", "东方树叶 500ml", "茶饮"),
+        _drink_chunk("patch", "user_review", "贴上很暖", "暖月艾草暖宫贴 10片", "暖宫贴"),
+        _drink_chunk("tea", "marketing", "红枣姜茶暖身", "暖月红枣姜茶 12袋", "经期茶饮"),
     ]
     parsed = ParsedQuery(
-        original_query="饮料 不要能量饮料",
-        retrieval_query="饮料",
-        negative_ingredients=["能量饮料"],  # Deliberately use a synonym to exercise normalization.
+        original_query="经期暖身 不要暖宝宝",
+        retrieval_query="经期暖身",
+        negative_ingredients=["暖宝宝"],  # Deliberately use a synonym to exercise normalization.
     )
     monkeypatch.setattr("search.search_service.understand_query", lambda query: parsed)
 
@@ -225,24 +225,24 @@ def test_synonym_negative_normalized_then_excludes(monkeypatch):
         retriever=_MultiChunkRetriever(chunks),
         reranker=None,
         use_rerank=False,
-    ).search("饮料 不要能量饮料", top_k_products=5)
+    ).search("经期暖身 不要暖宝宝", top_k_products=5)
 
     pids = [hit.product_id for hit in result.hits]
-    assert "rb" not in pids
+    assert "patch" not in pids
     assert "tea" in pids
 
 
 def test_brand_exclude_postfilter_blocks_leaked_candidates(monkeypatch):
     """Enforce brand exclusions even if the retriever ignores `where` and leaks candidates."""
     chunks = [
-        _brand_chunk("iphone", "Apple 苹果", 0.1),
-        _brand_chunk("huawei", "华为", 0.2),
-        _brand_chunk("vivo", "vivo", 0.3),
+        _brand_chunk("whey", "她力 HerPower", 0.1),
+        _brand_chunk("creatine", "力格 Forma", 0.2),
+        _brand_chunk("oats", "谷野 GrainWild", 0.3),
     ]
     parsed = ParsedQuery(
-        original_query="非华为非苹果的手机",
-        retrieval_query="手机",
-        brand_exclude=["华为", "苹果"],
+        original_query="非她力非力格的蛋白补给",
+        retrieval_query="蛋白补给",
+        brand_exclude=["她力", "力格"],
     )
     monkeypatch.setattr("search.search_service.understand_query", lambda query: parsed)
 
@@ -250,7 +250,7 @@ def test_brand_exclude_postfilter_blocks_leaked_candidates(monkeypatch):
         retriever=_MultiChunkRetriever(chunks),
         reranker=None,
         use_rerank=False,
-    ).search("非华为非苹果的手机", top_k_products=5)
+    ).search("非她力非力格的蛋白补给", top_k_products=5)
 
     brands = [hit.brand for hit in result.hits]
-    assert brands == ["vivo"]
+    assert brands == ["谷野 GrainWild"]

@@ -19,12 +19,10 @@ from search.query_understanding import (
 )
 
 
-# Reverse variant-to-canonical index used as a defensive brand fallback.
-_VARIANT_TO_CANONICAL: dict[str, str] = {
-    variant: canonical
-    for canonical, variants in BRAND_ALIASES.items()
-    for variant in variants
-}
+def _variant_to_canonical(taxonomy: dict) -> dict[str, str]:
+    """Reverse variant-to-canonical index used as a defensive brand fallback."""
+    aliases = {**(taxonomy.get("aliases") or {}), **BRAND_ALIASES}
+    return {variant: canonical for canonical, variants in aliases.items() for variant in variants}
 
 
 # ---------------------------------------------------------------------------
@@ -100,13 +98,13 @@ def _build_tool_schema(taxonomy: dict) -> dict:
                             "用户明确要排除的成分 / 品类 / 属性的【字面词】，下游在商品全文里做子串剔除。"
                             "必须填商品文本里会真实出现的词，例如 "
                             + "、".join(INGREDIENT_BLOCKLIST)
-                            + " 等；也可以是这些之外的任意词（如 '花生'、'香菜'、'辣'）。"
+                            + " 等；也可以是这些之外的任意词（如 '花生'、'抹茶'、'辣'）。"
                         ),
                     },
                     "soft_terms": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "主观偏好词，如 '轻量'、'通勤'、'性价比'。用于召回后重排，不做硬过滤。",
+                        "description": "主观偏好与场景词，如 '经期'、'马拉松'、'温和'、'性价比'。用于召回后重排，不做硬过滤。",
                     },
                     "needs_clarification": {
                         "type": "boolean",
@@ -132,58 +130,51 @@ def _build_tool_schema(taxonomy: dict) -> dict:
     }
 
 
-SYSTEM_PROMPT = """你是电商搜索的需求解析器。严格遵守以下规则：
+SYSTEM_PROMPT = """你是女性补给平台的搜索需求解析器。平台的一级品类：运动营养、女性营养素、经期关怀、运动服饰、运动修护、功能轻食。严格遵守以下规则：
 
 1. 你必须调用 extract_search_intent 函数，不要直接回答用户。
 2. category / sub_category / brand 必须严格从 enum 候选中选，禁止编造或写中文翻译。
 3. 否定语义只看局部范围：
-   - "我要 Nike，不要太贵" → brand_include=["Nike"]，brand_exclude=[]
-   - "推荐手机，不要华为" → sub_category="智能手机"，brand_exclude=["华为"]
+   - "我要她力的，不要太贵" → brand_include=["她力 HerPower"]，brand_exclude=[]
+   - "推荐蛋白粉，不要力格" → sub_category="蛋白粉"，brand_exclude=["力格 Forma"]
 4. 【品类反选优先走结构化字段，这是最重要的反选规则】：
    用户说"不要X品类"/"不要X类的"/"除了X"时，先判断 X 是不是一个品类/子类目：
    - 是子类目 → 放进 sub_category_exclude（映射到官方值），**不要**放进 negative_ingredients。
-     例："不要功能性饮料"/"不要能量饮料"/"不要功能饮料" → sub_category_exclude=["功能饮料"]
-     例："推荐饮料，不要碳酸的" → sub_category_exclude=["碳酸饮料"]
-     例："要手机，不要平板" → sub_category_exclude=["平板电脑"]
+     例："推荐经期用品，不要卫生棉条" → sub_category_exclude=["卫生棉条"]
+     例："推荐补剂，不要肌酸" → sub_category_exclude=["肌酸"]
    - 是一级品类 → 放进 category_exclude（映射到官方值）。
-     例："推荐点吃的，不要美妆" → category_exclude=["美妆护肤"]
-   子类目/品类的同义说法（"功能性饮料"="能量饮料"="提神饮料"→"功能饮料"）必须归一到 enum 官方值。
+     例："推荐点吃的，不要补剂" → category_exclude=["女性营养素"]
+   子类目/品类的同义说法必须归一到 enum 官方值。
 5. negative_ingredients 只用于【非品类的成分 / 口味 / 属性】排除（品类反选已由上一条处理）：
-   用户说"不含X"/"无X"/"不要X的"且 X 不是品类时填。下游按"商品标题与描述里是否出现该词"
-   做字面子串过滤，所以务必填【商品文本里会真实出现的字面词】，不要引申成字面不同的术语：
-   - "不要咖啡的饮料" → negative_ingredients=["咖啡"]（咖啡是口味/成分，不是要排除的子类目）
-   - "不要花生的零食" → ["花生"]
-   - "不放香菜" → ["香菜"]
-   - "无糖" → ["糖"]；"不含酒精" → ["酒精"]
-   特例：用户字面就是说成分（"无咖啡因"）时填该成分本身 → ["咖啡因"]。
-   注意：不要把用户正在搜索的主体品类填进来（搜"饮料"时别填"饮料"），只填要排除的部分。
-5. 一级品类（category）同义词映射（用户只给大类、没给子品类时务必填 category）：
-   - "美妆"/"化妆品"/"护肤"/"护肤品" → "美妆护肤"
-   - "数码"/"电子产品"/"3C" → "数码电子"
-   - "衣服"/"服装"/"运动装"/"运动" → "服饰运动"
-   - "零食"/"吃的"/"食品"/"生活用品" → "食品生活"
-6. 子品类（sub_category）同义词要映射到官方值：
-   - "运动鞋"/"跑鞋" → "跑步鞋"
-   - "手机" → "智能手机"
-   - "ipad"/"平板" → "平板电脑"
-   - "蓝牙耳机"/"降噪耳机"/"耳机" → "真无线耳机"
-   - "洗面奶"/"洁面乳" → "洁面"
-   - "口红"/"唇膏"/"唇彩" → "唇釉"
-   - "防晒霜"/"防晒乳"/"隔离" → "防晒"
-   - "爽肤水"/"水"/"柔肤水" → "化妆水"
-   - "卸妆水"/"卸妆油" → "卸妆"
-   - "精华液"/"安瓶" → "精华"
-   - "粉饼"/"散粉"/"定妆粉" → "蜜粉"
-   - "BB霜"/"气垫"/"粉底" → "粉底液"
+   用户说"不含X"/"无X"/"不要X的"/"对X过敏"且 X 不是品类时填。务必填【字面词】：
+   - "不要咖啡因" / "无咖啡因" → ["咖啡因"]
+   - "对坚果过敏" → ["坚果"]；"乳糖不耐" / "不要乳制品" → ["乳制品"]
+   - "不要大豆" → ["大豆"]；"无麸质" → ["麸质"]；"不吃鱼" → ["鱼"]
+   - "无香精" / "不要香味" → ["香精"]；"不含酒精" → ["酒精"]；"无糖" → ["糖"]
+   注意：不要把用户正在搜索的主体品类填进来，只填要排除的部分。
+6. 一级品类（category）同义词映射（用户只给大类、没给子品类时务必填 category）：
+   - "蛋白"/"补剂"/"运动补给"/"健身补充" → "运动营养"
+   - "维生素"/"营养素"/"补铁"/"补钙"/"叶酸"/"保健品" → "女性营养素"
+   - "大姨妈"/"例假"/"月经"/"经期用品"/"生理期" → "经期关怀"
+   - "运动服"/"运动装"/"瑜伽服"/"运动穿搭" → "运动服饰"
+   - "运动护肤"/"运动后护理"/"个护" → "运动修护"
+   - "吃的"/"零食"/"饮品"/"早餐"/"轻食" → "功能轻食"
+7. 子品类（sub_category）同义词要映射到官方值：
+   - "乳清"/"增肌粉" → "蛋白粉"；"电解质水"/"盐丸" → "电解质"
+   - "铁片"/"补铁" → "铁剂"；"钙片"/"维D" → "钙与维生素D"；"多维" → "复合维生素"
+   - "姨妈巾" → "卫生巾"；"棉条" → "卫生棉条"；"安心裤"/"月经裤" → "经期内裤"；"暖宝宝"/"暖贴" → "暖宫贴"
+   - "运动bra"/"运动文胸" → "运动内衣"；"跑步鞋" → "跑鞋"；"防晒衣"/"皮肤衣" → "防晒外套"
+   - "防晒霜"/"防晒乳" → "运动防晒"；"素颜霜"/"隔离" → "防晒隔离"；"洗面奶" → "洁面"
    - 若用户说的子品类在 enum 里找不到对应官方值，宁可只填 category、把 sub_category 留 null，
-     也不要硬套一个语义不符的子类（如"口红"绝不能映射到"眉笔"）。
-7. needs_clarification 只在 query 完全没有任何商品线索时才设为 true（如\"随便看看\"、\"你好\"）；
-   只要识别到 category / sub_category / brand / 价格 / 偏好中任意一项，就设为 false。
-8. 数字提取要小心：
+     也不要硬套一个语义不符的子类。
+8. 周期与人群信息（"经期"、"黄体期"、"孕期"、"备孕"、"马拉松"）属于场景，放进 soft_terms，不要放进 negative_ingredients。
+9. needs_clarification 只在 query 完全没有任何商品线索时才设为 true（如"随便看看"、"你好"）；
+   只要识别到 category / sub_category / brand / 价格 / 偏好 / 场景中任意一项，就设为 false。
+10. 数字提取要小心：
    - "300 以内" → max_price=300
    - "200 到 500" → min_price=200, max_price=500
-   - "iPhone 15" 不是价格
-9. 不确定的字段填 null 或空数组，不要瞎猜。
+   - "25g 蛋白"、"500mg 钠" 不是价格
+11. 不确定的字段填 null 或空数组，不要瞎猜。
 """
 
 
@@ -393,6 +384,7 @@ def _to_parsed_query(
             category = None
 
     known_brands = set(taxonomy["brands"])
+    variant_index = _variant_to_canonical(taxonomy)
 
     def _filter_brands(values: list[str] | None) -> list[str]:
         """Map variants to canonical brands, deduplicate, and drop unknown values."""
@@ -401,7 +393,7 @@ def _to_parsed_query(
         seen: set[str] = set()
         out: list[str] = []
         for value in values:
-            canonical = _VARIANT_TO_CANONICAL.get(value, value)
+            canonical = variant_index.get(value, value)
             if canonical in known_brands and canonical not in seen:
                 seen.add(canonical)
                 out.append(canonical)

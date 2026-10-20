@@ -94,7 +94,7 @@ _ensured: set[str] = set()
 
 
 def ensure_commerce_schema(conn: sqlite3.Connection) -> None:
-    """Create commerce tables and add ``products.merchant_id`` when missing.
+    """Create commerce tables and add ``products.merchant_id`` / ``attributes_json`` when missing.
 
     Stores call this on construction, which happens per request, so each database
     file is migrated once per process.
@@ -106,6 +106,8 @@ def ensure_commerce_schema(conn: sqlite3.Connection) -> None:
     columns = table_columns(conn, "products")
     if columns and "merchant_id" not in columns:
         conn.execute("ALTER TABLE products ADD COLUMN merchant_id TEXT")
+    if columns and "attributes_json" not in columns:
+        conn.execute("ALTER TABLE products ADD COLUMN attributes_json TEXT NOT NULL DEFAULT '{}'")
     if columns:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_products_merchant ON products(merchant_id)")
     conn.commit()

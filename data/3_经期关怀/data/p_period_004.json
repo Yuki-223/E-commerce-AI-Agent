@@ -1,0 +1,134 @@
+{
+  "product_id": "p_period_004",
+  "title": "月知经期安心裤 运动款 四层防漏 可水洗 可单独使用 高腰",
+  "brand": "月知 Lunara",
+  "category": "经期关怀",
+  "sub_category": "经期内裤",
+  "base_price": 89.0,
+  "image_path": "3_经期关怀/images/p_period_004.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_period_004_1",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "S"
+      },
+      "price": 89.0
+    },
+    {
+      "sku_id": "s_p_period_004_2",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "M"
+      },
+      "price": 89.0
+    },
+    {
+      "sku_id": "s_p_period_004_3",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "L"
+      },
+      "price": 89.0
+    },
+    {
+      "sku_id": "s_p_period_004_4",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "XL"
+      },
+      "price": 89.0
+    },
+    {
+      "sku_id": "s_p_period_004_5",
+      "properties": {
+        "颜色": "肤色",
+        "尺码": "S"
+      },
+      "price": 89.0
+    },
+    {
+      "sku_id": "s_p_period_004_6",
+      "properties": {
+        "颜色": "肤色",
+        "尺码": "M"
+      },
+      "price": 89.0
+    },
+    {
+      "sku_id": "s_p_period_004_7",
+      "properties": {
+        "颜色": "肤色",
+        "尺码": "L"
+      },
+      "price": 89.0
+    },
+    {
+      "sku_id": "s_p_period_004_8",
+      "properties": {
+        "颜色": "肤色",
+        "尺码": "XL"
+      },
+      "price": 89.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "莫代尔",
+      "聚酯纤维吸收层",
+      "防水TPU膜"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "可在产后恶露期配合使用",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "可水洗",
+      "运动防漏"
+    ],
+    "cycle_phases": [
+      "menstrual"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "四层结构：速干亲肤层、吸收层、防漏层和外层，轻量日可以单独穿着，量多日搭配卫生棉条做双重防护。运动款高腰包裹，深蹲、跑步时不易移位。【配料与安全】主要成分：莫代尔、聚酯纤维吸收层、防水TPU膜；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。可在产后恶露期配合使用。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "单独使用约可吸收2-3片普通卫生巾的量；冷水手洗后自然晾干，不要用柔顺剂和烘干。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有颜色：黑色，尺码：S（¥89）；颜色：黑色，尺码：M（¥89）；颜色：黑色，尺码：L（¥89）；颜色：黑色，尺码：XL（¥89）；颜色：肤色，尺码：S（¥89）；颜色：肤色，尺码：M（¥89）；颜色：肤色，尺码：L（¥89）；颜色：肤色，尺码：XL（¥89）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "尺码怎么选？",
+        "answer": "按平时内裤尺码选择即可；如果介于两个尺码之间，运动时选小一码包裹性更好，睡觉选大一码更舒适。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "深蹲狂魔",
+        "rating": 5,
+        "content": "深蹲完全没有侧漏焦虑。"
+      },
+      {
+        "nickname": "夜跑",
+        "rating": 4,
+        "content": "M码刚好，就是晾干比较慢。"
+      },
+      {
+        "nickname": "学生",
+        "rating": 5,
+        "content": "轻量日单穿很舒服。"
+      }
+    ]
+  }
+}

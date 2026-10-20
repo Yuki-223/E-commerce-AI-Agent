@@ -1,0 +1,81 @@
+{
+  "product_id": "p_care_007",
+  "title": "柔韧运动后肌肉放松按摩油 山金车 运动后舒缓 100ml",
+  "brand": "柔韧 Flexa",
+  "category": "运动修护",
+  "sub_category": "肌肉放松",
+  "base_price": 119.0,
+  "image_path": "5_运动修护/images/p_care_007.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_care_007_1",
+      "properties": {
+        "规格": "100ml"
+      },
+      "price": 119.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "甜杏仁油",
+      "山金车花提取物",
+      "薰衣草油",
+      "香料"
+    ],
+    "allergens": [
+      "坚果"
+    ],
+    "pregnancy": "avoid",
+    "pregnancy_note": "含多种植物精油，孕期不建议使用",
+    "caffeine": false,
+    "fragrance": true,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "按摩",
+      "精油"
+    ],
+    "cycle_phases": [
+      "luteal",
+      "menstrual"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "山金车、薰衣草精油调配的按摩油，运动后配合泡沫轴或手法按摩使用，帮助放松。含植物精油与香料成分，敏感肌先做局部测试。【配料与安全】主要成分：甜杏仁油、山金车花提取物、薰衣草油、香料；过敏原：坚果；不含咖啡因；含香精；纯素；孕期哺乳期：不建议；适合的周期阶段：黄体期、经期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "不建议。含多种植物精油，孕期不建议使用。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "取适量在酸胀部位按摩5-10分钟，避开伤口和黏膜。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有规格：100ml（¥119）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "可以用于经期腹部按摩吗？",
+        "answer": "非孕期可以轻柔按摩腹部帮助放松；如果疼痛严重或异常，请就医。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "撸铁",
+        "rating": 4,
+        "content": "泡沫轴后用，很舒服。"
+      },
+      {
+        "nickname": "闻香",
+        "rating": 5,
+        "content": "薰衣草味很助眠。"
+      },
+      {
+        "nickname": "Cat",
+        "rating": 3,
+        "content": "有点油，要多按一会儿。"
+      }
+    ]
+  }
+}

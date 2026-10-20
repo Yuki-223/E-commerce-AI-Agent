@@ -1,0 +1,168 @@
+{
+  "product_id": "p_wear_002",
+  "title": "轻跃中低强度运动内衣 瑜伽普拉提 无钢圈 一体成型 舒适背心式",
+  "brand": "轻跃 LeapLite",
+  "category": "运动服饰",
+  "sub_category": "运动内衣",
+  "base_price": 129.0,
+  "image_path": "4_运动服饰/images/p_wear_002.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_wear_002_1",
+      "properties": {
+        "颜色": "燕麦",
+        "尺码": "S"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_2",
+      "properties": {
+        "颜色": "燕麦",
+        "尺码": "M"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_3",
+      "properties": {
+        "颜色": "燕麦",
+        "尺码": "L"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_4",
+      "properties": {
+        "颜色": "燕麦",
+        "尺码": "XL"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_5",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "S"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_6",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "M"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_7",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "L"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_8",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "XL"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_9",
+      "properties": {
+        "颜色": "鼠尾草绿",
+        "尺码": "S"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_10",
+      "properties": {
+        "颜色": "鼠尾草绿",
+        "尺码": "M"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_11",
+      "properties": {
+        "颜色": "鼠尾草绿",
+        "尺码": "L"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_wear_002_12",
+      "properties": {
+        "颜色": "鼠尾草绿",
+        "尺码": "XL"
+      },
+      "price": 129.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "锦纶",
+      "氨纶"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "无钢圈设计，孕期日常穿着舒适",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "无钢圈",
+      "瑜伽"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "follicular",
+      "ovulatory",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "一体成型无缝工艺，没有钢圈和硬边，适合瑜伽、普拉提、骑行和日常穿着。支撑力中等，不适合跑跳类运动。【配料与安全】主要成分：锦纶、氨纶；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、卵泡期、排卵期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。无钢圈设计，孕期日常穿着舒适。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "按平时内衣尺码选择：S（70A-75A）、M（75B-80A）、L（80B-85A）、XL（85B-90A）。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有颜色：燕麦，尺码：S（¥129）；颜色：燕麦，尺码：M（¥129）；颜色：燕麦，尺码：L（¥129）；颜色：燕麦，尺码：XL（¥129）；颜色：黑色，尺码：S（¥129）；颜色：黑色，尺码：M（¥129）；颜色：黑色，尺码：L（¥129）；颜色：黑色，尺码：XL（¥129）等共12个规格。按平时内衣尺码选择：S（70A-75A）、M（75B-80A）、L（80B-85A）、XL（85B-90A）。"
+      },
+      {
+        "question": "可以跑步穿吗？",
+        "answer": "不建议。这款支撑力适合低冲击运动；跑步、跳绳请选择高强度运动内衣。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "普拉提",
+        "rating": 5,
+        "content": "像没穿一样舒服。"
+      },
+      {
+        "nickname": "居家办公",
+        "rating": 5,
+        "content": "当日常内衣穿也很好。"
+      },
+      {
+        "nickname": "跑步试了",
+        "rating": 3,
+        "content": "跑步确实晃，客服说得对。"
+      }
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "product_id": "p_wear_006",
+  "title": "轻跃冰丝防晒衣 UPF50+ 户外跑步骑行 连帽带面罩 轻薄透气",
+  "brand": "轻跃 LeapLite",
+  "category": "运动服饰",
+  "sub_category": "防晒外套",
+  "base_price": 159.0,
+  "image_path": "4_运动服饰/images/p_wear_006.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_wear_006_1",
+      "properties": {
+        "颜色": "冰川蓝",
+        "尺码": "S"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_2",
+      "properties": {
+        "颜色": "冰川蓝",
+        "尺码": "M"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_3",
+      "properties": {
+        "颜色": "冰川蓝",
+        "尺码": "L"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_4",
+      "properties": {
+        "颜色": "冰川蓝",
+        "尺码": "XL"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_5",
+      "properties": {
+        "颜色": "米白",
+        "尺码": "S"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_6",
+      "properties": {
+        "颜色": "米白",
+        "尺码": "M"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_7",
+      "properties": {
+        "颜色": "米白",
+        "尺码": "L"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_8",
+      "properties": {
+        "颜色": "米白",
+        "尺码": "XL"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_9",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "S"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_10",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "M"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_11",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "L"
+      },
+      "price": 159.0
+    },
+    {
+      "sku_id": "s_p_wear_006_12",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "XL"
+      },
+      "price": 159.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "锦纶",
+      "氨纶"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "物理防晒衣物，孕期可用",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "UPF50+",
+      "凉感"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "follicular",
+      "ovulatory",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "UPF50+ 防晒面料，连帽带可拆面罩，袖口拇指孔防止手背晒伤。冰丝凉感，适合夏季户外跑步、骑行、徒步。【配料与安全】主要成分：锦纶、氨纶；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、卵泡期、排卵期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。物理防晒衣物，孕期可用。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "面料防晒性能随洗涤次数略有下降，建议冷水轻柔洗。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有颜色：冰川蓝，尺码：S（¥159）；颜色：冰川蓝，尺码：M（¥159）；颜色：冰川蓝，尺码：L（¥159）；颜色：冰川蓝，尺码：XL（¥159）；颜色：米白，尺码：S（¥159）；颜色：米白，尺码：M（¥159）；颜色：米白，尺码：L（¥159）；颜色：米白，尺码：XL（¥159）等共12个规格。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "穿了还需要涂防晒霜吗？",
+        "answer": "衣服遮住的地方不需要，脸部、脖子等外露部位仍建议使用防晒霜。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "骑行女孩",
+        "rating": 5,
+        "content": "骑一下午手背没晒黑。"
+      },
+      {
+        "nickname": "怕热",
+        "rating": 4,
+        "content": "确实凉快。"
+      },
+      {
+        "nickname": "米白控",
+        "rating": 4,
+        "content": "米白很显白但不耐脏。"
+      }
+    ]
+  }
+}

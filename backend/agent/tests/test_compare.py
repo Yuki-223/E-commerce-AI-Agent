@@ -52,9 +52,9 @@ _HITS = [
 ]
 
 _DETAILS = [
-    _detail("p1", "Apple iPhone 17 Pro", "Apple 苹果", "数码电子", 8999, 9999),
-    _detail("p2", "小米 17 Ultra", "小米", "数码电子", 7499, 8499),
-    _detail("p3", "华为 Mate 80", "华为", "数码电子", 6999, 7999),
+    _detail("p1", "她力女性乳清蛋白粉", "她力 HerPower", "运动营养", 189, 329),
+    _detail("p2", "她力植物蛋白粉", "她力 HerPower", "运动营养", 159, 169),
+    _detail("p3", "力格一水肌酸", "力格 Forma", "运动营养", 128, 188),
 ]
 
 
@@ -219,20 +219,20 @@ class TestComparisonBuilder:
         from agent import comparison
 
         index = comparison.CompareIndex({
-            "p1": {"dims": {"性能/芯片": "A19 强", "续航": "中等", "屏幕": "XDR", "存储规格": "256G"}, "tagline": "性能党"},
-            "p2": {"dims": {"性能/芯片": "澎湃", "续航": "更优", "屏幕": "2K高刷", "存储规格": "256G起"}, "tagline": "性价比党"},
+            "p1": {"dims": {"核心作用": "补充优质蛋白", "关键成分": "分离乳清", "每份含量": "蛋白25g", "适用场景": "训练后"}, "tagline": "增肌塑形"},
+            "p2": {"dims": {"核心作用": "植物蛋白补充", "关键成分": "豌豆+糙米", "每份含量": "蛋白20g", "适用场景": "素食"}, "tagline": "素食女生"},
         })
         with patch.object(comparison, "get_compare_index", return_value=index):
             result = comparison.build_comparison(_DETAILS[:2])
 
         labels = [r["label"] for r in result["rows"]]
         assert labels[0] == "价格"
-        assert labels[1:] == comparison._CATEGORY_DIMENSIONS["数码电子"]
+        assert labels[1:] == comparison._CATEGORY_DIMENSIONS["运动营养"]
         # Highlight the cheapest price while leaving text dimensions without a winner.
-        assert result["rows"][0]["highlight"] == 1  # p2(7499) < p1(8999)
+        assert result["rows"][0]["highlight"] == 1  # p2(159) < p1(189)
         assert all(r["highlight"] is None for r in result["rows"][1:])
         # Dimension values come from the index.
-        assert result["rows"][1]["values"] == ["A19 强", "澎湃"]
+        assert result["rows"][1]["values"] == ["补充优质蛋白", "植物蛋白补充"]
         # Purchase advice is disabled, so recommendation remains empty.
         assert result["recommendation"] == ""
 
@@ -255,22 +255,22 @@ class TestFixedDimensions:
     def test_same_category_uses_category_dimensions(self):
         from agent.comparison import _dimensions_for, _CATEGORY_DIMENSIONS
 
-        dims = _dimensions_for(_DETAILS[:2])  # Both products are electronics.
-        assert dims == _CATEGORY_DIMENSIONS["数码电子"]
+        dims = _dimensions_for(_DETAILS[:2])  # Both products are sports nutrition.
+        assert dims == _CATEGORY_DIMENSIONS["运动营养"]
 
     def test_cross_category_falls_back_to_generic(self):
         from agent.comparison import _dimensions_for, _GENERIC_DIMENSIONS
 
         digital = _DETAILS[0]
-        clothes = _detail("c9", "某T恤", "某牌", "服饰运动", 99, 199)
+        clothes = _detail("c9", "某瑜伽裤", "某牌", "运动服饰", 99, 199)
         assert _dimensions_for([digital, clothes]) == _GENERIC_DIMENSIONS
 
     def test_all_dimensions_for_category_includes_generic(self):
         """Include category-specific and generic dimensions for offline extraction and cross-category comparison."""
         from agent.comparison import all_dimensions_for_category, _CATEGORY_DIMENSIONS, _GENERIC_DIMENSIONS
 
-        dims = all_dimensions_for_category("数码电子")
-        for d in _CATEGORY_DIMENSIONS["数码电子"]:
+        dims = all_dimensions_for_category("运动营养")
+        for d in _CATEGORY_DIMENSIONS["运动营养"]:
             assert d in dims
         for d in _GENERIC_DIMENSIONS:
             assert d in dims

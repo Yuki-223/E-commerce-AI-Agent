@@ -1,0 +1,89 @@
+{
+  "product_id": "p_period_003",
+  "title": "月知医用级硅胶月经杯 可重复使用 S/M两码 附消毒杯 环保省钱",
+  "brand": "月知 Lunara",
+  "category": "经期关怀",
+  "sub_category": "月经杯",
+  "base_price": 129.0,
+  "image_path": "3_经期关怀/images/p_period_003.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_period_003_1",
+      "properties": {
+        "尺码": "S（未生育/经量少）"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_period_003_2",
+      "properties": {
+        "尺码": "M（经量多/已生育）"
+      },
+      "price": 129.0
+    },
+    {
+      "sku_id": "s_p_period_003_3",
+      "properties": {
+        "尺码": "S+M 双杯装"
+      },
+      "price": 219.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "医用级硅胶"
+    ],
+    "allergens": [],
+    "pregnancy": "avoid",
+    "pregnancy_note": "产后恶露期不建议使用内置式用品",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "环保",
+      "长效12小时"
+    ],
+    "cycle_phases": [
+      "menstrual"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "医用级硅胶材质，单次最长可用12小时，可重复使用数年。适合想减少一次性用品、或需要长时间训练的女性。附带可折叠消毒杯，方便煮沸消毒。【配料与安全】主要成分：医用级硅胶；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：不建议；适合的周期阶段：经期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "不建议。产后恶露期不建议使用内置式用品。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "每次经期前后煮沸消毒；使用中每8-12小时取出清洗。需要一定的学习过程，前几次可配合卫生巾作为备份。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有尺码：S（未生育/经量少）（¥129）；尺码：M（经量多/已生育）（¥129）；尺码：S+M 双杯装（¥219）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "S和M怎么选？",
+        "answer": "一般未生育、经量偏少或较年轻选S；经量多或已经生育选M。如果不确定，可以先买双杯装试用。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "环保主义者",
+        "rating": 5,
+        "content": "用了一年，省钱又省心。"
+      },
+      {
+        "nickname": "徒步爱好者",
+        "rating": 5,
+        "content": "户外徒步终于不用找地方换卫生巾。"
+      },
+      {
+        "nickname": "Kiki",
+        "rating": 3,
+        "content": "学习曲线有点陡，第三个周期才熟练。"
+      }
+    ]
+  }
+}

@@ -136,10 +136,10 @@ class TestChatBlocking:
         m._user_memory = UserMemoryStore(db_path=db)
         m._agent = _FakeAgent()
 
-        r = c.post("/chat", json={"query": "以后不要给我推荐苹果", "user_id": "u1"})
+        r = c.post("/chat", json={"query": "以后不要给我推荐力格", "user_id": "u1"})
 
         assert r.status_code == 200
-        assert m._user_memory.get_preference("u1").brand_exclude == ["Apple"]
+        assert m._user_memory.get_preference("u1").brand_exclude == ["力格"]
         updates = r.json()["trace"]["memory_updates"]
         assert updates[0]["field"] == "brand_exclude"
         assert updates[0]["undo_token"].startswith("undo_")
@@ -219,7 +219,7 @@ class TestChatStream:
         with c.stream(
             "POST",
             "/chat/stream",
-            json={"query": "以后推荐轻一点的", "user_id": "u1"},
+            json={"query": "以后推荐温和一点的", "user_id": "u1"},
         ) as r:
             body = "".join(chunk for chunk in r.iter_text())
 
@@ -227,7 +227,7 @@ class TestChatStream:
         types = [e for e, _ in events]
         assert "memory_update" in types
         assert types.index("memory_update") < types.index("done")
-        assert m._user_memory.get_preference("u1").preference_keywords == ["轻量"]
+        assert m._user_memory.get_preference("u1").preference_keywords == ["温和"]
 
 
 class TestPreferences:
@@ -520,3 +520,20 @@ class TestOrders:
         c, _ = client
         r = c.post("/orders", json={})
         assert r.status_code == 400
+
+
+class TestCatalogMedia:
+    """Bundled catalog: attributes in the payload and images served under /media."""
+
+    def test_product_payload_has_attributes_and_local_image(self, client):
+        from store.product_store import DEFAULT_DB_PATH, ProductStore
+
+        if not DEFAULT_DB_PATH.exists() or ProductStore().get_product_detail("p_sport_001") is None:
+            pytest.skip("catalog not imported; run python -m store.import_product_data --reset")
+        c, _ = client
+        body = c.get("/products/p_sport_001").json()
+        assert body["attributes"]["allergens"] == ["乳制品"]
+        assert body["imageURL"].startswith("/media/")
+        image = c.get(body["imageURL"])
+        assert image.status_code == 200
+        assert image.headers["content-type"].startswith("image/svg")

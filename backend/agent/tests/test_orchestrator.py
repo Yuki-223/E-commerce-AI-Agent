@@ -169,7 +169,7 @@ def _make_agent(
 def _remember_base(session: AgentSession, sub_category: str, query: str | None = None) -> None:
     parsed = ParsedQuery(
         original_query=query or sub_category,
-        category="服饰运动",
+        category="运动服饰",
         sub_category=sub_category,
         retrieval_query=query or sub_category,
     )
@@ -181,38 +181,38 @@ def _remember_base(session: AgentSession, sub_category: str, query: str | None =
 class TestContextualSearchModes:
     def test_complement_targets_new_category_and_excludes_anchor(self):
         service = _StubSearchService(hits=[
-            {"product_id": "old", "title": "Lululemon 瑜伽裤", "brand": "Lululemon", "sub_category": "瑜伽裤", "base_price": 800},
-            {"product_id": "tee", "title": "Nike 运动短袖", "brand": "Nike", "sub_category": "短袖T恤", "base_price": 199},
-            {"product_id": "hoodie", "title": "李宁连帽卫衣", "brand": "李宁", "sub_category": "卫衣", "base_price": 299},
+            {"product_id": "old", "title": "轻跃高腰瑜伽裤", "brand": "轻跃 LeapLite", "sub_category": "瑜伽裤", "base_price": 199},
+            {"product_id": "bra", "title": "轻跃中低强度运动内衣", "brand": "轻跃 LeapLite", "sub_category": "运动内衣", "base_price": 129},
+            {"product_id": "tank", "title": "轻跃速干运动背心", "brand": "轻跃 LeapLite", "sub_category": "运动背心", "base_price": 99},
         ])
         tool = RecommendTool(search_service=service, decomposer=_single_decomposer)
         session = AgentSession()
         _remember_base(session, "瑜伽裤")
 
-        result = tool.run("推荐可以搭配瑜伽裤的运动上衣", session, {})
+        result = tool.run("推荐可以搭配瑜伽裤的运动内衣", session, {})
 
-        assert service.calls[-1]["query"] == "运动上衣"
+        assert service.calls[-1]["query"] == "运动内衣"
         assert service.calls[-1]["base"] is None
         assert result.payload["summary"]["mode"] == "complement"
-        assert [p["sub_category"] for p in result.payload["products"]] == ["短袖T恤", "卫衣"]
+        assert [p["sub_category"] for p in result.payload["products"]] == ["运动内衣"]
         assert all(p["sub_category"] != "瑜伽裤" for p in result.payload["products"])
         assert result.payload["contextual_search"]["exclude_sub_categories"] == ["瑜伽裤"]
 
     def test_pivot_to_shoes_does_not_return_previous_yoga_pants(self):
         service = _StubSearchService(hits=[
-            {"product_id": "old", "title": "Lululemon 瑜伽裤", "brand": "Lululemon", "sub_category": "瑜伽裤", "base_price": 800},
-            {"product_id": "run", "title": "HOKA 跑步鞋", "brand": "HOKA", "sub_category": "跑步鞋", "base_price": 999},
-            {"product_id": "basket", "title": "Nike 篮球鞋", "brand": "Nike", "sub_category": "篮球鞋", "base_price": 699},
+            {"product_id": "old", "title": "轻跃高腰瑜伽裤", "brand": "轻跃 LeapLite", "sub_category": "瑜伽裤", "base_price": 199},
+            {"product_id": "run", "title": "轻跃女款缓震跑鞋", "brand": "轻跃 LeapLite", "sub_category": "跑鞋", "base_price": 499},
+            {"product_id": "socks", "title": "轻跃女款跑步袜", "brand": "轻跃 LeapLite", "sub_category": "运动袜", "base_price": 59},
         ])
         tool = RecommendTool(search_service=service, decomposer=_single_decomposer)
         session = AgentSession()
         _remember_base(session, "瑜伽裤")
 
-        result = tool.run("再看看运动鞋", session, {})
+        result = tool.run("再看看跑鞋", session, {})
 
-        assert service.calls[-1]["query"] == "运动鞋"
+        assert service.calls[-1]["query"] == "跑鞋"
         assert result.payload["summary"]["mode"] == "pivot"
-        assert [p["sub_category"] for p in result.payload["products"]] == ["跑步鞋", "篮球鞋"]
+        assert [p["sub_category"] for p in result.payload["products"]] == ["跑鞋"]
 
     def test_refine_keeps_base_for_same_category_adjustment(self):
         service = _StubSearchService(hits=[

@@ -1,0 +1,92 @@
+{
+  "product_id": "p_food_001",
+  "title": "谷野高蛋白燕麦片 每份15g蛋白 高纤 无添加蔗糖 早餐即食 1kg",
+  "brand": "谷野 GrainWild",
+  "category": "功能轻食",
+  "sub_category": "燕麦",
+  "base_price": 49.0,
+  "image_path": "6_功能轻食/images/p_food_001.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_food_001_1",
+      "properties": {
+        "口味": "原味",
+        "规格": "1kg"
+      },
+      "price": 49.0
+    },
+    {
+      "sku_id": "s_p_food_001_2",
+      "properties": {
+        "口味": "可可",
+        "规格": "1kg"
+      },
+      "price": 55.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "燕麦片",
+      "大豆分离蛋白",
+      "可可粉（可可味）"
+    ],
+    "allergens": [
+      "麸质",
+      "大豆"
+    ],
+    "pregnancy": "safe",
+    "pregnancy_note": "普通食品，孕期可食用",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "高蛋白",
+      "无蔗糖"
+    ],
+    "cycle_phases": [
+      "follicular",
+      "ovulatory",
+      "luteal",
+      "menstrual"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "燕麦加入大豆蛋白，每份约15g蛋白质、6g膳食纤维，缓释碳水适合训练日早餐。无添加蔗糖。含麸质与大豆。【配料与安全】主要成分：燕麦片、大豆分离蛋白、可可粉（可可味）；过敏原：麸质、大豆；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：卵泡期、排卵期、黄体期、经期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。普通食品，孕期可食用。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "40g燕麦加250ml牛奶或植物奶，微波1分钟或冷泡过夜。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有口味：原味，规格：1kg（¥49）；口味：可可，规格：1kg（¥55）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "可可味含咖啡因吗？",
+        "answer": "可可粉含有微量天然咖啡因，含量远低于咖啡，一般可忽略。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "早八人",
+        "rating": 5,
+        "content": "冷泡燕麦一周不重样。"
+      },
+      {
+        "nickname": "增肌期",
+        "rating": 4,
+        "content": "蛋白含量不错。"
+      },
+      {
+        "nickname": "小周",
+        "rating": 4,
+        "content": "原味需要自己加点水果。"
+      }
+    ]
+  }
+}

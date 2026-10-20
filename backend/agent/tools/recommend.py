@@ -47,23 +47,11 @@ _MAX_PER_SUBCATEGORY = 2
 # Candidate-pool multiplier used before brand and subcategory diversity filtering.
 _DIVERSITY_POOL_MULTIPLIER = 5
 
-# Normalize multilingual brand aliases so they share the same diversity quota. Keys are
-# lowercase and whitespace-free; values are canonical brand identifiers.
-_BRAND_ALIASES = {
-    "apple苹果": "apple",
-    "苹果": "apple",
-    "apple": "apple",
-    "nike": "nike",
-    "耐克": "nike",
-    "thenorthface": "thenorthface",
-    "北面": "thenorthface",
-}
-
-
 def _canonical_brand(brand: str) -> str:
-    """Normalize brand aliases to a canonical diversity key."""
-    norm = (brand or "").strip().lower().replace(" ", "")
-    return _BRAND_ALIASES.get(norm, norm)
+    """Normalize a brand to its diversity key; "她力 HerPower" and "她力" share a quota."""
+    norm = (brand or "").strip()
+    first = norm.split()[0] if norm.split() else norm
+    return first.lower()
 
 
 def _diversify(
@@ -348,6 +336,7 @@ class RecommendTool:
             "category": result.parsed.category,
             "max_price": result.parsed.max_price,
             "mode": plan.mode,
+            "safety": list(getattr(result, "safety", []) or []),
         }
         payload = {
             "query": query,
@@ -433,6 +422,7 @@ class RecommendTool:
             "needs_clarification": result.parsed.needs_clarification,
             "category": result.parsed.category,
             "max_price": result.parsed.max_price,
+            "safety": list(getattr(result, "safety", []) or []),
         }
 
         payload = {

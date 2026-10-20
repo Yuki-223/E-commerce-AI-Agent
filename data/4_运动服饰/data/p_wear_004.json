@@ -1,0 +1,169 @@
+{
+  "product_id": "p_wear_004",
+  "title": "轻跃女款缓震跑鞋 女性脚型楦头 窄跟宽前掌 轻量回弹 日常训练",
+  "brand": "轻跃 LeapLite",
+  "category": "运动服饰",
+  "sub_category": "跑鞋",
+  "base_price": 499.0,
+  "image_path": "4_运动服饰/images/p_wear_004.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_wear_004_1",
+      "properties": {
+        "颜色": "月光白",
+        "尺码": "35"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_2",
+      "properties": {
+        "颜色": "月光白",
+        "尺码": "36"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_3",
+      "properties": {
+        "颜色": "月光白",
+        "尺码": "37"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_4",
+      "properties": {
+        "颜色": "月光白",
+        "尺码": "38"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_5",
+      "properties": {
+        "颜色": "月光白",
+        "尺码": "39"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_6",
+      "properties": {
+        "颜色": "月光白",
+        "尺码": "40"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_7",
+      "properties": {
+        "颜色": "樱粉",
+        "尺码": "35"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_8",
+      "properties": {
+        "颜色": "樱粉",
+        "尺码": "36"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_9",
+      "properties": {
+        "颜色": "樱粉",
+        "尺码": "37"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_10",
+      "properties": {
+        "颜色": "樱粉",
+        "尺码": "38"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_11",
+      "properties": {
+        "颜色": "樱粉",
+        "尺码": "39"
+      },
+      "price": 499.0
+    },
+    {
+      "sku_id": "s_p_wear_004_12",
+      "properties": {
+        "颜色": "樱粉",
+        "尺码": "40"
+      },
+      "price": 499.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "工程网面",
+      "EVA发泡中底",
+      "橡胶外底"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "孕期脚可能变大，请重新测量后选码",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "女性楦头",
+      "缓震"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "follicular",
+      "ovulatory",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "按女性脚型设计楦头：后跟更窄、前掌留出空间，减少跟部滑脱和前掌挤压。中底轻量回弹，适合日常5-15公里训练。【配料与安全】主要成分：工程网面、EVA发泡中底、橡胶外底；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、卵泡期、排卵期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。孕期脚可能变大，请重新测量后选码。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "跑鞋建议比日常鞋大半码，下午脚略肿时试穿更准确。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有颜色：月光白，尺码：35（¥499）；颜色：月光白，尺码：36（¥499）；颜色：月光白，尺码：37（¥499）；颜色：月光白，尺码：38（¥499）；颜色：月光白，尺码：39（¥499）；颜色：月光白，尺码：40（¥499）；颜色：樱粉，尺码：35（¥499）；颜色：樱粉，尺码：36（¥499）等共12个规格。跑鞋建议比日常鞋大半码，下午脚略肿时试穿更准确。"
+      },
+      {
+        "question": "和男女同款跑鞋有什么不同？",
+        "answer": "很多“女款”只是缩小尺码；这款按女性脚型调整了后跟宽度和足弓位置，后跟更贴合。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "窄脚跟",
+        "rating": 5,
+        "content": "终于不掉跟了！"
+      },
+      {
+        "nickname": "新手跑者",
+        "rating": 4,
+        "content": "很轻，樱粉色好看。"
+      },
+      {
+        "nickname": "38码",
+        "rating": 4,
+        "content": "大半码刚刚好。"
+      }
+    ]
+  }
+}

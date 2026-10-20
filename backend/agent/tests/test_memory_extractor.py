@@ -4,18 +4,18 @@ from agent.memory_extractor import extract_preference_updates
 
 
 def test_extract_brand_exclude():
-    updates = extract_preference_updates("以后不要给我推荐苹果", "u1", "s1")
+    updates = extract_preference_updates("以后不要给我推荐 HerPower", "u1", "s1")
 
     assert len(updates) == 1
     assert updates[0].field == "brand_exclude"
-    assert updates[0].value == "Apple"
+    assert updates[0].value == "她力"
 
 
 def test_extract_style_preference():
-    updates = extract_preference_updates("以后推荐轻一点的通勤款", "u1", "s1")
+    updates = extract_preference_updates("以后推荐温和一点的通勤款", "u1", "s1")
 
     assert [(u.field, u.value) for u in updates] == [
-        ("preference_keywords", "轻量"),
+        ("preference_keywords", "温和"),
         ("preference_keywords", "通勤"),
     ]
 
@@ -28,8 +28,8 @@ def test_extract_budget_range():
 
 
 def test_temporary_or_question_does_not_write():
-    assert extract_preference_updates("这次想看看苹果", "u1", "s1") == []
-    assert extract_preference_updates("苹果手机怎么样", "u1", "s1") == []
+    assert extract_preference_updates("这次想看看她力", "u1", "s1") == []
+    assert extract_preference_updates("她力蛋白粉怎么样", "u1", "s1") == []
 
 
 def test_high_risk_does_not_write():

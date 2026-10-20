@@ -30,6 +30,9 @@ from store.product_store import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 IMAGE_MANIFEST_PATH = PROJECT_ROOT / "backend" / "cdn" / "image_manifest.json"
+# Bundled product images under data/ are served by main.py at this path.
+MEDIA_DIR = PROJECT_ROOT / "data"
+MEDIA_PREFIX = "/media"
 
 router = APIRouter()
 store = ProductStore(DEFAULT_DB_PATH)
@@ -147,8 +150,15 @@ def default_error_code(status_code: int) -> str:
     return f"API_HTTP_{status_code}"
 
 
+def image_url_for(product_id: str, image_url: str | None, image_path: str | None) -> str | None:
+    """CDN manifest first, then a stored URL, then the bundled file served under /media."""
+    if image_manifest.get(product_id) or image_url:
+        return image_manifest.get(product_id) or image_url
+    return f"{MEDIA_PREFIX}/{image_path}" if image_path else None
+
+
 def product_payload(detail: ProductDetail) -> dict[str, Any]:
-    image_url = image_manifest.get(detail.product_id) or detail.image_url
+    image_url = image_url_for(detail.product_id, detail.image_url, detail.image_path)
     specs = specifications_payload(detail.skus)
     return {
         "productID": detail.product_id,
@@ -166,6 +176,8 @@ def product_payload(detail: ProductDetail) -> dict[str, Any]:
         "skus": [sku_payload(sku) for sku in detail.skus],
         "reviews": [review_payload(review) for review in detail.reviews],
         "evidence": evidence_payload(detail),
+        # Ingredients, allergens and safety flags (search/safety.py).
+        "attributes": detail.attributes,
         "updatedAt": None,
     }
 

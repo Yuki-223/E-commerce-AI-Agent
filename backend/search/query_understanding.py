@@ -129,15 +129,28 @@ class ParsedQuery:
 # ---------------------------------------------------------------------------
 
 # Canonical brand keys map to every SQLite/Chroma spelling, including the canonical name.
-BRAND_ALIASES: dict[str, tuple[str, ...]] = {
-    "Apple 苹果":      ("Apple 苹果", "苹果"),
-    "耐克":            ("耐克", "Nike"),
-    "The North Face":  ("The North Face", "北面"),
-}
+# Bilingual catalog brands ("她力 HerPower") also get each half as an alias automatically
+# (see _bilingual_aliases); list extra spellings here.
+BRAND_ALIASES: dict[str, tuple[str, ...]] = {}
 
-_EXTRA_BRAND_ALIASES: dict[str, tuple[str, ...]] = {
-    "Apple 苹果": ("Apple", "apple", "iphone", "iPhone"),
-}
+_EXTRA_BRAND_ALIASES: dict[str, tuple[str, ...]] = {}
+
+
+def _bilingual_aliases(raw_brands: set[str] | list[str]) -> dict[str, tuple[str, ...]]:
+    """"她力 HerPower" → ("她力 HerPower", "她力", "HerPower")."""
+    out: dict[str, tuple[str, ...]] = {}
+    for raw in raw_brands:
+        parts = [part for part in raw.split() if part]
+        if len(parts) > 1:
+            out[raw] = (raw, *parts)
+    return out
+
+
+def _brand_aliases(raw_brands: set[str] | list[str]) -> dict[str, tuple[str, ...]]:
+    merged = dict(_bilingual_aliases(raw_brands))
+    for canonical, variants in BRAND_ALIASES.items():
+        merged[canonical] = tuple(dict.fromkeys(merged.get(canonical, ()) + variants))
+    return merged
 
 
 @lru_cache(maxsize=1)
@@ -148,7 +161,7 @@ def load_taxonomy(db_path: Path = DEFAULT_DB_PATH) -> dict[str, object]:
     and expands canonical brands to stored variants. It is cached once per process.
     """
     if not db_path.exists():
-        return {"sub_to_cat": {}, "brands": [], "brand_expand": {}}
+        return {"sub_to_cat": {}, "brands": [], "brand_expand": {}, "aliases": {}}
 
     with sqlite3.connect(db_path) as conn:
         rows = conn.execute(
@@ -163,9 +176,10 @@ def load_taxonomy(db_path: Path = DEFAULT_DB_PATH) -> dict[str, object]:
         if brand:
             raw_brands.add(brand)
 
+    aliases = _brand_aliases(raw_brands)
     # Reverse variant-to-canonical index.
     variant_to_canonical: dict[str, str] = {}
-    for canonical, variants in BRAND_ALIASES.items():
+    for canonical, variants in aliases.items():
         for variant in variants:
             variant_to_canonical[variant] = canonical
 
@@ -177,8 +191,8 @@ def load_taxonomy(db_path: Path = DEFAULT_DB_PATH) -> dict[str, object]:
         canonicals.add(canonical)
         brand_expand.setdefault(canonical, []).append(raw)
 
-    # Include the canonical spelling even when absent from stored rows.
-    for canonical, variants in BRAND_ALIASES.items():
+    # Include every alias spelling so $in / $nin and text matches catch all of them.
+    for canonical, variants in aliases.items():
         if canonical in canonicals:
             existing = set(brand_expand[canonical])
             for variant in variants:
@@ -189,18 +203,19 @@ def load_taxonomy(db_path: Path = DEFAULT_DB_PATH) -> dict[str, object]:
         "sub_to_cat": sub_to_cat,
         "brands": sorted(canonicals),
         "brand_expand": brand_expand,
+        "aliases": aliases,
     }
 
 
 def expand_brands(canonical_brands: list[str]) -> list[str]:
-    """Expand canonical brands to stored variants for ``$in`` and ``$nin``."""
+    """Expand canonical brands (or any alias) to stored variants for ``$in`` and ``$nin``."""
     taxonomy = load_taxonomy()
     expand: dict[str, list[str]] = taxonomy["brand_expand"]  # type: ignore[assignment]
+    aliases: dict[str, tuple[str, ...]] = dict(taxonomy.get("aliases") or {})  # type: ignore[arg-type]
+    for canonical, variants in {**BRAND_ALIASES, **_EXTRA_BRAND_ALIASES}.items():
+        aliases[canonical] = tuple(dict.fromkeys(aliases.get(canonical, ()) + variants))
     variant_to_canonical: dict[str, str] = {}
-    for canonical, variants in BRAND_ALIASES.items():
-        for variant in variants:
-            variant_to_canonical[variant] = canonical
-    for canonical, variants in _EXTRA_BRAND_ALIASES.items():
+    for canonical, variants in aliases.items():
         for variant in variants:
             variant_to_canonical[variant] = canonical
     out: list[str] = []
@@ -208,7 +223,7 @@ def expand_brands(canonical_brands: list[str]) -> list[str]:
     for raw in canonical_brands:
         canonical = variant_to_canonical.get(raw, raw)
         variants = list(expand.get(canonical, [canonical]))
-        for extra in BRAND_ALIASES.get(canonical, ()) + _EXTRA_BRAND_ALIASES.get(canonical, ()):
+        for extra in aliases.get(canonical, ()):
             if extra not in variants:
                 variants.append(extra)
         for variant in variants:
@@ -226,9 +241,8 @@ def expand_brands(canonical_brands: list[str]) -> list[str]:
 # term only after confirming that it appears in catalog text.
 INGREDIENT_BLOCKLIST: tuple[str, ...] = (
     "酒精", "乙醇", "香精", "色素", "防腐剂",
-    "糖", "蔗糖", "果葡糖浆",
-    "咖啡因", "咖啡",
-    "日系", "韩系",
+    "糖", "蔗糖", "咖啡因", "咖啡",
+    "乳制品", "乳糖", "大豆", "坚果", "麸质", "鱼",
 )
 
 
@@ -332,78 +346,82 @@ _NEGATION_CUES = ("不要", "不想要", "不想", "不含", "不带", "没有",
 # Colloquial category aliases mapped to official taxonomy values for deterministic
 # exclusion fallback. Values must exactly match stored subcategories.
 _SUBCAT_SYNONYMS: dict[str, str] = {
-    # Food and beverages
-    "功能性饮料": "功能饮料",
-    "能量饮料": "功能饮料",
-    "功能型饮料": "功能饮料",
-    "提神饮料": "功能饮料",
-    "碳酸": "碳酸饮料",
-    "汽水": "碳酸饮料",
-    "气泡水": "碳酸饮料",
-    "可乐": "碳酸饮料",
-    "零食": "坚果/零食",
-    "坚果": "坚果/零食",
-    "小零食": "坚果/零食",
-    "膨化食品": "坚果/零食",
-    "速食": "方便食品",
-    "泡面": "方便食品",
-    "方便面": "方便食品",
-    "酸奶": "酸奶",
-    "牛奶": "牛奶",
-    "纯牛奶": "牛奶",
-    "茶": "茶饮",
-    "茶饮料": "茶饮",
-    # Consumer electronics
-    "蓝牙耳机": "真无线耳机",
-    "无线耳机": "真无线耳机",
-    "耳机": "真无线耳机",
-    "手机": "智能手机",
-    "平板": "平板电脑",
-    "ipad": "平板电脑",
-    "笔记本": "笔记本电脑",
-    "电脑": "笔记本电脑",
-    "笔电": "笔记本电脑",
-    # Apparel and sports
-    "慢跑鞋": "跑步鞋",
-    "运动鞋": "跑步鞋",
-    "球鞋": "篮球鞋",
-    "登山鞋": "徒步鞋",
-    "短袖": "短袖T恤",
-    "t恤": "短袖T恤",
-    "短裤": "运动短裤",
-    "长裤": "运动长裤",
-    "卫衣": "卫衣",
+    # Sports nutrition
+    "乳清": "蛋白粉",
+    "乳清蛋白": "蛋白粉",
+    "增肌粉": "蛋白粉",
+    "蛋白粉": "蛋白粉",
+    "电解质水": "电解质",
+    "盐丸": "电解质",
+    "电解质": "电解质",
+    "能量胶": "能量胶",
+    "肌酸": "肌酸",
+    "蛋白棒": "蛋白棒",
+    "胶原": "胶原蛋白",
+    "胶原蛋白": "胶原蛋白",
+    "支链氨基酸": "BCAA",
+    "bcaa": "BCAA",
+    # Micronutrients
+    "铁片": "铁剂",
+    "补铁": "铁剂",
+    "铁剂": "铁剂",
+    "叶酸": "叶酸",
+    "钙片": "钙与维生素D",
+    "维生素d": "钙与维生素D",
+    "镁": "镁",
+    "鱼油": "鱼油",
+    "多维": "复合维生素",
+    "复合维生素": "复合维生素",
+    "益生菌": "益生菌",
+    "b12": "维生素B12",
+    # Cycle care
+    "姨妈巾": "卫生巾",
+    "卫生巾": "卫生巾",
+    "棉条": "卫生棉条",
+    "卫生棉条": "卫生棉条",
+    "月经杯": "月经杯",
+    "安心裤": "经期内裤",
+    "月经裤": "经期内裤",
+    "经期内裤": "经期内裤",
+    "暖宝宝": "暖宫贴",
+    "暖贴": "暖宫贴",
+    "暖宫贴": "暖宫贴",
+    "姜茶": "经期茶饮",
+    "私护": "私护清洁",
+    # Sportswear
+    "运动bra": "运动内衣",
+    "运动文胸": "运动内衣",
+    "运动内衣": "运动内衣",
     "瑜伽裤": "瑜伽裤",
-    "速干衣": "速干T恤",
-    "双肩包": "背包",
-    "书包": "背包",
-    # Beauty and skincare
-    "补水面膜": "面膜",
-    "贴片面膜": "面膜",
-    "面膜": "面膜",
-    "精华液": "精华",
-    "精华": "精华",
-    "面部精华": "精华",
-    "爽肤水": "化妆水",
-    "化妆水": "化妆水",
-    "卸妆水": "卸妆",
-    "卸妆油": "卸妆",
-    "卸妆膏": "卸妆",
+    "跑步鞋": "跑鞋",
+    "跑鞋": "跑鞋",
+    "背心": "运动背心",
+    "防晒衣": "防晒外套",
+    "皮肤衣": "防晒外套",
+    "骑行裤": "骑行短裤",
+    "运动袜": "运动袜",
+    # Recovery and care
+    "防晒霜": "运动防晒",
+    "防晒乳": "运动防晒",
+    "素颜霜": "防晒隔离",
+    "隔离": "防晒隔离",
+    "止汗": "止汗露",
+    "止汗露": "止汗露",
     "洗面奶": "洁面",
-    "洁面乳": "洁面",
-    "面部防晒": "防晒",
-    "防晒霜": "防晒",
-    "防晒": "防晒",
-    "口红": "唇釉",
-    "唇釉": "唇釉",
-    "面霜": "面霜",
-    "乳液": "面霜",
-    "眼霜": "眼霜",
-    "粉底": "粉底液",
-    "粉底液": "粉底液",
-    "散粉": "蜜粉",
-    "蜜粉": "蜜粉",
-    "眉笔": "眉笔",
+    "洁面": "洁面",
+    "身体乳": "身体乳",
+    "润唇膏": "润唇膏",
+    "唇膏": "润唇膏",
+    "按摩油": "肌肉放松",
+    "发带": "发圈发带",
+    # Functional food
+    "燕麦": "燕麦",
+    "坚果": "坚果",
+    "黑巧": "巧克力",
+    "巧克力": "巧克力",
+    "酸奶": "酸奶",
+    "轻食": "即食餐",
+    "即食": "即食餐",
 }
 
 
@@ -445,6 +463,10 @@ def _regex_extract_excludes(query: str) -> tuple[list[str], list[str]]:
         # "不含酒精的清爽防晒" negates only what comes before 的 or a punctuation mark;
         # the noun after it is what the user wants.
         window = re.split(r"[的，。,；;！!？?\s]", window.lstrip(), maxsplit=1)[0]
+        # "无糖饮品" / "无香精止汗露": the cue negates an ingredient, and the category noun
+        # after it is what the user wants.
+        if any(window.startswith(term) for term in INGREDIENT_BLOCKLIST):
+            continue
         # 1. Colloquial alias to official subcategory.
         for syn, official in _SUBCAT_SYNONYMS.items():
             if syn in window:
@@ -473,7 +495,8 @@ def _regex_extract_brand_excludes(query: str) -> list[str]:
 
     taxonomy = load_taxonomy()
     brands = list(taxonomy.get("brands", []) or [])
-    for canonical, variants in BRAND_ALIASES.items():
+    aliases = {**(taxonomy.get("aliases") or {}), **BRAND_ALIASES}  # type: ignore[dict-item]
+    for canonical, variants in aliases.items():
         if canonical not in brands:
             brands.append(canonical)
         for variant in variants:

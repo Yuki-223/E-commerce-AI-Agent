@@ -100,9 +100,10 @@ def import_product(
             image_path,
             image_url,
             source_path,
+            attributes_json,
             status
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
         ON CONFLICT(product_id) DO UPDATE SET
             title = excluded.title,
             brand = excluded.brand,
@@ -112,6 +113,7 @@ def import_product(
             image_path = excluded.image_path,
             image_url = excluded.image_url,
             source_path = excluded.source_path,
+            attributes_json = excluded.attributes_json,
             status = excluded.status
         """,
         (
@@ -124,6 +126,7 @@ def import_product(
             product.get("image_path"),
             None,
             str(relative_source),
+            json_text(product.get("attributes", {})),
         ),
     )
 

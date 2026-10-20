@@ -54,15 +54,15 @@ _IMAGE_MANIFEST = _load_image_manifest()
 # always use the same dimensions for stable and reproducible output. Price is generated
 # separately by the deterministic ``_price_row`` helper.
 #
-# The dimensions follow the fields present in the source catalog, avoiding empty rows:
-# electronics use description/FAQ plus SKU storage; beauty uses description plus SKU
-# volume; apparel uses description plus SKU size/color; food uses description plus SKU
-# flavor/count.
+# The dimensions follow the fields present in the source catalog, avoiding empty rows;
+# scripts/women_catalog_spec.py fills the same lists for compare_index.json.
 _CATEGORY_DIMENSIONS: dict[str, list[str]] = {
-    "数码电子": ["性能/芯片", "续航", "屏幕", "存储规格"],
-    "美妆护肤": ["核心功效", "关键成分", "适用肤质", "容量规格"],
-    "服饰运动": ["材质面料", "版型", "适用场景", "尺码颜色"],
-    "食品生活": ["口味风味", "配料成分", "规格分量", "适用场景"],
+    "运动营养": ["核心作用", "关键成分", "每份含量", "适用场景"],
+    "女性营养素": ["补充重点", "关键成分", "每日用量", "适合人群"],
+    "经期关怀": ["使用场景", "材质成分", "吸收规格", "舒适度"],
+    "运动服饰": ["支撑强度", "面料", "版型", "尺码颜色"],
+    "运动修护": ["核心功效", "关键成分", "适用肤质", "容量规格"],
+    "功能轻食": ["营养亮点", "配料成分", "规格分量", "食用场景"],
 }
 
 # Generic dimensions for cross-category comparisons.
@@ -191,7 +191,7 @@ def _product_header(detail: ProductDetail) -> dict[str, Any]:
         "title": detail.title,
         "brand": detail.brand,
         "price": detail.price_range.min_price,
-        "image_url": _IMAGE_MANIFEST.get(detail.product_id) or detail.image_url,
+        "image_url": _IMAGE_MANIFEST.get(detail.product_id) or detail.image_url or (f"/media/{detail.image_path}" if detail.image_path else None),
     }
 
 

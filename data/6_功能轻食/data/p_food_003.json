@@ -1,0 +1,86 @@
+{
+  "product_id": "p_food_003",
+  "title": "谷野南非博士茶 Rooibos 无咖啡因 孕期经期可喝 冷泡热泡 20包",
+  "brand": "谷野 GrainWild",
+  "category": "功能轻食",
+  "sub_category": "饮品",
+  "base_price": 45.0,
+  "image_path": "6_功能轻食/images/p_food_003.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_food_003_1",
+      "properties": {
+        "口味": "原味",
+        "规格": "20包"
+      },
+      "price": 45.0
+    },
+    {
+      "sku_id": "s_p_food_003_2",
+      "properties": {
+        "口味": "香草",
+        "规格": "20包"
+      },
+      "price": 49.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "南非博士茶（路易波士茶）",
+      "天然香草香料（香草味）"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "不含咖啡因，孕期可适量饮用",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "无咖啡因",
+      "孕期可喝"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "南非博士茶天然不含咖啡因，单宁含量低，口感圆润带甜香。适合想减少咖啡因、经期或孕期也想喝杯茶的人。【配料与安全】主要成分：南非博士茶（路易波士茶）、天然香草香料（香草味）；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。不含咖啡因，孕期可适量饮用。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "1包冲泡300ml热水5分钟，或冷泡6小时。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有口味：原味，规格：20包（¥45）；口味：香草，规格：20包（¥49）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "会影响补铁吗？",
+        "answer": "南非博士茶单宁含量较低，对铁吸收的影响比绿茶红茶小，但仍建议与铁剂间隔饮用。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "孕晚期",
+        "rating": 5,
+        "content": "终于能每天喝茶了。"
+      },
+      {
+        "nickname": "晚上失眠",
+        "rating": 5,
+        "content": "睡前喝一杯完全不影响睡眠。"
+      },
+      {
+        "nickname": "小鱼",
+        "rating": 4,
+        "content": "香草味很香。"
+      }
+    ]
+  }
+}

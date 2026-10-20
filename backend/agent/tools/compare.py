@@ -83,7 +83,7 @@ class CompareTool:
             session.set("pending_compare", {"hit_count": len(last_hits)})
             return self._plain(
                 "想对比哪几款呢？可以说「对比第一个和第三个」，"
-                "或者「对比华为和小米那两款」。"
+                "或者「对比铁剂和复合维生素那两款」。"
             )
 
         # Clear resolved pending state so it does not capture the next turn.

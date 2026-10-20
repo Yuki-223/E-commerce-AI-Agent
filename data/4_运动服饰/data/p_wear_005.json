@@ -1,0 +1,168 @@
+{
+  "product_id": "p_wear_005",
+  "title": "轻跃速干运动背心 宽松遮臀 吸湿排汗 跑步健身 透气网眼背",
+  "brand": "轻跃 LeapLite",
+  "category": "运动服饰",
+  "sub_category": "运动背心",
+  "base_price": 99.0,
+  "image_path": "4_运动服饰/images/p_wear_005.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_wear_005_1",
+      "properties": {
+        "颜色": "白色",
+        "尺码": "S"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_2",
+      "properties": {
+        "颜色": "白色",
+        "尺码": "M"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_3",
+      "properties": {
+        "颜色": "白色",
+        "尺码": "L"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_4",
+      "properties": {
+        "颜色": "白色",
+        "尺码": "XL"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_5",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "S"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_6",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "M"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_7",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "L"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_8",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "XL"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_9",
+      "properties": {
+        "颜色": "雾粉",
+        "尺码": "S"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_10",
+      "properties": {
+        "颜色": "雾粉",
+        "尺码": "M"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_11",
+      "properties": {
+        "颜色": "雾粉",
+        "尺码": "L"
+      },
+      "price": 99.0
+    },
+    {
+      "sku_id": "s_p_wear_005_12",
+      "properties": {
+        "颜色": "雾粉",
+        "尺码": "XL"
+      },
+      "price": 99.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "聚酯纤维",
+      "氨纶"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "宽松版型孕期可穿",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "速干",
+      "遮臀"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "follicular",
+      "ovulatory",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "宽松长款遮臀，背部网眼透气，速干面料适合夏季训练。可以外穿在运动内衣外面。【配料与安全】主要成分：聚酯纤维、氨纶；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、卵泡期、排卵期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。宽松版型孕期可穿。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "宽松版型，想要合身可选小一码。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有颜色：白色，尺码：S（¥99）；颜色：白色，尺码：M（¥99）；颜色：白色，尺码：L（¥99）；颜色：白色，尺码：XL（¥99）；颜色：黑色，尺码：S（¥99）；颜色：黑色，尺码：M（¥99）；颜色：黑色，尺码：L（¥99）；颜色：黑色，尺码：XL（¥99）等共12个规格。宽松版型，想要合身可选小一码。"
+      },
+      {
+        "question": "白色会透吗？",
+        "answer": "白色面料较厚，正常不透；里面建议搭配肤色或白色运动内衣。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "夏日健身",
+        "rating": 5,
+        "content": "很透气，汗干得快。"
+      },
+      {
+        "nickname": "梨形身材",
+        "rating": 5,
+        "content": "长度刚好遮臀。"
+      },
+      {
+        "nickname": "小雅",
+        "rating": 4,
+        "content": "雾粉色很温柔。"
+      }
+    ]
+  }
+}

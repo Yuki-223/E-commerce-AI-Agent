@@ -22,6 +22,9 @@ CREATE TABLE IF NOT EXISTS products (
         CHECK (status IN ('active', 'inactive')),
     -- Owning merchant; NULL means platform-operated (the bundled catalog).
     merchant_id  TEXT,
+    -- Ingredients, allergens and safety flags (pregnancy, caffeine, fragrance, vegan...)
+    -- used by the safety filter in search/safety.py.
+    attributes_json TEXT NOT NULL DEFAULT '{}',
     created_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CHECK (image_path IS NOT NULL OR image_url IS NOT NULL)

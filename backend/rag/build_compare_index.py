@@ -43,7 +43,7 @@ def _extract_schema(dimensions: list[str]) -> dict[str, Any]:
     }
     properties["tagline"] = {
         "type": "string",
-        "description": "一句『适合人群/定位』短语，≤16字，如『追求极致性能的科技爱好者』",
+        "description": "一句『适合人群/定位』短语，≤16字，如『经期也想坚持训练的跑步女生』",
     }
     return {
         "type": "function",

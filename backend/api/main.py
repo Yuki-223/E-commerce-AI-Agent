@@ -25,6 +25,7 @@ os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from agent.memory_extractor import extract_preference_updates
@@ -123,6 +124,9 @@ class PreferenceRequest(BaseModel):
     category_specific: dict[str, dict[str, Any]] = Field(default_factory=dict)
     preference_note: str | None = None
     notes: str | None = None
+    body_profile: dict[str, Any] = Field(default_factory=dict)
+    safety_flags: list[str] = Field(default_factory=list)
+    allergens_avoid: list[str] = Field(default_factory=list)
 
 
 class PreferenceUndoRequest(BaseModel):
@@ -137,6 +141,8 @@ app = FastAPI(title="E-commerce AI Agent", version="0.2.0")
 
 # Product detail and batch-query endpoints.
 app.include_router(products_router.router)
+# Bundled product images (data/<category>/images/*) when no CDN manifest entry exists.
+app.mount(products_router.MEDIA_PREFIX, StaticFiles(directory=products_router.MEDIA_DIR, check_dir=False), name="media")
 # Accounts, shopper orders and addresses, and the merchant console.
 app.include_router(auth_router.router)
 app.include_router(orders_router.router)
@@ -566,7 +572,7 @@ def generate_title(req: TitleRequest) -> dict[str, str]:
     system = (
         "你是对话标题生成器。根据用户的购物需求，生成一个简洁的中文标题，"
         "用于历史记录列表展示。要求：① 4-8 个字；② 概括核心需求（品类+关键属性），"
-        "如「油皮洗面奶」「平价蓝牙耳机」「三亚出行搭配」；③ 只输出标题本身，"
+        "如「经期补铁」「半马能量补给」「敏感肌防晒」；③ 只输出标题本身，"
         "不要引号、标点、解释。"
     )
     convo = f"用户：{user_text}"

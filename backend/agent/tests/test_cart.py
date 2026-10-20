@@ -501,3 +501,27 @@ def test_store_order_by_cart_item_ids(store: CartStore):
     order = store.build_order(cart_item_ids=[a.cart_item_id])
     assert [line.product_id for line in order.lines] == ["p1"]
     assert [line.product_id for line in store.list_items()] == ["p2"]
+
+
+def test_ask_spec_preselects_size_from_body_profile(monkeypatch, store: CartStore):
+    """A shopper whose profile says M gets 尺码 M preselected on the spec card."""
+    with sqlite3.connect(store.db_path) as conn:
+        conn.execute(
+            "INSERT INTO products(product_id,title,brand,category,sub_category,base_price) VALUES (?,?,?,?,?,?)",
+            ("p4", "高腰瑜伽裤", "轻跃", "运动服饰", "瑜伽裤", 199),
+        )
+        conn.executemany(
+            "INSERT INTO product_skus(sku_id,product_id,properties_json,price) VALUES (?,?,?,?)",
+            [(f"p4_{s}", "p4", f'{{"尺码":"{s}"}}', 199) for s in ("S", "M", "L")],
+        )
+        conn.commit()
+    monkeypatch.setattr(cart_module, "dispatch_action", _stub_dispatch("add"))
+    sess = AgentSession()
+    sess.user_profile = {"body_profile": {"clothing_size": "M"}}
+    sess.set("last_focus_product_id", "p4")
+
+    r = CartTool(cart_store=store).run("把它加入购物车", sess, {})
+
+    assert r.payload["action"] == "ask_spec"
+    assert r.payload["suggested_options"] == {"尺码": "M"}
+    assert "尺码M" in r.narrative_override

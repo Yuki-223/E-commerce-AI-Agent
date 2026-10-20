@@ -4,7 +4,7 @@ from __future__ import annotations
 
 Usage:
     cd backend && python -m agent.cli
-    > 推荐 500 以内的敏感肌精华
+    > 推荐 200 以内、不含咖啡因的长跑补给
     > /exit
 
 Environment variables:

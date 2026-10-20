@@ -2,8 +2,8 @@
 """Account and catalog administration for local demos.
 
     python -m store.manage create-admin --username admin --password ******
-    python -m store.manage assign-products --merchant-user shop1 --brand 珀莱雅
-    python -m store.manage assign-products --merchant-user shop1 --category 数码电子
+    python -m store.manage assign-products --merchant-user shop1 --brand 她力
+    python -m store.manage assign-products --merchant-user shop1 --category 运动服饰
 
 Admin accounts cannot be self-registered over the API; they manage every shop and
 the platform-operated catalog (``merchant_id`` NULL). ``assign-products`` hands bundled

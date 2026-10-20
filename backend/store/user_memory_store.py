@@ -33,6 +33,13 @@ class UserPreference:
     category_specific: dict[str, dict[str, Any]] = field(default_factory=dict)
     preference_note: str | None = None
     notes: str | None = None
+    # Skin and body profile: skin_type, skin_concerns, skin_tone (cool/neutral/warm),
+    # height_cm, weight_kg, clothing_size, bra_size, shoe_size. Used for SKU matching.
+    body_profile: dict[str, Any] = field(default_factory=dict)
+    # Safety switches from search/safety.py SAFETY_FLAGS and allergens to avoid. Only the
+    # user sets these; the chat memory extractor never writes health statements.
+    safety_flags: list[str] = field(default_factory=list)
+    allergens_avoid: list[str] = field(default_factory=list)
 
     @classmethod
     def empty(cls, user_id: str) -> "UserPreference":

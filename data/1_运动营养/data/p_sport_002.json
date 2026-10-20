@@ -1,0 +1,91 @@
+{
+  "product_id": "p_sport_002",
+  "title": "她力植物蛋白粉 豌豆+糙米双蛋白 纯素 无乳糖无大豆 每份20g蛋白",
+  "brand": "她力 HerPower",
+  "category": "运动营养",
+  "sub_category": "蛋白粉",
+  "base_price": 159.0,
+  "image_path": "1_运动营养/images/p_sport_002.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_sport_002_1",
+      "properties": {
+        "口味": "抹茶",
+        "规格": "450g 罐装"
+      },
+      "price": 169.0
+    },
+    {
+      "sku_id": "s_p_sport_002_2",
+      "properties": {
+        "口味": "原味",
+        "规格": "450g 罐装"
+      },
+      "price": 159.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "豌豆分离蛋白",
+      "糙米蛋白",
+      "抹茶粉（抹茶味）",
+      "罗汉果甜苷"
+    ],
+    "allergens": [],
+    "pregnancy": "safe",
+    "pregnancy_note": "配料为常见植物蛋白，孕期可作为日常蛋白来源；如需控制体重或血糖请咨询医生",
+    "caffeine": true,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "纯素",
+      "无乳糖",
+      "无大豆"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "follicular",
+      "ovulatory",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "豌豆蛋白与糙米蛋白组合，氨基酸互补，适合素食者、乳制品过敏或对大豆敏感的女性。每份约20g蛋白质，不含乳制品、大豆和麸质。抹茶口味使用的是食品级抹茶粉，含有少量天然咖啡因；对咖啡因敏感可选原味。【配料与安全】主要成分：豌豆分离蛋白、糙米蛋白、抹茶粉（抹茶味）、罗汉果甜苷；过敏原：无常见过敏原；含咖啡因；无香精；纯素；孕期哺乳期：一般可用；适合的周期阶段：经期、卵泡期、排卵期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。配料为常见植物蛋白，孕期可作为日常蛋白来源；如需控制体重或血糖请咨询医生。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "每日1-2勺，兑水、燕麦奶或加入早餐奶昔。植物蛋白口感偏颗粒，用摇摇杯多摇一会儿更顺滑。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有口味：抹茶，规格：450g 罐装（¥169）；口味：原味，规格：450g 罐装（¥159）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "原味也含咖啡因吗？",
+        "answer": "不含。只有抹茶口味因为添加了抹茶粉含少量天然咖啡因，原味完全不含咖啡因。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "素食跑者",
+        "rating": 5,
+        "content": "终于找到不含大豆的植物蛋白，原味加香蕉打奶昔很好喝。"
+      },
+      {
+        "nickname": "瑜伽阿柚",
+        "rating": 4,
+        "content": "抹茶味清爽，口感比想象中细。"
+      },
+      {
+        "nickname": "小林",
+        "rating": 3,
+        "content": "冲水还是有点颗粒感，要多摇。"
+      }
+    ]
+  }
+}

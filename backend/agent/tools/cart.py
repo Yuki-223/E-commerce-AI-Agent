@@ -29,6 +29,7 @@ from agent.tools.reference import resolve_indices, resolve_by_name, extract_name
 from store.address_store import AddressStore
 from store.cart_store import CartNotFoundError, CartStore, DEFAULT_ADDRESS
 from store.order_store import OrderError
+from store.sku_match import suggest_options
 from store.product_store import ProductStore
 
 
@@ -97,12 +98,13 @@ class CartTool:
     def run(self, query: str, session: AgentSession, slots: dict[str, Any]) -> ToolResult:
         # A logged-in shopper's turn works on their own cart. The tool instance is shared
         # across requests, so bind a shallow copy instead of mutating ``self._store``.
+        # The profile rides along for size and shade preselection in spec cards.
+        bound = copy.copy(self)
+        bound._profile = getattr(session, "user_profile", None) or {}
         account_id = getattr(session, "account_id", None)
         if account_id and account_id != self._store.user_id:
-            bound = copy.copy(self)
             bound._store = self._store.for_user(account_id)
-            return bound._run(query, session)
-        return self._run(query, session)
+        return bound._run(query, session)
 
     def _run(self, query: str, session: AgentSession) -> ToolResult:
         # Use the raw utterance for product/SKU resolution because a router rewrite may
@@ -247,7 +249,7 @@ class CartTool:
         text = (
             "你想加入哪一款呢？\n"
             + "\n".join(lines)
-            + "\n告诉我序号或品牌名就行，例如「第一个」或「华为那款」。"
+            + "\n告诉我序号或品牌名就行，例如「第一个」或「她力那款」。"
         )
         return ToolResult(
             tool_name=self.name,
@@ -477,6 +479,10 @@ class CartTool:
             text = f"已理解为把「{title}」加入购物车，数量按你说的 {qty} 件。这款有多个规格，选好就能加购或直接下单～"
         # Ordered dimensions produce stable chips; retain ``options`` for compatibility.
         dimensions = [{"name": dim, "values": values} for dim, values in dims.items()]
+        suggested = suggest_options(dims, getattr(self, "_profile", None))
+        if suggested:
+            text += "已按你的档案预选了" + "、".join(f"{k}{v}" for k, v in suggested.items()) + "。"
+
         return ToolResult(
             tool_name=self.name,
             payload={
@@ -486,6 +492,7 @@ class CartTool:
                 "dimensions": dimensions,
                 "options": dims,
                 "quantity": qty,
+                "suggested_options": suggested,
                 "skus": [
                     {"sku_id": k["sku_id"], "options": k["options"], "price": k["price"], "stock_qty": k.get("stock_qty")}
                     for k in skus

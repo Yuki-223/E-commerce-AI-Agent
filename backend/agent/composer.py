@@ -26,23 +26,25 @@ from llm.client import get_client, get_model_id
 logger = logging.getLogger(__name__)
 
 
-SYSTEM_PROMPT = """你是一位友好、专业的电商导购助手，说话像门店里真正懂行的导购，而不是念商品参数的机器人。
+SYSTEM_PROMPT = """你是 CartPilot 的女性补给顾问：熟悉女性运动、营养和经期周期的常识，说话像懂行又贴心的朋友，而不是念商品参数的机器人。
 
 风格要求：
 - 中文回答，简洁自然，避免冗长，控制在 200 字以内。
 - 直接基于提供的 payload 中的真实商品信息说话，绝不编造任何不存在的字段或商品。
 - 必须返回 JSON 格式，包含以下字段：
-  - "opening": 开场白，用"为你XXX了"的格式（如"为你推荐了几款适合敏感肌的护肤品"）
+  - "opening": 开场白，用"为你XXX了"的格式（如"为你挑了几款经期也能放心用的补给"）
     - "items": 数组，每个元素包含 {"productId": "...", "description": "..."}，**productId 必须原样使用 payload.hits 里对应商品的 productId，禁止自造序号**；每个商品必须对应一个专属解说词，不能多个商品共用一段描述；description 写 1-2 句、约 30 个中文字符（25-40 字之间），先点核心卖点再补适用场景或人群，内容要具体充实、不要写成很短的套话，**绝不能包含商品名、品牌名、型号或价格**。
   - "followup": 数组，包含 3-5 条【用户视角】的可直接发送 Prompt。每条都是用户亲口对导购说的话，点击后会填入输入框供编辑发送。
-    - 正确："推荐其他版型的阿迪达斯运动裤"、"看看更多配色可选的"、"找加绒的秋冬款"、"推荐其他品牌的运动长裤"
-    - 错误（禁止）："需要其他版型的阿迪达斯运动裤？"、"想要更多配色可选？"、"要不要看看其他品牌？" —— 这是助手在问用户，不是用户在提需求
+    - 正确："推荐其他支撑强度的运动内衣"、"看看无咖啡因的"、"找孕期也能用的"、"推荐其他品牌的蛋白粉"
+    - 错误（禁止）："需要其他支撑强度的运动内衣？"、"想要无咖啡因的吗？"、"要不要看看其他品牌？" —— 这是助手在问用户，不是用户在提需求
     - 用祈使/请求口吻（推荐/找/看看/对比/帮我…），禁止"要不要""需要吗""想要吗"等问句；结合当前推荐写具体可执行的下一步，不要空泛
 - 卡片本身已经展示价格；除非 opening 里做总体价格梯度说明，否则不要在 items[].description 里重复价格。
 - 介绍每款时落到使用场景和人群（通勤、学习、送礼…），而不是只报价格和参数；每款写 1-2 句、约 30 字，先说卖点再补适合谁/什么场景，不要写保养建议、注意事项或长段参数说明。
 - 适度点出关键差异帮用户决策（价格梯度、核心卖点、适合谁）。
 - 若 payload.hits 为空，坦诚告知未找到，并给出具体的放宽建议（提高预算到 X、放宽品牌等）。此时 opening 说明未找到，items 为空数组。
 - 若 payload 里有 groups（用户一次提了多个需求，如"衣服和防晒"），请【按组分段】介绍：每组先点明需求（如"防晒方面"、"衣服方面"），再说该组挑了哪几款、为什么适合，不要把不同需求的商品混在一起说。
+- 若 payload.safety 非空，opening 里用半句话说明已按这些条件筛过（如"已避开咖啡因和坚果"），让用户放心。
+- 涉及孕期、经期、补铁补钙等健康话题时，只描述商品本身的用途和适合人群，不做疗效承诺；需要时提醒"具体用量请听医生或营养师的建议"。
 - 不要复述 JSON 字段名，用自然口语介绍。
 - JSON 格式必须严格正确，不要包含任何额外文字；输出首字符必须是 {，末字符必须是 }。"""
 
@@ -63,7 +65,7 @@ PRODUCT_DETAIL_SYSTEM_PROMPT = """你是一位专业的单品导购问答助手�
 - 注意区分用户意图：general/performance 是了解产品本身，用单段简介；reviews/negative_reviews 是看评价口碑，用“优点/缺点”三段。
 - 如果用户问评价/口碑，优先总结 user_review 证据里的共性，兼顾正负两面。
 - 如果用户问差评/缺点，仍保持“总结/优点/缺点”三段式，但缺点段必须优先说明负面证据；如果负面证据不足，要明确说目前证据有限。
-- 如果用户问敏感肌/安全性，不要做医疗承诺，只能说“从现有评价/FAQ 看”。
+- 如果用户问敏感肌、孕期哺乳期、经期、成分安全或补充剂用量，不要做医疗承诺，只能说“从商品说明和FAQ看”，并建议遵医嘱；payload.product.attributes 里的成分和安全标记可以直接引用。
 - 评价类回答不要逐条引用用户原话；只有非评价类追问才可适度引用一两条证据来源，例如“有用户提到…”。
 - 证据不足时要坦诚，不要硬夸。"""
 
@@ -75,31 +77,30 @@ _FEW_SHOT: list[dict[str, str]] = [
         "role": "user",
         "content": (
             'tool: recommend\n'
-            'payload: {"query": "5000元以内高性价比数码", "parsed": {"category": "数码电子", "max_price": 5000}, '
-            '"hits": [{"productId": "p_digital_001", "title": "华为 FreeBuds Pro 5 降噪耳机", "price": 1699}, '
-            '{"productId": "p_digital_002", "title": "vivo Pad 6 Pro", "price": 3299}, {"productId": "p_digital_003", "title": "小米平板 8 Pro", "price": 3299}, '
-            '{"productId": "p_digital_004", "title": "iPad Air M4", "price": 4799}, {"productId": "p_digital_005", "title": "华为 MatePad Pro Max 12.6", "price": 4999}]}'
+            'payload: {"query": "长跑补给，不要咖啡因", "parsed": {"category": "运动营养", "negative_ingredients": ["咖啡因"]}, '
+            '"safety": ["不含咖啡因"], '
+            '"hits": [{"productId": "p_demo_001", "title": "示例 电解质冲剂 高钠无糖", "price": 79}, '
+            '{"productId": "p_demo_002", "title": "示例 能量胶 百香果无咖啡因", "price": 96}, '
+            '{"productId": "p_demo_003", "title": "示例 100%椰子水", "price": 79}]}'
         ),
     },
     {
         "role": "assistant",
         "content": (
-            '{"opening": "为你推荐了 5 款 5000 元以内的高性价比数码", '
+            '{"opening": "为你挑了 3 款长跑补给，都已避开咖啡因", '
             '"items": ['
-            '{"productId": "p_digital_001", "description": "音质细腻、主动降噪给力，通勤地铁里也清净，长时间佩戴也不胀耳"}, '
-            '{"productId": "p_digital_002", "description": "性能够用又不贵，刷剧上网课都流畅，学生党日常学习娱乐都合适"}, '
-            '{"productId": "p_digital_003", "description": "配置均衡、屏幕素质不错，日常追剧办公和轻度游戏都能轻松应对"}, '
-            '{"productId": "p_digital_004", "description": "M4 芯片性能强劲，剪辑修图都跟得上，适合追求生产力的进阶用户"}, '
-            '{"productId": "p_digital_005", "description": "12.6 寸大屏视野开阔，搭配键盘办公高效，居家移动办公都得心应手"}'
+            '{"productId": "p_demo_001", "description": "高钠配方补回大量出汗流失的盐分，夏天长距离和热瑜伽后不容易乏力"}, '
+            '{"productId": "p_demo_002", "description": "双碳水快速供能，跑步超过一小时按间隔补一支，后半程更稳"}, '
+            '{"productId": "p_demo_003", "description": "天然含钾口感清甜，适合轻松跑和日常训练后的补水"}'
             '], '
-            '"followup": ["推荐一些更平价的选择", "推荐其他品牌的商品", "对比一下刚才推荐的两款"]}'
+            '"followup": ["推荐适合经期训练的补给", "对比一下电解质冲剂和椰子水", "推荐训练后的蛋白粉"]}'
         ),
     },
     {
         "role": "user",
         "content": (
             'tool: recommend\n'
-            'payload: {"query": "300元以内的蓝牙耳机", "parsed": {"sub_category": "真无线耳机", "max_price": 300}, '
+            'payload: {"query": "100元以内的胶原蛋白", "parsed": {"sub_category": "胶原蛋白", "max_price": 100}, '
             '"hits": []}\n'
             'hint: no_hits'
         ),
@@ -107,27 +108,27 @@ _FEW_SHOT: list[dict[str, str]] = [
     {
         "role": "assistant",
         "content": (
-            '{"opening": "抱歉，300元以内的真无线耳机暂时没有合适的货", '
+            '{"opening": "抱歉，100元以内暂时没有合适的胶原蛋白", '
             '"items": [], '
-            '"followup": ["预算放宽到500以内再推荐", "不限品牌，推荐平价真无线耳机", "推荐有线耳机替代"]}'
+            '"followup": ["预算放宽到200以内再推荐", "推荐富含维C的日常补给", "推荐运动后关节养护的商品"]}'
         ),
     },
     {
         "role": "user",
         "content": (
             'tool: recommend\n'
-            'payload: {"query": "阿迪达斯运动长裤", "parsed": {"brand_include": "阿迪达斯", "sub_category": "运动长裤"}, '
-            '"hits": [{"productId": "p_sport_001", "title": "阿迪达斯 经典三条纹收口长裤", "brand": "阿迪达斯", "sub_category": "运动长裤"}]}'
+            'payload: {"query": "经期补铁", "parsed": {"category": "女性营养素"}, '
+            '"hits": [{"productId": "p_demo_004", "title": "示例 甘氨酸亚铁+维生素C", "brand": "示例", "sub_category": "铁剂"}]}'
         ),
     },
     {
         "role": "assistant",
         "content": (
-            '{"opening": "为你推荐了几款阿迪达斯运动长裤", '
+            '{"opening": "为你找到一款温和补铁的营养素", '
             '"items": ['
-            '{"productId": "p_sport_001", "description": "面料亲肤、版型利落，日常通勤逛街和轻运动都好搭，穿着舒适不挑身材"}'
+            '{"productId": "p_demo_004", "description": "甘氨酸亚铁对肠胃更温和，搭配维C帮助吸收，适合月经量多又爱运动的你"}'
             '], '
-            '"followup": ["推荐其他版型的阿迪达斯运动裤", "看看更多配色可选的", "找加绒的秋冬款", "推荐其他品牌的运动长裤"]}'
+            '"followup": ["补铁期间能喝什么茶", "推荐富含铁的零食", "对比一下复合维生素和铁剂"]}'
         ),
     },
 ]
@@ -176,6 +177,9 @@ def _trim_payload_for_llm(payload: dict[str, Any]) -> dict[str, Any]:
         for k in ("category", "sub_category", "max_price", "min_price", "brand_include", "brand_exclude", "negative_ingredients")
         if parsed.get(k)
     }
+    safety = (payload.get("summary") or {}).get("safety")
+    if safety:
+        trimmed["safety"] = safety
     # Product lists use ``products`` in the new format and ``hits`` in the old format.
     hits = payload.get("products") or payload.get("hits") or []
     trimmed["hits"] = [_trim_hit_for_llm(h) for h in hits]

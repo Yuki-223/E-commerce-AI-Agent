@@ -1,0 +1,94 @@
+{
+  "product_id": "p_sport_006",
+  "title": "她力高蛋白棒 每根15g蛋白 低糖高纤 坚果巧克力 12根",
+  "brand": "她力 HerPower",
+  "category": "运动营养",
+  "sub_category": "蛋白棒",
+  "base_price": 108.0,
+  "image_path": "1_运动营养/images/p_sport_006.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_sport_006_1",
+      "properties": {
+        "口味": "坚果黑巧",
+        "规格": "12根"
+      },
+      "price": 108.0
+    },
+    {
+      "sku_id": "s_p_sport_006_2",
+      "properties": {
+        "口味": "海盐焦糖",
+        "规格": "12根"
+      },
+      "price": 108.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "乳清蛋白",
+      "可溶性玉米纤维",
+      "杏仁",
+      "可可粉",
+      "海盐",
+      "麦芽糖醇"
+    ],
+    "allergens": [
+      "乳制品",
+      "坚果"
+    ],
+    "pregnancy": "safe",
+    "pregnancy_note": "为普通食品，孕期可适量食用，注意坚果过敏",
+    "caffeine": true,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": false,
+    "tags": [
+      "高蛋白",
+      "低糖",
+      "便携"
+    ],
+    "cycle_phases": [
+      "luteal",
+      "follicular"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "每根约15g蛋白质与8g膳食纤维，糖含量低于3g，适合训练前后或下午加餐。坚果黑巧口味含杏仁和少量可可，天然含有咖啡因和镁；海盐焦糖口味不含坚果。【配料与安全】主要成分：乳清蛋白、可溶性玉米纤维、杏仁、可可粉、海盐、麦芽糖醇；过敏原：乳制品、坚果；含咖啡因；无香精；含动物来源成分；孕期哺乳期：一般可用；适合的周期阶段：黄体期、卵泡期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "可以。为普通食品，孕期可适量食用，注意坚果过敏。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "训练后或两餐之间1根；放在包里出差、通勤很方便。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有口味：坚果黑巧，规格：12根（¥108）；口味：海盐焦糖，规格：12根（¥108）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "黄体期特别想吃甜食，能用它代替吗？",
+        "answer": "黄体期食欲上升很常见，用高蛋白高纤维的零食替代一部分甜点，饱腹更持久；但它不是正餐替代品，一天1-2根即可。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "加班狗",
+        "rating": 5,
+        "content": "下午饿了来一根，比面包抗饿多了。"
+      },
+      {
+        "nickname": "控糖中",
+        "rating": 4,
+        "content": "海盐焦糖很香，有点粘牙。"
+      },
+      {
+        "nickname": "坚果过敏",
+        "rating": 4,
+        "content": "选了不含坚果的焦糖味，标注很清楚。"
+      }
+    ]
+  }
+}

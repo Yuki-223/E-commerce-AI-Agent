@@ -1,0 +1,193 @@
+{
+  "product_id": "p_wear_003",
+  "title": "轻跃高腰裸感瑜伽裤 不卷边 深蹲不透 九分 口袋款 经期友好深色",
+  "brand": "轻跃 LeapLite",
+  "category": "运动服饰",
+  "sub_category": "瑜伽裤",
+  "base_price": 199.0,
+  "image_path": "4_运动服饰/images/p_wear_003.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_wear_003_1",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "XS"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_2",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "S"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_3",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "M"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_4",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "L"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_5",
+      "properties": {
+        "颜色": "黑色",
+        "尺码": "XL"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_6",
+      "properties": {
+        "颜色": "深灰",
+        "尺码": "XS"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_7",
+      "properties": {
+        "颜色": "深灰",
+        "尺码": "S"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_8",
+      "properties": {
+        "颜色": "深灰",
+        "尺码": "M"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_9",
+      "properties": {
+        "颜色": "深灰",
+        "尺码": "L"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_10",
+      "properties": {
+        "颜色": "深灰",
+        "尺码": "XL"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_11",
+      "properties": {
+        "颜色": "酒红",
+        "尺码": "XS"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_12",
+      "properties": {
+        "颜色": "酒红",
+        "尺码": "S"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_13",
+      "properties": {
+        "颜色": "酒红",
+        "尺码": "M"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_14",
+      "properties": {
+        "颜色": "酒红",
+        "尺码": "L"
+      },
+      "price": 199.0
+    },
+    {
+      "sku_id": "s_p_wear_003_15",
+      "properties": {
+        "颜色": "酒红",
+        "尺码": "XL"
+      },
+      "price": 199.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "锦纶",
+      "氨纶"
+    ],
+    "allergens": [],
+    "pregnancy": "caution",
+    "pregnancy_note": "孕中晚期建议选择托腹孕妇款，高腰压缩不宜过紧",
+    "caffeine": false,
+    "fragrance": false,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "深蹲不透",
+      "高腰",
+      "口袋"
+    ],
+    "cycle_phases": [
+      "menstrual",
+      "follicular",
+      "ovulatory",
+      "luteal"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "高腰宽腰头收腹不卷边，裸感面料，深蹲测试不透。两侧口袋可放手机。深色系经期穿也更安心，搭配经期安心裤效果更好。【配料与安全】主要成分：锦纶、氨纶；过敏原：无常见过敏原；不含咖啡因；无香精；纯素；孕期哺乳期：谨慎使用；适合的周期阶段：经期、卵泡期、排卵期、黄体期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "需要谨慎。孕中晚期建议选择托腹孕妇款，高腰压缩不宜过紧。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "按臀围选码：XS（80-85cm）、S（86-90）、M（91-95）、L（96-100）、XL（101-106）。冷水机洗，勿烘干。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有颜色：黑色，尺码：XS（¥199）；颜色：黑色，尺码：S（¥199）；颜色：黑色，尺码：M（¥199）；颜色：黑色，尺码：L（¥199）；颜色：黑色，尺码：XL（¥199）；颜色：深灰，尺码：XS（¥199）；颜色：深灰，尺码：S（¥199）；颜色：深灰，尺码：M（¥199）等共15个规格。按臀围选码：XS（80-85cm）、S（86-90）、M（91-95）、L（96-100）、XL（101-106）。冷水机洗，勿烘干。"
+      },
+      {
+        "question": "黄体期容易水肿，尺码怎么选？",
+        "answer": "如果经前腹部腰部容易胀，选能覆盖胀气期的尺码或靠大一码，高腰头的弹性能兼顾平时。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "深蹲测试",
+        "rating": 5,
+        "content": "镜子前深蹲完全不透。"
+      },
+      {
+        "nickname": "酒红控",
+        "rating": 5,
+        "content": "颜色很高级。"
+      },
+      {
+        "nickname": "Lisa",
+        "rating": 4,
+        "content": "腰头很稳，就是有点长。"
+      }
+    ]
+  }
+}

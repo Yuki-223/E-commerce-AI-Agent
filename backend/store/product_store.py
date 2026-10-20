@@ -10,7 +10,7 @@ FAQ 和评价。它不做语义检索，也不生成推荐理由；这些交给 
 import argparse
 import json
 import sqlite3
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -81,6 +81,8 @@ class ProductDetail:
     marketing_description: str
     faqs: list[ProductFaq]
     reviews: list[ProductReview]
+    # Ingredients, allergens and safety flags; see search/safety.py.
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 class ProductStore:
@@ -293,6 +295,7 @@ class ProductStore:
             marketing_description=row["marketing_description"],
             faqs=self.get_faqs(product_id),
             reviews=self.get_reviews(product_id),
+            attributes=self.get_attributes([product_id]).get(product_id, {}),
         )
 
     def get_skus(
@@ -351,6 +354,26 @@ class ProductStore:
             )
             for row in rows
         ]
+
+    def get_attributes(self, product_ids: Sequence[str]) -> dict[str, dict[str, Any]]:
+        """Return ``attributes_json`` per product; empty for catalogs without the column."""
+        ids = list(dict.fromkeys(pid for pid in product_ids if pid))
+        if not ids:
+            return {}
+        placeholders = ",".join("?" for _ in ids)
+        try:
+            with self.connect() as conn:
+                rows = conn.execute(
+                    f"SELECT product_id, attributes_json FROM products WHERE product_id IN ({placeholders})",
+                    ids,
+                ).fetchall()
+        except sqlite3.OperationalError:
+            return {}
+        out: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            parsed = load_json_text(row["attributes_json"] or "{}")
+            out[row["product_id"]] = parsed if isinstance(parsed, dict) else {}
+        return out
 
     def get_reviews(
         self,

@@ -33,6 +33,7 @@ import logging
 from rag.retriever import ChromaRetriever, RetrievedChunk
 from rag.reranker import ApiReranker, RerankedChunk, get_reranker
 from search.query_understanding import ParsedQuery, expand_brands, understand_query
+from search.safety import constraints_from_profile, split_negatives, violation
 from search.where_builder import build_chroma_where
 
 logger = logging.getLogger(__name__)
@@ -100,6 +101,10 @@ class SearchResult:
     hits: list[ProductHit]
     raw_chunk_count: int                 # Chroma chunks before deduplication/filtering.
     filtered_chunk_count: int            # Chunks remaining after postfiltering.
+    # Safety constraints applied (search/safety.py), as user-facing labels.
+    safety: list[str] = field(default_factory=list)
+    # product_id -> reason for products the safety filter removed.
+    safety_excluded: dict[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -107,6 +112,8 @@ class SearchResult:
             "raw_chunk_count": self.raw_chunk_count,
             "filtered_chunk_count": self.filtered_chunk_count,
             "hits": [hit.to_dict() for hit in self.hits],
+            "safety": self.safety,
+            "safety_excluded": self.safety_excluded,
         }
 
 
@@ -171,6 +178,14 @@ class SearchService:
                 continue  # No SKU reaches the budget floor.
             ok.add(cand.product_id)
         return [c for c in chunks if c.product_id in ok]
+
+    def _product_attributes(self, product_ids: list[str]) -> dict[str, dict[str, Any]]:
+        """Structured attributes per product; an unreadable catalog disables the filter."""
+        try:
+            return self._get_products().get_attributes(product_ids)
+        except Exception as exc:  # noqa: BLE001 - safety data is optional for old catalogs
+            logger.warning("Failed to load product attributes; skipping the safety filter: %r", exc)
+            return {}
 
     def _product_fulltext(self, product_ids: list[str]) -> dict[str, str]:
         """Load candidate BM25 text from title, marketing description, and FAQ."""
@@ -305,8 +320,20 @@ class SearchService:
             )
 
         # 3. Apply exclusions at product level before reranking. If any chunk or metadata
-        # matches an exclusion, remove every chunk for that product.
-        negatives = _normalize_negatives(parsed.negative_ingredients)
+        # matches an exclusion, remove every chunk for that product. Exclusions that name
+        # a structured attribute (allergens, caffeine, fragrance...) are judged on
+        # attributes_json together with the profile's safety flags instead of on text.
+        negatives, safety = split_negatives(_normalize_negatives(parsed.negative_ingredients))
+        safety = constraints_from_profile(user_profile, safety)
+        safety_excluded: dict[str, str] = {}
+        if safety.active() and chunks:
+            attributes = self._product_attributes([c.product_id for c in chunks if c.product_id])
+            for pid, attrs in attributes.items():
+                reason = violation(attrs, safety)
+                if reason:
+                    safety_excluded[pid] = reason
+            if safety_excluded:
+                chunks = [c for c in chunks if c.product_id not in safety_excluded]
         excluded_subs = set(parsed.sub_category_exclude or [])
         excluded_cats = set(parsed.category_exclude or [])
         excluded_brands = _expanded_brand_set(parsed.brand_exclude)
@@ -345,6 +372,8 @@ class SearchService:
             hits=hits,
             raw_chunk_count=raw_count,
             filtered_chunk_count=filtered_count,
+            safety=safety.labels(),
+            safety_excluded=safety_excluded,
         )
 
 
@@ -455,13 +484,13 @@ def _brand_conflicts_with_include(brand: str, includes: list[str]) -> bool:
 # Map negative aliases to literal catalog terms so substring fallback remains effective.
 # Structured category exclusions are already applied during retrieval.
 _NEGATIVE_ALIAS: dict[str, str] = {
-    "功能性饮料": "功能饮料",
-    "能量饮料": "功能饮料",
-    "功能型饮料": "功能饮料",
-    "提神饮料": "功能饮料",
-    "碳酸": "碳酸饮料",
-    "汽水": "碳酸饮料",
-    "气泡水": "碳酸饮料",
+    "姨妈巾": "卫生巾",
+    "棉条": "卫生棉条",
+    "暖宝宝": "暖宫贴",
+    "暖贴": "暖宫贴",
+    "乳糖": "乳制品",
+    "牛奶": "乳制品",
+    "奶制品": "乳制品",
     "0糖": "无糖",
     "零糖": "无糖",
     "无糖型": "无糖",

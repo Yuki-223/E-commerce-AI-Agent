@@ -1,0 +1,86 @@
+{
+  "product_id": "p_period_005",
+  "title": "暖月艾草暖宫贴 恒温约50°C 持续10小时 经期腹部热敷 10片",
+  "brand": "暖月 Warmoon",
+  "category": "经期关怀",
+  "sub_category": "暖宫贴",
+  "base_price": 39.0,
+  "image_path": "3_经期关怀/images/p_period_005.svg",
+  "skus": [
+    {
+      "sku_id": "s_p_period_005_1",
+      "properties": {
+        "规格": "10片"
+      },
+      "price": 39.0
+    },
+    {
+      "sku_id": "s_p_period_005_2",
+      "properties": {
+        "规格": "30片"
+      },
+      "price": 99.0
+    }
+  ],
+  "attributes": {
+    "ingredients": [
+      "铁粉",
+      "活性炭",
+      "蛭石",
+      "艾草粉",
+      "香精"
+    ],
+    "allergens": [],
+    "pregnancy": "avoid",
+    "pregnancy_note": "孕期不建议腹部热敷",
+    "caffeine": false,
+    "fragrance": true,
+    "alcohol": false,
+    "vegan": true,
+    "tags": [
+      "热敷",
+      "艾草香"
+    ],
+    "cycle_phases": [
+      "menstrual"
+    ]
+  },
+  "rag_knowledge": {
+    "marketing_description": "铁粉氧化自发热，恒温约50°C持续约10小时，热敷腹部或腰骶部帮助缓解经期的不适感。添加艾草香，不喜欢香味的可以选无香暖贴。【配料与安全】主要成分：铁粉、活性炭、蛭石、艾草粉、香精；过敏原：无常见过敏原；不含咖啡因；含香精；纯素；孕期哺乳期：不建议；适合的周期阶段：经期。",
+    "official_faq": [
+      {
+        "question": "孕期、哺乳期或备孕可以用吗？",
+        "answer": "不建议。孕期不建议腹部热敷。"
+      },
+      {
+        "question": "怎么使用？什么时候用最合适？",
+        "answer": "贴在内衣外侧，不要直接贴皮肤；睡觉时不建议使用，以免低温烫伤。皮肤感觉迟钝者慎用。"
+      },
+      {
+        "question": "规格怎么选？",
+        "answer": "目前有规格：10片（¥39）；规格：30片（¥99）。按使用频率选择规格，第一次尝试建议选小规格。"
+      },
+      {
+        "question": "可以直接贴在皮肤上吗？",
+        "answer": "不可以。请贴在贴身衣物外侧，长时间直接接触皮肤容易造成低温烫伤。"
+      }
+    ],
+    "user_reviews": [
+      {
+        "nickname": "怕冷体质",
+        "rating": 5,
+        "content": "上班贴一片，一整天暖暖的。"
+      },
+      {
+        "nickname": "小鹿",
+        "rating": 4,
+        "content": "艾草味有点重。"
+      },
+      {
+        "nickname": "通勤",
+        "rating": 5,
+        "content": "比暖宝宝薄，衣服外面看不出来。"
+      }
+    ]
+  }
+}
