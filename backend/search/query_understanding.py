@@ -400,6 +400,9 @@ def _regex_extract_excludes(query: str) -> tuple[list[str], list[str]]:
         if idx < 0:
             continue
         window = text[idx + len(cue): idx + len(cue) + 12]
+        # "不含酒精的清爽防晒" negates only what comes before 的 or a punctuation mark;
+        # the noun after it is what the user wants.
+        window = re.split(r"[的，。,；;！!？?\s]", window.lstrip(), maxsplit=1)[0]
         # 1. Colloquial alias to official subcategory.
         for syn, official in _SUBCAT_SYNONYMS.items():
             if syn in window:

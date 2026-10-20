@@ -135,6 +135,18 @@ def test_regex_extracts_carbonated():
     assert "碳酸饮料" in sub
 
 
+def test_regex_does_not_exclude_the_noun_after_de():
+    # 「不含酒精的清爽防晒」 asks for sunscreen without alcohol; 防晒 must stay searchable.
+    sub, cat = _regex_extract_excludes("给我妈买 300 元以内不含酒精的清爽防晒")
+    assert "防晒" not in sub
+    assert cat == []
+
+
+def test_regex_keeps_exclusion_after_a_space():
+    sub, cat = _regex_extract_excludes("推荐饮料，不要 碳酸饮料")
+    assert "碳酸饮料" in sub
+
+
 def test_regex_zero_false_positive_on_price():
     # A price constraint without a category must not produce a false category exclusion.
     sub, cat = _regex_extract_excludes("推荐饮料，不要太贵")
