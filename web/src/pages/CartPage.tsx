@@ -33,8 +33,8 @@ function QuantityInput({ line, onCommit, disabled }: { line: CartLine; onCommit:
     if (n !== line.quantity) onCommit(Math.min(n, 999))
   }
   return (
-    <div className="flex h-9 w-[116px] items-center rounded-[10px] border border-line-strong">
-      <button type="button" aria-label="减少" disabled={disabled || line.quantity <= 1} onClick={() => onCommit(line.quantity - 1)} className="h-[34px] w-9 p-0 text-[17px] text-ink-muted disabled:opacity-40">
+    <div className="flex h-9 w-[116px] items-center rounded-[10px] bg-secondary">
+      <button type="button" aria-label="减少" disabled={disabled || line.quantity <= 1} onClick={() => onCommit(line.quantity - 1)} className="h-9 w-9 p-0 text-[17px] text-ink-muted disabled:opacity-40">
         −
       </button>
       <label className="grow">
@@ -49,7 +49,7 @@ function QuantityInput({ line, onCommit, disabled }: { line: CartLine; onCommit:
           className="w-full bg-transparent text-center text-[15px] font-semibold outline-none"
         />
       </label>
-      <button type="button" aria-label="增加" disabled={disabled} onClick={() => onCommit(line.quantity + 1)} className="h-[34px] w-9 p-0 text-[17px] text-primary-text disabled:opacity-40">
+      <button type="button" aria-label="增加" disabled={disabled} onClick={() => onCommit(line.quantity + 1)} className="h-9 w-9 p-0 text-[17px] text-primary-text disabled:opacity-40">
         +
       </button>
     </div>
@@ -255,7 +255,7 @@ export function CartPage() {
               </label>
               <div className="flex grow flex-col gap-px">
                 <span className="text-xs text-ink-subtle">已选 {selectedQty} 件</span>
-                <span className="text-lg font-bold text-primary-text" data-testid="cart-total">{yuan2(selectedTotal)}</span>
+                <span className="text-lg font-bold text-error-text" data-testid="cart-total">{yuan2(selectedTotal)}</span>
               </div>
               <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-11 rounded-full bg-primary px-5 active:scale-[0.97] text-[15px] font-semibold text-on-primary disabled:opacity-50">
                 结算（{selectedQty}）
@@ -312,24 +312,16 @@ export function CartPage() {
           </section>
 
           <aside aria-label="结算" className="sticky top-0 flex w-80 shrink-0 flex-col gap-4 rounded-[20px] border border-line bg-surface p-5 shadow-[0_2px_6px_rgba(43,30,18,0.04)]">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1 rounded-xl bg-field p-3">
-                <span className="text-xs text-ink-muted">清单</span>
-                <span className="text-[17px] font-bold">{lines.length} 款</span>
-              </div>
-              <div className="flex flex-col gap-1 rounded-xl bg-field p-3">
-                <span className="text-xs text-ink-muted">数量</span>
-                <span className="text-[17px] font-bold">{itemCount} 件</span>
-              </div>
-            </div>
             <div className="flex flex-col gap-1">
-              <span className="text-[13px] text-ink-muted">已选 {selectedQty} 件 · 合计</span>
-              <span className="text-[30px] font-bold text-primary-text" data-testid="cart-total">
+              <span className="text-[13px] text-ink-muted">
+                {lines.length} 款 · 共 {itemCount} 件{selectedQty !== itemCount && `，已选 ${selectedQty} 件`} · 合计
+              </span>
+              <span className="text-[30px] font-bold leading-tight text-error-text" data-testid="cart-total">
                 {yuan2(selectedTotal)}
               </span>
             </div>
             {/* Checkout is a no-op, matching the iOS app (handoff doc: 不做真实下单). */}
-            <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-12 rounded-3xl bg-primary active:scale-[0.98] text-base font-semibold text-on-primary disabled:opacity-50">
+            <button type="button" disabled={selectedQty === 0} title="演示版暂不支持下单" className="h-10 rounded-[10px] bg-primary text-[15px] font-semibold text-on-primary hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50">
               结算（{selectedQty}）
             </button>
             <p className="m-0 text-xs leading-[18px] text-ink-subtle">
