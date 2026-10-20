@@ -4,9 +4,11 @@ import { useCart } from '../../hooks/useCart'
 import { usePresence } from '../../hooks/usePresence'
 import { preferenceSummary, usePreference } from '../../hooks/usePreference'
 import { profileLabel, useActiveProfile, type Profile } from '../../stores/profiles'
+import { ROLE_LABELS, isSeller, useAuth } from '../../stores/auth'
+import { toast } from '../../stores/toast'
 import { useSettings } from '../../stores/ui'
 import { ProfilesView } from '../chat/ComposerMenu'
-import { IconCart, IconChevronDown, IconChevronRight, IconGear, IconHelp, IconHistory, IconUsers } from '../Icons'
+import { IconBox, IconCart, IconCheckCircle, IconChevronDown, IconChevronRight, IconCrown, IconGear, IconHelp, IconHistory, IconUsers } from '../Icons'
 import { HistoryManagerDialog } from './HistoryManagerDialog'
 
 export function Avatar({ profile, size = 32 }: { profile: Profile; size?: number }) {
@@ -36,6 +38,8 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
   const { data } = usePreference(profile.userId)
   const { data: cart } = useCart()
   const openSettings = useSettings((s) => s.open)
+  const account = useAuth((s) => s.account)
+  const signOut = useAuth((s) => s.signOut)
   const [open, setOpen] = useState(false)
   const [view, setView] = useState<'root' | 'profiles'>('root')
   const [history, setHistory] = useState(false)
@@ -109,6 +113,26 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
                 <span className="grow">购物车</span>
                 <span className="text-xs text-ink-subtle">{cart?.cart.item_count ?? 0} 件</span>
               </Link>
+              <Link role="menuitem" to="/orders" onClick={close} className={ROW}>
+                <span className={ICON}>
+                  <IconBox size={16} />
+                </span>
+                <span className="grow">我的订单</span>
+              </Link>
+              <button type="button" role="menuitem" onClick={() => (close(), openSettings('addresses'))} className={ROW}>
+                <span className={ICON}>
+                  <IconCheckCircle size={16} />
+                </span>
+                <span className="grow">收货地址</span>
+              </button>
+              {isSeller(account) && (
+                <Link role="menuitem" to="/merchant" onClick={close} className={ROW}>
+                  <span className={ICON}>
+                    <IconCrown size={16} />
+                  </span>
+                  <span className="grow">商家后台</span>
+                </Link>
+              )}
               <button type="button" role="menuitem" onClick={() => (close(), setHistory(true))} className={ROW}>
                 <span className={ICON}>
                   <IconHistory size={16} />
@@ -122,6 +146,28 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
                 <span className="grow">帮助与反馈</span>
                 <span aria-hidden="true" className="text-xs text-ink-subtle">↗</span>
               </a>
+              <div aria-hidden="true" className="mx-1 my-1 h-px bg-line" />
+              {account ? (
+                <button type="button" role="menuitem" onClick={() => (close(), signOut(), toast({ title: '已退出登录' }))} className={ROW}>
+                  <span className={ICON}>
+                    <IconUsers size={16} />
+                  </span>
+                  <span className="flex min-w-0 grow flex-col">
+                    <span>退出登录</span>
+                  </span>
+                  <span className="truncate text-xs text-ink-subtle">
+                    {account.username} · {ROLE_LABELS[account.role]}
+                  </span>
+                </button>
+              ) : (
+                <Link role="menuitem" to="/login" onClick={close} className={ROW}>
+                  <span className={ICON}>
+                    <IconUsers size={16} />
+                  </span>
+                  <span className="grow">登录 / 注册</span>
+                  <span className="text-xs text-ink-subtle">顾客或商家</span>
+                </Link>
+              )}
               <div aria-hidden="true" className="mx-1 my-1 h-px bg-line" />
               <div className="px-2.5 pb-1 pt-1.5 text-xs text-ink-subtle">
                 CartPilot · MIT ·{' '}

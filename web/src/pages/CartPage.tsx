@@ -10,6 +10,8 @@ import { CollapseBox } from '../components/Collapse'
 import { SpecDialog } from '../components/cart/SpecDialog'
 import { ProductImage } from '../components/product/ProductImage'
 import { CART_KEY, useCart, useCartMutation } from '../hooks/useCart'
+import { ORDERS_KEY } from '../hooks/useCommerce'
+import { AddressPicker } from '../components/orders/AddressPicker'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useIsNarrow } from '../hooks/useIsNarrow'
 import { usePresence, usePresenceList } from '../hooks/usePresence'
@@ -245,14 +247,22 @@ export function CartPage() {
   const narrow = useIsNarrow()
   const qc = useQueryClient()
   const [checkingOut, setCheckingOut] = useState(false)
+  const [addressId, setAddressId] = useState<number | null>(null)
 
-  // POST /orders for the ticked lines; the backend removes them from the cart.
+  // POST /orders for the ticked lines; the backend reserves stock and removes them from the cart.
   const checkout = async () => {
     setCheckingOut(true)
     try {
-      const { order, cart } = await api.order({ cartItemIDs: selected.map((l) => String(l.cart_item_id)) })
+      const { order, cart } = await api.order({ cartItemIDs: selected.map((l) => String(l.cart_item_id)), address_id: addressId })
       qc.setQueryData<CartResponse>(CART_KEY, { cart })
-      toast({ tone: 'success', title: '下单成功', detail: `订单号 ${order.order_id} · 共 ${order.item_count} 件 · 实付 ${yuan2(order.total)}` })
+      void qc.invalidateQueries({ queryKey: ORDERS_KEY })
+      const split = (order.order_ids?.length ?? 1) > 1 ? `，按店铺拆成 ${order.order_ids!.length} 单` : ''
+      toast({
+        tone: 'success',
+        title: '订单已提交，待支付',
+        detail: `共 ${order.item_count} 件 · 应付 ${yuan2(order.total)}${split}`,
+        action: { label: '去支付', to: '/orders' },
+      })
     } catch (err) {
       toast({ tone: 'error', title: '下单失败', detail: err instanceof ApiError ? err.message : '请稍后再试' })
     } finally {
@@ -281,6 +291,9 @@ export function CartPage() {
                 </CollapseBox>
               ))}
               <p className="mx-1 mt-1 text-xs leading-[18px] text-ink-subtle">点规格可以改；在对话里说“把第二个删掉”也能修改购物车。</p>
+            </div>
+            <div className="shrink-0 border-t border-line-faint bg-surface px-4 py-2.5">
+              <AddressPicker value={addressId} onChange={setAddressId} />
             </div>
             <div className="flex shrink-0 items-center gap-3 border-t border-line bg-surface px-4 pb-[max(10px,env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-6px_16px_rgba(43,30,18,0.05)]">
               <label className="flex min-h-11 cursor-pointer items-center gap-1.5 text-sm">
@@ -355,7 +368,8 @@ export function CartPage() {
                 {yuan2(selectedTotal)}
               </span>
             </div>
-            {/* A demonstration order: POST /orders, no payment. */}
+            <AddressPicker value={addressId} onChange={setAddressId} />
+            {/* POST /orders creates pending-payment orders; payment (simulated) happens on 我的订单. */}
             <button type="button" disabled={selectedQty === 0 || checkingOut} onClick={() => void checkout()} className="h-10 rounded-[10px] bg-primary text-[15px] font-semibold text-on-primary hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50">
               {checkingOut ? '正在下单…' : `结算（${selectedQty}）`}
             </button>

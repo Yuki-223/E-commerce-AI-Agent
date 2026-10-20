@@ -196,8 +196,31 @@ npm run preview   # 本地预览生产构建（含 PWA，可“添加到主屏�
 ```
 
 - 页面宽度小于 768 px 时自动切换为手机布局；用手机访问时，`vite --host` 可在局域网暴露开发服务器（真实后端需按第 4 步以 `HOST=0.0.0.0` 启动）。
-- 历史对话和偏好档案存在浏览器 IndexedDB 里；购物车全局只有一份，由后端保存。
+- 历史对话和偏好档案存在浏览器 IndexedDB 里；购物车、订单和收货地址由后端按登录账号保存，未登录时共用体验账号 `demo_user`。
 - 模拟模式下复现加载中、出错、断线重试、后端未连接等状态的方法见 `web/README.md`。
+
+## 账号、订单与商家后台
+
+顾客和商家共用一套后端，未登录时仍按体验账号 `demo_user` 工作，所以 iOS 客户端和旧版网页不用改。
+
+- **账号：** `POST /auth/register`（`role` 为 `customer` 或 `merchant`；注册商家需要填 `shop_name`）、`POST /auth/login`、`GET /auth/me`。登录后请求带上 `Authorization: Bearer <token>`，购物车、订单、地址和对话里的加购、下单都只作用于这个账号。
+- **订单：** 下单后状态为 `待支付`，同一事务里扣减库存，库存不够返回 409。多个店铺的商品按店铺拆单。流转：`待支付 → 待发货 → 已发货 → 已完成`，另有取消、退款申请、商家同意或拒绝退款；取消、退款和超时未支付（`ORDER_PAY_TIMEOUT_MINUTES`，默认 30）都会回补库存。支付是模拟的。
+- **商家后台（`/merchant/*`）：** 经营概览、商品和 SKU 的发布、编辑、上下架、改价、改库存，订单发货（填写物流单号），退款处理，店铺资料。商品写入后会在后台增量更新 Chroma 索引（`rag/sync.py`），AI 导购随即能推荐新商品；没有 embedding 凭证时设 `RAG_SYNC_ON_WRITE=0`，之后再运行 `python -m rag.sync --all` 补齐。
+- **网页版：** 账户菜单里有 登录 / 注册、我的订单、收货地址，商家账号还会看到 商家后台。
+
+```bash
+cd backend
+python -m store.manage create-admin --username admin --password 你的密码            # 平台管理员，可管理所有店铺和自营商品
+python -m store.manage assign-products --merchant-user shop1 --brand 珀莱雅          # 把内置商品分给某个商家，方便演示
+```
+
+| 环境变量 | 作用 |
+| --- | --- |
+| `AUTH_SECRET` | 令牌签名密钥，部署时必须设置，未设置时使用开发用密钥 |
+| `AUTH_REQUIRED=1` | 购物车和订单接口拒绝未登录请求（默认允许，按体验账号处理） |
+| `AUTH_TOKEN_TTL_SECONDS` | 令牌有效期，默认 7 天 |
+
+已有数据库会在后端首次访问时自动补上新表和 `products.merchant_id` 列，不需要 `--reset`。
 
 ## 直接调用 API
 

@@ -173,6 +173,29 @@ npm run dev        # against the local backend from step 4; /api/* is proxied to
 
 Open `http://localhost:5173`. The mock layer reads the product JSON and images under `data/`, answers chats with a scripted SSE stream and keeps the cart and preferences in the browser, using the same paths, SSE event names and fields as the real backend. The only switch is `VITE_USE_MOCK=1`. `npm test` runs the unit tests, `npm run build` writes `web/dist` (the mock layer is left out unless the flag is set), and `npm run preview` serves the build, including the installable PWA. See `web/README.md` for how to trigger each UI state in mock mode.
 
+## Accounts, orders and the merchant console
+
+Shoppers and merchants share one backend. Requests without a login still act as the demo shopper `demo_user`, so the iOS app and older web builds keep working.
+
+- **Accounts:** `POST /auth/register` (`role` is `customer` or `merchant`; merchants also send `shop_name`), `POST /auth/login`, `GET /auth/me`. With `Authorization: Bearer <token>`, the cart, orders, addresses and the chat agent's add-to-cart and checkout all act on that account.
+- **Orders:** checkout creates `pending_payment` orders and reserves stock in the same transaction. If stock runs out the request returns 409. Lines are split into one order per shop. Orders move `pending_payment → paid → shipped → completed`, and can also be cancelled or refunded: the shopper requests a refund and the merchant approves or rejects it. Cancelling, refunding and unpaid expiry (`ORDER_PAY_TIMEOUT_MINUTES`, default 30) release the stock. Payment is simulated.
+- **Merchant console (`/merchant/*`):** dashboard; publishing and editing products and SKUs, listing and delisting, price and stock changes; shipping with a tracking number; refund decisions; and the shop profile. Each catalog write triggers an incremental Chroma update in the background (`rag/sync.py`), so the shopping agent can recommend new products right away. Without embedding credentials, set `RAG_SYNC_ON_WRITE=0` and run `python -m rag.sync --all` later.
+- **Web app:** the account menu has 登录 / 注册 (log in / register), 我的订单 (my orders) and 收货地址 (shipping addresses). Merchant accounts also get 商家后台 (the merchant console).
+
+```bash
+cd backend
+python -m store.manage create-admin --username admin --password <password>        # platform admin: manages every shop and the platform-operated catalog
+python -m store.manage assign-products --merchant-user shop1 --brand 珀莱雅        # hand bundled products to a merchant for demos
+```
+
+| Variable | Effect |
+| --- | --- |
+| `AUTH_SECRET` | Token signing key. Set it for any deployment; a development key is used otherwise |
+| `AUTH_REQUIRED=1` | Cart and order endpoints reject anonymous requests (default: treat them as the demo shopper) |
+| `AUTH_TOKEN_TTL_SECONDS` | Token lifetime, 7 days by default |
+
+Existing databases gain the new tables and `products.merchant_id` automatically on first use; no `--reset` needed.
+
 ## Try the API directly
 
 FastAPI documentation is available at `http://127.0.0.1:8000/docs`.

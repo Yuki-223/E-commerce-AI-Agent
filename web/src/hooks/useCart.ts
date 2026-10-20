@@ -4,7 +4,7 @@ import type { CartMutationRequest, CartResponse } from '../api/types'
 
 export const CART_KEY = ['cart'] as const
 
-/** GET /cart snapshot; the cart is global (one per backend, shared by all profiles). */
+/** GET /cart snapshot: the signed-in account's cart, or the shared demo cart when signed out (all profiles share it). */
 export function useCart() {
   return useQuery({ queryKey: CART_KEY, queryFn: ({ signal }) => api.cart(signal), staleTime: 5_000 })
 }

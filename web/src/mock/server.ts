@@ -7,7 +7,8 @@ import type { CartMutationRequest, ChatRequest, CompareRequest, OrderRequest, Ti
 import { scriptTurn } from './agent'
 import { buildComparison, catalog, getProductDetail, productPayload, type ProductDetail } from './catalog'
 import { mockCtl } from './controls'
-import { CartNotFoundError, cartStore, preferenceFromDict, preferenceStore, sessionStore } from './state'
+import { addressText, commerceFetch, createOrder, defaultAddressText, shopperId } from './commerce'
+import { CartNotFoundError, DEFAULT_ADDRESS, cartStore, preferenceFromDict, preferenceStore, sessionStore } from './state'
 
 const sleep = (ms: number, signal?: AbortSignal | null) =>
   new Promise<void>((resolve, reject) => {
@@ -34,19 +35,28 @@ function cartItemId(value: string | null | undefined): number | Response {
 }
 
 /** POST /orders in api/main.py: items order now, cartItemIDs check out those lines. */
-function placeOrder(req: OrderRequest): Response {
+function placeOrder(req: OrderRequest, init: RequestInit): Response {
+  const userId = shopperId(init)
+  if (userId instanceof Response) return userId
+  if (!req.items?.length && !req.cartItemIDs?.length) return httpError(400, 'items 和 cartItemIDs 不能都为空')
+  let address = DEFAULT_ADDRESS
+  if (req.address_id != null) {
+    const text = addressText(userId, req.address_id)
+    if (!text) return httpError(404, '收货地址不存在')
+    address = text
+  } else {
+    address = req.address?.trim() || defaultAddressText(userId) || DEFAULT_ADDRESS
+  }
   try {
     let order
     if (req.items?.length) {
-      order = cartStore.order(req.items.map((i) => cartStore.directLine(i.productID, i.skuID, i.quantity)))
-    } else if (req.cartItemIDs?.length) {
-      const ids = new Set(req.cartItemIDs.map(Number))
+      order = createOrder(userId, req.items.map((i) => cartStore.directLine(i.productID, i.skuID, i.quantity)), address)
+    } else {
+      const ids = new Set(req.cartItemIDs!.map(Number))
       const lines = cartStore.listItems().filter((l) => ids.has(l.cart_item_id))
       if (!lines.length) return httpError(404, '购物车里没有可下单的商品')
       for (const l of lines) cartStore.removeItem(l.cart_item_id)
-      order = cartStore.order(lines)
-    } else {
-      return httpError(400, 'items 和 cartItemIDs 不能都为空')
+      order = createOrder(userId, lines, address)
     }
     if (req.session_id) {
       const session = sessionStore.getOrCreate(req.session_id)
@@ -176,7 +186,7 @@ export async function mockFetch(path: string, init: RequestInit = {}): Promise<R
 
   if (method === 'GET' && p === '/cart') return json(cartStore.snapshot())
   if (method === 'POST' && p === '/cart/mutate') return mutateCart(await readBody<CartMutationRequest>(init))
-  if (method === 'POST' && p === '/orders') return placeOrder(await readBody<OrderRequest>(init))
+  if (method === 'POST' && p === '/orders') return placeOrder(await readBody<OrderRequest>(init), init)
   if (method === 'POST' && p === '/cart/reset') return json({ status: 'cleared', removed: cartStore.clear() })
 
   if (method === 'POST' && p === '/compare') {
@@ -214,6 +224,9 @@ export async function mockFetch(path: string, init: RequestInit = {}): Promise<R
     return json({ title: Array.from(title || text).slice(0, 16).join('') })
   }
   if (method === 'GET' && p === '/suggestions') return json(suggestions())
+
+  const commerce = await commerceFetch(method, url, init)
+  if (commerce) return commerce
 
   if (method === 'POST' && p === '/chat/stream') return sseResponse(await readBody<ChatRequest>(init), signal)
   if (method === 'POST' && (m = p.match(/^\/sessions\/([^/]+)\/reset$/))) return json({ status: 'reset', session_id: m[1] })

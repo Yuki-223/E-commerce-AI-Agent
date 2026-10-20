@@ -72,6 +72,7 @@ export function Switch({ checked, label, onChange }: { checked: boolean; label: 
 export const SECTIONS = '-mt-8 [&>section:last-child]:border-b-0 [&>div:last-child>section:last-child]:border-b-0'
 
 export const FIELD = 'h-9 rounded-lg border border-line-strong bg-surface px-3 text-sm text-ink outline-none focus:border-primary'
+export const TEXTAREA = 'h-24 resize-y rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm leading-[21px] text-ink outline-none focus:border-primary'
 
 const BUTTON_BASE = 'inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-[13px] font-medium active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100'
 export const BUTTON = `${BUTTON_BASE} border border-line-strong bg-surface text-ink hover:bg-secondary`

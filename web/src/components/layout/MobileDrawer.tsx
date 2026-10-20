@@ -6,9 +6,10 @@ import { usePresence } from '../../hooks/usePresence'
 import { yuan } from '../../lib/format'
 import { historyGroup } from '../../lib/format'
 import { useConversations, type Conversation } from '../../stores/conversations'
+import { isSeller, useAuth } from '../../stores/auth'
 import { useActiveProfile } from '../../stores/profiles'
 import { useDrawer, useSettings } from '../../stores/ui'
-import { IconAddSquare, IconCart, IconClose, IconCompose, IconSearch } from '../Icons'
+import { IconAddSquare, IconBox, IconCart, IconClose, IconCompose, IconCrown, IconSearch, IconUsers } from '../Icons'
 import { Avatar } from './AccountButton'
 import { HistoryList } from './HistoryItem'
 import { InstallHint, useInstall } from '../../hooks/useInstall'
@@ -26,6 +27,7 @@ export function MobileDrawer() {
   const [query, setQuery] = useState('')
   const [hint, setHint] = useState(false)
   const openSettings = useSettings((s) => s.open)
+  const account = useAuth((s) => s.account)
   const presence = usePresence(open)
 
   useEffect(() => set(false), [location.pathname, location.search, set])
@@ -93,6 +95,22 @@ export function MobileDrawer() {
               {cart?.cart.item_count ?? 0} 件{cart?.cart.item_count ? ` · ${yuan(cart.cart.total)}` : ''}
             </span>
           </Link>
+          <Link to="/orders" className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 text-[15px] text-ink no-underline">
+            <IconBox size={20} className="text-primary-text" />
+            <span className="grow">我的订单</span>
+          </Link>
+          {isSeller(account) && (
+            <Link to="/merchant" className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 text-[15px] text-ink no-underline">
+              <IconCrown size={20} className="text-primary-text" />
+              <span className="grow">商家后台</span>
+            </Link>
+          )}
+          {!account && (
+            <Link to="/login" className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 text-[15px] text-ink no-underline">
+              <IconUsers size={20} className="text-primary-text" />
+              <span className="grow">登录 / 注册</span>
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => (set(false), openSettings('preferences'))}

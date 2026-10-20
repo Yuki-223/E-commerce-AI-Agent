@@ -311,9 +311,15 @@ export interface RecommendPayload {
   debug?: Record<string, unknown>
 }
 
-/** OrderSummary.to_dict() in store/cart_store.py. */
+/**
+ * OrderSummary.to_dict() in store/cart_store.py: one checkout. A checkout that
+ * spans several shops creates several orders; order_ids lists them all.
+ */
 export interface Order {
   order_id: string
+  /** Absent from backends before persisted orders. */
+  order_ids?: string[]
+  status?: OrderStatus
   address: string
   lines: CartLine[]
   item_count: number
@@ -325,6 +331,8 @@ export interface OrderRequest {
   items?: { productID: string; skuID: string | null; quantity: number }[]
   cartItemIDs?: string[]
   address?: string | null
+  /** An address-book entry; wins over `address`. */
+  address_id?: number | null
   session_id?: string | null
 }
 
@@ -375,4 +383,170 @@ export interface ComposerJson {
   opening: string
   items: { productId: string; description: string }[]
   followup: string[]
+}
+
+// ---------------------------------------------------------------------------
+// Accounts: POST /auth/register, POST /auth/login, GET /auth/me  (api/auth.py)
+// ---------------------------------------------------------------------------
+
+export type AccountRole = 'customer' | 'merchant' | 'admin'
+
+export interface Account {
+  user_id: string
+  username: string
+  nickname: string
+  role: AccountRole
+  merchant_id: string | null
+}
+
+export interface AuthResponse {
+  token: string
+  account: Account
+}
+
+export interface RegisterRequest {
+  username: string
+  password: string
+  nickname?: string | null
+  role: 'customer' | 'merchant'
+  shop_name?: string | null
+}
+
+export interface Merchant {
+  merchant_id: string
+  owner_user_id: string
+  name: string
+  description: string
+  status: 'pending' | 'active' | 'suspended'
+}
+
+// ---------------------------------------------------------------------------
+// Persisted orders: GET /orders, POST /orders/{id}/…  (store/order_store.py Order.to_dict)
+// ---------------------------------------------------------------------------
+
+export type OrderStatus = 'pending_payment' | 'paid' | 'shipped' | 'completed' | 'cancelled' | 'refund_requested' | 'refunded'
+
+export interface OrderItem {
+  product_id: string
+  sku_id: string
+  title: string
+  options: Record<string, string>
+  quantity: number
+  unit_price: number
+  subtotal: number
+}
+
+export interface OrderRecord {
+  order_id: string
+  checkout_id: string
+  user_id: string
+  merchant_id: string | null
+  merchant_name: string
+  status: OrderStatus
+  status_label: string
+  total: number
+  item_count: number
+  address: string
+  items: OrderItem[]
+  carrier: string | null
+  tracking_no: string | null
+  refund_reason: string | null
+  created_at: string
+  paid_at: string | null
+  shipped_at: string | null
+  completed_at: string | null
+  cancelled_at: string | null
+}
+
+export interface OrdersResponse {
+  orders: OrderRecord[]
+}
+
+export interface OrderRecordResponse {
+  order: OrderRecord
+}
+
+// ---------------------------------------------------------------------------
+// Address book: /addresses  (store/address_store.py Address.to_dict)
+// ---------------------------------------------------------------------------
+
+export interface Address {
+  address_id: number
+  user_id: string
+  recipient: string
+  phone: string
+  region: string
+  detail: string
+  is_default: boolean
+  /** The one-line snapshot an order stores. */
+  text: string
+}
+
+export type AddressRequest = Pick<Address, 'recipient' | 'phone' | 'region' | 'detail' | 'is_default'>
+
+// ---------------------------------------------------------------------------
+// Merchant console: /merchant/*  (api/merchant.py, store/merchant_store.py)
+// ---------------------------------------------------------------------------
+
+export interface MerchantSku {
+  sku_id: string
+  properties: Record<string, string>
+  price: number
+  stock_qty: number
+  status: 'active' | 'inactive'
+}
+
+export interface MerchantProduct {
+  product_id: string
+  title: string
+  brand: string
+  category: string
+  sub_category: string | null
+  base_price: number
+  image_path: string | null
+  image_url: string | null
+  status: 'active' | 'inactive'
+  merchant_id: string | null
+  updated_at: string
+  description: string
+  skus: MerchantSku[]
+  total_stock: number
+  sold_qty: number
+}
+
+export interface SkuBody {
+  sku_id?: string | null
+  properties: Record<string, string>
+  price: number
+  stock_qty: number
+  status?: 'active' | 'inactive'
+}
+
+export interface ProductCreateRequest {
+  title: string
+  brand: string
+  category: string
+  sub_category: string
+  image_url: string
+  description: string
+  skus: SkuBody[]
+}
+
+export type ProductPatchRequest = Partial<Omit<ProductCreateRequest, 'skus'>>
+
+export interface MerchantStats {
+  status_counts: Record<OrderStatus, number>
+  order_count: number
+  paid_order_count: number
+  revenue: number
+  top_products: { product_id: string; title: string; quantity: number; sales: number }[]
+  daily_sales: { day: string; sales: number; orders: number }[]
+  product_count: number
+  active_product_count: number
+  low_stock: { product_id: string; title: string; total_stock: number }[]
+}
+
+export interface ShopResponse {
+  merchant: Merchant | null
+  admin: boolean
 }

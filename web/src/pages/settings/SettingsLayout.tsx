@@ -1,10 +1,11 @@
 import { useEffect, useRef, type ComponentType } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
-import { IconClose, IconDatabase, IconGear, IconSliders, IconUsers } from '../../components/Icons'
+import { IconBox, IconClose, IconDatabase, IconGear, IconSliders, IconUsers } from '../../components/Icons'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { usePresence } from '../../hooks/usePresence'
 import { useSettings, type SettingsTab } from '../../stores/ui'
 import { PreferencePage } from '../PreferencePage'
+import { AddressSettings } from './AddressSettings'
 import { DataSettings } from './DataSettings'
 import { GeneralSettings } from './GeneralSettings'
 import { ProfileSettings } from './ProfileSettings'
@@ -14,6 +15,7 @@ export const SETTINGS_TABS: { id: SettingsTab; label: string; Icon: typeof IconG
   { id: 'general', label: '通用', Icon: IconGear, Page: GeneralSettings },
   { id: 'preferences', label: '购物偏好', Icon: IconSliders, Page: PreferencePage },
   { id: 'profiles', label: '偏好档案', Icon: IconUsers, Page: ProfileSettings },
+  { id: 'addresses', label: '收货地址', Icon: IconBox, Page: AddressSettings },
   { id: 'data', label: '数据与存储', Icon: IconDatabase, Page: DataSettings },
 ]
 

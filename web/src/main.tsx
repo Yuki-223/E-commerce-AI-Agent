@@ -6,6 +6,7 @@ import { App } from './App'
 import { bindQueryClient } from './chat/engine'
 import { api } from './api/endpoints'
 import { hydrateConversations } from './stores/conversations'
+import { useAuth } from './stores/auth'
 import { hydrateProfiles } from './stores/profiles'
 import { initTheme } from './stores/theme'
 import './styles/index.css'
@@ -14,6 +15,10 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
 })
 bindQueryClient(queryClient)
+// Cart, orders and addresses belong to the signed-in account: refetch everything when it changes.
+useAuth.subscribe((s, prev) => {
+  if (s.token !== prev.token) void queryClient.resetQueries()
+})
 void hydrateConversations()
 void hydrateProfiles()
 initTheme()
