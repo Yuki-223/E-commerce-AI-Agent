@@ -85,7 +85,7 @@ export function Sidebar() {
   if (collapsed) {
     return (
       <aside {...shell('w-14')}>
-        <div className="flex h-full w-14 flex-col items-center gap-1 pb-3 pt-2.5">
+        <div className={`flex h-full w-14 flex-col items-center gap-1 pb-3 pt-2.5 ${sliding ? 'animate-fade-in-snap' : ''}`}>
           <RailButton label="展开侧栏" onClick={toggle}>
             <IconSidebar />
           </RailButton>
@@ -111,7 +111,8 @@ export function Sidebar() {
 
   return (
     <aside {...shell('w-[260px]')}>
-      <div className="flex h-full w-[260px] flex-col">
+      {/* The swapped-in contents fade in while the width moves, instead of cutting over. */}
+      <div className={`flex h-full w-[260px] flex-col ${sliding ? 'animate-fade-in-snap' : ''}`}>
         <div className="flex h-14 shrink-0 items-center justify-between pl-4 pr-2.5">
           <Link to="/" className="font-logo text-[21px] tracking-[0.3px] text-ink no-underline hover:text-ink">
             CartPilot

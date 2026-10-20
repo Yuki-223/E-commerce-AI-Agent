@@ -35,4 +35,15 @@ a:hover { color: var(--primary-hover); }
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+  /* The thinking dots keep a slow opacity-only breath instead of freezing; no movement.
+     (Keyframes live here: Tailwind only emits keyframes its own utilities use.) */
+  @keyframes quiet-breathe {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  .animate-quiet-dot {
+    animation-name: quiet-breathe !important;
+    animation-duration: 1.9s !important;
+    animation-iteration-count: infinite !important;
+  }
 }

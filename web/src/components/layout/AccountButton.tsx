@@ -154,7 +154,7 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
         {!compact && (
           <>
             <span className="min-w-0 grow truncate text-sm font-medium">{profileLabel(profile)}</span>
-            <IconChevronDown size={11} className="mr-1 shrink-0 text-ink-subtle" />
+            <IconChevronDown size={11} className={`mr-1 shrink-0 text-ink-subtle transition-transform duration-snap ease-snap ${open ? 'rotate-180' : ''}`} />
           </>
         )}
       </button>

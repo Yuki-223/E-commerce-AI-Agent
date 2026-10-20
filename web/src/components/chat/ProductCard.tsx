@@ -16,8 +16,9 @@ export function ProductCard({ product, description, viewing, compareChecked, onT
   const tags = product.tags.slice(1, 3)
   return (
     <article
-      className={`flex flex-col gap-2.5 rounded-[18px] bg-surface p-3 ${
-        viewing ? 'border-2 border-primary shadow-[0_4px_14px_rgba(206,135,99,0.14)]' : 'border border-line shadow-card'
+      // 正在查看 is a 1px ring over the 1px border (2px total) so the card's size never changes.
+      className={`flex flex-col gap-2.5 rounded-[18px] border bg-surface p-3 transition-[border-color,box-shadow] duration-snap ease-out ${
+        viewing ? 'border-primary shadow-[0_0_0_1px_var(--primary),0_4px_14px_rgba(206,135,99,0.14)]' : 'border-line shadow-card'
       }`}
     >
       <div className="flex gap-3">

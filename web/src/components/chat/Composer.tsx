@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useBump } from '../../hooks/useBump'
 import { usePresence } from '../../hooks/usePresence'
 import { useSpeech } from '../../hooks/useSpeech'
 import { compressImage, firstImage, IMAGE_ACCEPT } from '../../lib/image'
@@ -249,17 +250,20 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
     </button>
   )
 
+  // Send and stop swap places with a quick scale-in rather than a hard cut.
+  const swap = useBump(Boolean(busy && onStop), 'animate-swap-in')
   const sendButton =
     busy && onStop ? (
-      <button type="button" aria-label="停止生成" onClick={onStop} className={`flex ${btn} shrink-0 items-center justify-center rounded-full bg-ink p-0 text-bg`}>
+      <button key={swap.key} type="button" aria-label="停止生成" onClick={onStop} className={`flex ${btn} shrink-0 items-center justify-center rounded-full bg-ink p-0 text-bg ${swap.className}`}>
         <IconStop />
       </button>
     ) : (
       <button
+        key={swap.key}
         type="submit"
         aria-label="发送"
         disabled={!canSend}
-        className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-on-primary ${canSend ? 'bg-primary' : 'bg-disabled'}`}
+        className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-on-primary ${canSend ? 'bg-primary' : 'bg-disabled'} ${swap.className}`}
       >
         <IconSend size={home ? 15 : 16} />
       </button>

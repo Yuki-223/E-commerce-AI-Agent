@@ -83,6 +83,8 @@ export default {
         'expand-in': expandIn,
         // Count badges: a changed number pops back from 60%.
         'count-pop': { from: { transform: 'scale(0.6)' } },
+        'swap-in': { from: { opacity: '0', transform: 'scale(0.8)' } },
+        'saved-check-decay': { to: { opacity: '0' } },
         'collapse-out': exit(expandIn),
         reveal: { from: { opacity: '0', filter: 'blur(6px)' } },
         'bubble-in': { from: { opacity: '0', transform: 'translateY(6px) scale(0.92)' } },
@@ -122,6 +124,11 @@ export default {
         // Storybook Grapheme Reveal: 90ms per piece; `both` keeps a piece blurred until it starts.
         reveal: 'reveal 90ms cubic-bezier(.215, .61, .355, 1) both',
         'count-pop': 'count-pop var(--dur-slow) var(--ease-spring-bounce)',
+        // Send ⇄ stop, the sidebar's swapped contents, 回到最新: a quick 120ms entrance.
+        'swap-in': 'swap-in var(--dur-snap) var(--ease-out)',
+        'fade-in-snap': 'fade-in var(--dur-snap) var(--ease-out)',
+        // 已复制链接: pop in, hold 2.5s, fade out (Storybook saved-check-decay).
+        copied: 'pop-in var(--dur-snap) var(--ease-out), saved-check-decay 300ms var(--ease-out) 2.5s forwards',
         'bubble-in': 'bubble-in var(--dur-slow) var(--ease-overshoot)',
         'fade-up': 'fade-up var(--dur-slow) var(--ease-out)',
         'quiet-dot': 'quiet-dot 1.9s cubic-bezier(.4, 0, .2, 1) infinite',

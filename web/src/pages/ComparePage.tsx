@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/http'
 import type { ComparisonProduct } from '../api/types'
 import { CartButton } from '../components/CartButton'
+import { CopiedTip, shareOrCopy, useCopiedTip } from '../components/CopiedTip'
 import { IconCheckCircle, IconChevronLeft, IconClose, IconCrown, IconPlusCircle, IconSwipe } from '../components/Icons'
 import { ProductImage } from '../components/product/ProductImage'
 import { useCart, useCartMutation } from '../hooks/useCart'
@@ -137,6 +138,7 @@ export function ComparePage() {
   const candidates = useCandidates(ids, fromConv)
   useDocumentTitle('商品对比')
   const narrow = useIsNarrow()
+  const copied = useCopiedTip()
 
   const setIds = (next: string[]) => {
     const p = new URLSearchParams(params)
@@ -218,13 +220,16 @@ export function ComparePage() {
           <Link to={fromConv ? `/c/${fromConv}` : '/'} className="flex h-11 grow items-center justify-center rounded-xl border border-line-strong text-sm font-semibold text-ink no-underline">
             问问 AI 选哪个
           </Link>
-          <button
-            type="button"
-            onClick={() => (navigator.share ? void navigator.share({ title: '商品对比', url: window.location.href }).catch(() => undefined) : void navigator.clipboard?.writeText(window.location.href))}
-            className="flex h-11 grow items-center justify-center rounded-xl bg-primary active:scale-[0.98] text-sm font-semibold text-on-primary"
-          >
-            分享对比
-          </button>
+          <div className="relative flex grow">
+            <button
+              type="button"
+              onClick={() => void shareOrCopy({ title: '商品对比', url: window.location.href }).then((c) => c && copied.show())}
+              className="flex h-11 grow items-center justify-center rounded-xl bg-primary active:scale-[0.98] text-sm font-semibold text-on-primary"
+            >
+              分享对比
+            </button>
+            <CopiedTip tip={copied} className="inset-x-0 bottom-full mx-auto mb-2" />
+          </div>
         </div>
       </>
     )
