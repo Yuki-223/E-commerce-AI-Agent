@@ -8,6 +8,11 @@ import { AccountButton } from './AccountButton'
 import { HistoryItem } from './HistoryItem'
 import { SearchDialog } from './SearchDialog'
 
+/** Apple keyboards show ⌘K; everyone else gets Ctrl K. */
+const IS_MAC =
+  typeof navigator !== 'undefined' &&
+  /mac|iphone|ipad/i.test((navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData?.platform ?? navigator.platform)
+
 const ROW = 'flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink no-underline hover:bg-sidebar-hover hover:text-ink'
 const RAIL_BTN = 'flex h-9 w-9 items-center justify-center rounded-lg p-0 text-ink-muted hover:bg-sidebar-hover hover:text-ink'
 
@@ -30,8 +35,8 @@ function RailButton({ label, onClick, children, to }: { label: string; onClick?:
 
 /**
  * Desktop sidebar in the claude.ai / classic style: logo + collapse toggle,
- * flat nav rows (新对话 · 搜索 window · 购物车), a single-line 最近 list, account row
- * pinned to the bottom. Collapsed, it becomes a 56px icon rail.
+ * flat nav rows (新对话 · 搜索 drawn as a field with a ⌘K / Ctrl K hint · 购物车), a
+ * single-line 最近 list, account row pinned to the bottom. Collapsed, it becomes a 56px icon rail.
  */
 export function Sidebar() {
   const navigate = useNavigate()
@@ -119,12 +124,20 @@ export function Sidebar() {
             </span>
             新对话
           </button>
-          <button type="button" onClick={() => setSearching(true)} className={`${ROW} group`}>
-            <span className="flex w-6 justify-center text-ink-muted">
+          <button
+            type="button"
+            aria-label="搜索对话"
+            aria-keyshortcuts={IS_MAC ? 'Meta+K' : 'Control+K'}
+            onClick={() => setSearching(true)}
+            className="my-1 flex h-9 w-full items-center gap-2.5 rounded-lg border border-line-strong bg-surface px-[7px] text-left text-sm text-ink-subtle"
+          >
+            <span className="flex w-6 justify-center">
               <IconSearch size={15} />
             </span>
             <span className="grow">搜索</span>
-            <kbd className="hidden rounded-[5px] border border-line-strong px-1.5 py-px font-sans text-[11px] text-ink-subtle group-hover:inline">⌘K</kbd>
+            <kbd aria-hidden className="font-sans text-xs text-ink-subtle">
+              {IS_MAC ? '⌘K' : 'Ctrl K'}
+            </kbd>
           </button>
           <Link to="/cart" className={`${ROW} ${onCart ? 'bg-sidebar-active' : ''}`}>
             <span className="flex w-6 justify-center text-ink-muted">
