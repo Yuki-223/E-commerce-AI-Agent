@@ -33,7 +33,7 @@ export function MobileCartLink() {
   const { data } = useCart()
   const count = data?.cart.item_count ?? 0
   return (
-    <Link to="/cart" aria-label={`购物车，${count} 件`} className={`${BTN} relative text-ink-muted`}>
+    <Link to="/cart" aria-label={`购物车，${count} 件`} className={`${BTN} relative rounded-full text-ink active:bg-secondary`}>
       <IconCart size={22} strokeWidth={2.1} />
       {count > 0 && (
         <span className="absolute right-[3px] top-[5px] flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-bold text-bg">{count > 99 ? '99+' : count}</span>

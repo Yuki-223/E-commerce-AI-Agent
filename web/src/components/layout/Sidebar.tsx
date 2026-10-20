@@ -129,7 +129,7 @@ export function Sidebar() {
             aria-label="搜索对话"
             aria-keyshortcuts={IS_MAC ? 'Meta+K' : 'Control+K'}
             onClick={() => setSearching(true)}
-            className="my-0.5 flex h-9 w-full items-center gap-2.5 rounded-lg border border-line-strong bg-field px-[7px] text-left text-[15px] text-ink-subtle"
+            className="my-1 flex h-9 w-full items-center gap-2.5 rounded-lg border border-line-strong bg-field px-[7px] text-left text-[15px] text-ink-subtle transition-colors duration-fast hover:border-ink-subtle hover:text-ink-muted"
           >
             <span className="flex w-6 justify-center">
               <IconSearch size={17} />
@@ -144,7 +144,10 @@ export function Sidebar() {
               <IconCart size={19} strokeWidth={1.9} />
             </span>
             <span className="grow">购物车</span>
-            {cartCount > 0 && <span className="rounded-full bg-primary-tint px-1.5 text-xs font-semibold leading-5 text-primary-text">{cartCount}</span>}
+            {cartCount > 0 && (
+              // On /cart the row already has the active fill, so the count sits on surface instead.
+              <span className={`rounded-full px-1.5 text-xs font-semibold leading-5 text-ink-muted ${onCart ? 'bg-surface' : 'bg-sidebar-active'}`}>{cartCount}</span>
+            )}
           </Link>
         </nav>
 
