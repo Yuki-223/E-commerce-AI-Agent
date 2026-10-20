@@ -13,6 +13,7 @@ import { withProductRef, type ProductRef } from '../lib/productRef'
 import { preferenceKey } from '../hooks/usePreference'
 import { useConversations, type ChatMessage } from '../stores/conversations'
 import { toast } from '../stores/toast'
+import { finishThinking, onMeta, onStatus, onToolResult, startThinking } from './thinking'
 
 let queryClient: QueryClient | null = null
 const controllers = new Map<string, AbortController>()
@@ -63,7 +64,7 @@ export async function send(convId: string, input: SendInput) {
     image_base64: input.image ?? null,
   }
   const assistantId = uid()
-  s.upsertMessage(convId, { id: assistantId, role: 'assistant', createdAt: Date.now(), text: '', state: 'pending', request })
+  s.upsertMessage(convId, { id: assistantId, role: 'assistant', createdAt: Date.now(), text: '', state: 'pending', request, thinking: startThinking() })
   await run(convId, assistantId, request)
 
   if (isFirstTurn) void nameConversation(convId, [input.refProduct?.title, input.text.trim()].filter(Boolean).join(' '))
@@ -77,7 +78,7 @@ export async function retry(convId: string, assistantId: string) {
   const request = { ...msg.request, session_id: sessionId ?? msg.request.session_id }
   store().patchMessage(convId, assistantId, {
     state: 'pending', error: undefined, status: undefined, retryAttempt: undefined, text: '', composer: null,
-    productIds: undefined, comparison: null, specSelection: null, memory: undefined,
+    productIds: undefined, comparison: null, specSelection: null, memory: undefined, thinking: startThinking(),
   })
   await run(convId, assistantId, request)
 }
@@ -100,12 +101,14 @@ async function run(convId: string, msgId: string, request: ChatRequest) {
               request.session_id = ev.data.session_id
               break
             case 'status':
-              patch({ status: ev.data.message, statusPhase: ev.data.phase, retryAttempt: undefined })
+              patch((m) => ({ status: ev.data.message, statusPhase: ev.data.phase, retryAttempt: undefined, thinking: m.thinking && onStatus(m.thinking, ev.data) }))
               break
             case 'meta':
+              patch((m) => ({ thinking: m.thinking && onMeta(m.thinking, ev.data) }))
               break
             case 'tool_result': {
               gotAnswer = true
+              patch((m) => ({ thinking: m.thinking && onToolResult(m.thinking, ev.data) }))
               const effect = interpretToolResult(ev.data)
               if (effect.kind === 'products') patch({ productIds: effect.productIds })
               else if (effect.kind === 'specSelection') {
@@ -124,7 +127,7 @@ async function run(convId: string, msgId: string, request: ChatRequest) {
             case 'token':
               gotAnswer = true
               narrative += ev.data
-              patch({ state: 'streaming' })
+              patch((m) => ({ state: 'streaming', thinking: m.thinking && finishThinking(m.thinking) }))
               break
             case 'memory_update':
               patch((m) => ({ memory: [...(m.memory ?? []), ev.data] }))
@@ -152,7 +155,7 @@ async function run(convId: string, msgId: string, request: ChatRequest) {
     await reveal(convId, msgId, narrative)
   } catch (err) {
     if (controller.signal.aborted) {
-      patch((m) => ({ state: 'done', text: m.text || narrative || '已停止生成。', status: undefined }))
+      patch((m) => ({ state: 'done', text: m.text || narrative || '已停止生成。', status: undefined, thinking: m.thinking && finishThinking(m.thinking) }))
     } else {
       patch({ state: 'error', error: describeError(err), status: undefined, retryAttempt: undefined })
     }

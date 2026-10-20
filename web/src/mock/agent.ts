@@ -112,6 +112,9 @@ function search(query: string, userId: string | null | undefined) {
   return { hits: top, maxPrice, noAlcohol }
 }
 
+/** Soft preferences the real parser keeps as `soft_terms`. */
+const SOFT_TERMS = ['敏感肌', '清爽', '温和', '保湿', '轻薄', '防水', '降噪', '续航', '学生党', '通勤']
+
 /** Composer-style 25–40 character pitch without brand or price, built from compare_index. */
 function itemDescription(d: ProductDetail): string {
   const point = compareDim(d.product_id, '核心卖点')
@@ -150,7 +153,15 @@ function recommend(query: string, session: MockSession, userId: string | null | 
         query,
         products: hits.map(card),
         summary: { hit_count: hits.length, needs_clarification: false, category: hits[0]?.category ?? null },
-        debug: { parsed: { max_price: maxPrice, negative_ingredients: noAlcohol ? ['酒精'] : [] } },
+        debug: {
+          parsed: {
+            category: hits[0]?.category ?? null,
+            sub_category: sub || null,
+            max_price: maxPrice,
+            negative_ingredients: noAlcohol ? ['酒精'] : [],
+            soft_terms: SOFT_TERMS.filter((t) => query.includes(t)),
+          },
+        },
       },
       composer_hint: null,
       narrative_override: null,

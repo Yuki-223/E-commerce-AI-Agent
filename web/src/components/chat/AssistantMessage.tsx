@@ -1,32 +1,34 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { retry } from '../../chat/engine'
 import { useProducts } from '../../hooks/useProducts'
-import { useConversations, type ChatMessage } from '../../stores/conversations'
-import { IconAlert, IconCompare, IconRetry } from '../Icons'
+import type { ChatMessage } from '../../stores/conversations'
+import { IconAlert, IconRetry } from '../Icons'
 import { InlineComparison } from '../compare/InlineComparison'
 import { ProductCard } from './ProductCard'
 import { SpecSelectionCard } from './SpecSelectionCard'
 import { StatusBubble } from './StatusBubble'
 import { StreamText } from './StreamText'
+import { ThinkingBlock } from './ThinkingBlock'
 
 interface Props {
   convId: string
   message: ChatMessage
   /** Follow-up chips only under the latest answer. */
   isLatest: boolean
+  /** Sends a follow-up chip, or a search restated without one condition. */
   onFollowup: (text: string) => void
+  /** Cards ticked 加入对比 anywhere in the conversation. */
+  compareIds: string[]
+  onToggleCompare: (productId: string, checked: boolean) => void
   onOpenProduct: (productId: string) => void
   onSpecSubmit: (chosen: Record<string, string>, phrase: string) => void
   busy: boolean
 }
 
-export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpenProduct, onSpecSubmit, busy }: Props) {
+export function AssistantMessage({ convId, message, isLatest, onFollowup, compareIds, onToggleCompare, onOpenProduct, onSpecSubmit, busy }: Props) {
   const [params] = useSearchParams()
   const viewing = params.get('product')
-  const patchMessage = useConversations((s) => s.patchMessage)
-  const compare = message.compareIds ?? []
-  const setCompare = (next: (c: string[]) => string[]) => patchMessage(convId, message.id, (m) => ({ compareIds: next(m.compareIds ?? []) }))
   const { data: products } = useProducts(message.productIds)
   // Answers that arrive while on screen rise in; ones loaded from history don't.
   const [live] = useState(() => message.state === 'pending' || message.state === 'streaming')
@@ -60,14 +62,18 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
 
   const opening = message.composer?.opening ?? message.text
   const working = message.state === 'pending' || (message.state === 'streaming' && !opening)
-  if (working) return <StatusBubble text={message.status} retryAttempt={message.retryAttempt} />
+  const thinking = message.thinking && (
+    <ThinkingBlock thinking={message.thinking} editable={isLatest && message.state === 'done' && !busy} onRefine={onFollowup} />
+  )
+  if (working) return message.retryAttempt || !message.thinking ? <StatusBubble text={message.status} retryAttempt={message.retryAttempt} /> : thinking
 
   const done = message.state === 'done'
   const descriptions = new Map(message.composer?.items.map((i) => [i.productId, i.description]) ?? [])
   const followups = isLatest && done ? message.composer?.followup ?? [] : []
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
+      {thinking}
       {opening && (
         <div className="max-w-[640px] self-start whitespace-pre-line rounded-[18px] border border-line bg-surface px-4 py-[11px] text-[15px] leading-[22px]">
           <StreamText text={opening} />
@@ -83,8 +89,8 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
               product={p}
               description={descriptions.get(p.productID)}
               viewing={viewing === p.productID}
-              compareChecked={compare.includes(p.productID)}
-              onToggleCompare={(on) => setCompare((c) => (on ? [...c, p.productID].slice(-4) : c.filter((x) => x !== p.productID)))}
+              compareChecked={compareIds.includes(p.productID)}
+              onToggleCompare={(on) => onToggleCompare(p.productID, on)}
               onOpen={() => onOpenProduct(p.productID)}
             />
           ))}
@@ -103,19 +109,16 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, onOpen
         </div>
       )}
 
-      {(compare.length >= 2 || followups.length > 0) && (
+      {followups.length > 0 && (
         <div className={`${rise} flex flex-wrap items-center gap-2`}>
-          {compare.length >= 2 && (
-            <Link
-              to={`/compare?ids=${compare.join(',')}&from=${convId}`}
-              className="flex h-8 items-center gap-1.5 rounded-full bg-primary px-3.5 text-[13px] active:scale-[0.97] font-semibold text-on-primary no-underline hover:text-on-primary"
-            >
-              <IconCompare />
-              对比所选（{compare.length}）
-            </Link>
-          )}
           {followups.map((f) => (
-            <button key={f} type="button" onClick={() => onFollowup(f)} className="rounded-full bg-chip px-3.5 py-2 text-[13px] text-primary-text">
+            <button
+              key={f}
+              type="button"
+              disabled={busy}
+              onClick={() => onFollowup(f)}
+              className="rounded-full bg-chip px-3.5 py-2 text-[13px] text-primary-text hover:bg-secondary active:scale-[0.97] disabled:opacity-50"
+            >
               {f}
             </button>
           ))}

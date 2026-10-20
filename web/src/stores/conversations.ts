@@ -1,4 +1,5 @@
 import type { ProductRef } from '../lib/productRef'
+import type { Thinking } from '../chat/thinking'
 import { create } from 'zustand'
 import { loadConversations, saveConversations } from '../lib/db'
 import type { ChatRequest, Comparison, ComposerJson, MemoryUpdateEventData, SpecDimension } from '../api/types'
@@ -34,9 +35,9 @@ export interface ChatMessage {
   status?: string
   statusPhase?: string
   composer?: ComposerJson | null
+  /** 思考过程 folded from the stream; absent on turns saved before it existed. */
+  thinking?: Thinking
   productIds?: string[]
-  /** Cards ticked 加入对比 under this answer. */
-  compareIds?: string[]
   comparison?: Comparison | null
   specSelection?: SpecSelection | null
   cartAction?: string
@@ -55,6 +56,8 @@ export interface Conversation {
   updatedAt: number
   /** Backend session_id from the first `session` event. */
   sessionId?: string
+  /** Cards ticked 加入对比 anywhere in the conversation, oldest first, at most 4. */
+  compareIds?: string[]
   messages: ChatMessage[]
 }
 

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { isStreaming, send, stop } from '../chat/engine'
 import { CartButton } from '../components/CartButton'
 import { AssistantMessage } from '../components/chat/AssistantMessage'
 import { Composer, type ComposerHandle } from '../components/chat/Composer'
 import { MemoryBanner } from '../components/chat/MemoryBanner'
 import { UserMessage } from '../components/chat/UserMessage'
-import { IconArrowDown } from '../components/Icons'
+import { IconArrowDown, IconClose, IconCompare } from '../components/Icons'
 import { MainHeader } from '../components/layout/MainHeader'
 import { MenuButton, MobileCartLink, MobileHeader } from '../components/layout/MobileHeader'
 import { useIsNarrow } from '../hooks/useIsNarrow'
@@ -22,6 +22,7 @@ export function ChatPage() {
   const conv = useConversations((s) => s.conversations[conversationId])
   const loaded = useConversations((s) => s.loaded)
   const patchMessage = useConversations((s) => s.patchMessage)
+  const patchConv = useConversations((s) => s.patch)
   const narrow = useIsNarrow()
   const composer = useRef<ComposerHandle | null>(null)
   const scroller = useRef<HTMLDivElement>(null)
@@ -51,6 +52,15 @@ export function ChatPage() {
     const el = scroller.current
     if (!el) return
     setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 48)
+  }
+
+  const compareIds = conv?.compareIds ?? []
+  const toggleCompare = (productId: string, on: boolean) =>
+    patchConv(conversationId, { compareIds: on ? [...compareIds.filter((x) => x !== productId), productId].slice(-4) : compareIds.filter((x) => x !== productId) })
+
+  const sendText = (text: string) => {
+    setAtBottom(true)
+    void send(conversationId, { text, userId: profile.userId })
   }
 
   const openProduct = (productId: string) => {
@@ -85,7 +95,7 @@ export function ChatPage() {
       )}
       {memoryMsg && <MemoryBanner key={memoryMsg.id} convId={conv.id} message={memoryMsg} />}
       <div className="relative min-h-0 grow">
-        <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-4 pb-4 pt-4 md:px-8 md:pt-6">
+        <div ref={scroller} onScroll={onScroll} className={`h-full overflow-y-auto px-4 pt-4 md:px-8 md:pt-6 ${compareIds.length >= 2 ? 'pb-14' : 'pb-4'}`}>
           <div className="mx-auto flex max-w-[820px] flex-col gap-4">
             {messages.map((m, i) =>
               m.role === 'user' ? (
@@ -96,7 +106,9 @@ export function ChatPage() {
                   convId={conv.id}
                   message={m}
                   isLatest={i === messages.length - 1}
-                  onFollowup={(t) => composer.current?.setText(t)}
+                  onFollowup={sendText}
+                  compareIds={compareIds}
+                  onToggleCompare={toggleCompare}
                   onOpenProduct={openProduct}
                   busy={busy}
                   onSpecSubmit={(chosen, phrase) => {
@@ -109,16 +121,34 @@ export function ChatPage() {
             )}
           </div>
         </div>
-        {!atBottom && (
-          <button
-            type="button"
-            onClick={() => scrollToBottom(true)}
-            className="absolute bottom-3 left-1/2 flex h-8 -translate-x-1/2 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3.5 text-[13px] font-semibold text-ink shadow-[0_6px_16px_rgba(43,30,18,0.12)]"
-          >
-            <IconArrowDown />
-            回到最新
-          </button>
-        )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center gap-2 [&>*]:pointer-events-auto">
+          {compareIds.length >= 2 && (
+            <div className="flex h-8 animate-pop-in items-center rounded-full bg-primary text-[13px] font-semibold text-on-primary shadow-[0_6px_16px_rgba(43,30,18,0.16)]">
+              <Link to={`/compare?ids=${compareIds.join(',')}&from=${conv.id}`} className="flex h-full items-center gap-1.5 pl-3.5 pr-2 text-on-primary no-underline hover:text-on-primary">
+                <IconCompare />
+                对比所选（{compareIds.length}）
+              </Link>
+              <button
+                type="button"
+                aria-label="清空对比选择"
+                onClick={() => patchConv(conv.id, { compareIds: [] })}
+                className="mr-1 flex h-6 w-6 items-center justify-center rounded-full bg-transparent p-0 text-on-primary opacity-80 hover:bg-[rgba(255,255,255,0.18)] hover:opacity-100"
+              >
+                <IconClose size={9} />
+              </button>
+            </div>
+          )}
+          {!atBottom && (
+            <button
+              type="button"
+              onClick={() => scrollToBottom(true)}
+              className="flex h-8 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3.5 text-[13px] font-semibold text-ink shadow-[0_6px_16px_rgba(43,30,18,0.12)]"
+            >
+              <IconArrowDown />
+              回到最新
+            </button>
+          )}
+        </div>
       </div>
       <div className="shrink-0 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 md:px-8 md:pb-[18px] md:pt-3">
         <div className="mx-auto max-w-[820px]">
