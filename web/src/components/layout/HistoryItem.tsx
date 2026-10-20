@@ -66,7 +66,7 @@ export function HistoryItem({ conv, dense = false }: { conv: Conversation; dense
         <NavLink
           to={`/c/${conv.id}`}
           title={`${conv.title}\n${meta}`}
-          className={`flex h-8 items-center rounded-lg pl-2 pr-8 text-[13.5px] no-underline hover:bg-sidebar-hover ${
+          className={`flex h-9 items-center rounded-lg pl-2 pr-8 text-[15px] no-underline hover:bg-sidebar-hover ${
             active || menu ? 'bg-sidebar-active text-ink hover:bg-sidebar-active hover:text-ink' : 'text-ink-muted hover:text-ink'
           }`}
         >

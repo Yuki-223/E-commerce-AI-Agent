@@ -13,7 +13,7 @@ const IS_MAC =
   typeof navigator !== 'undefined' &&
   /mac|iphone|ipad/i.test((navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData?.platform ?? navigator.platform)
 
-const ROW = 'flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink no-underline hover:bg-sidebar-hover hover:text-ink'
+const ROW = 'flex h-10 w-full items-center gap-2.5 rounded-lg px-2 text-left text-[15px] text-ink no-underline hover:bg-sidebar-hover hover:text-ink'
 const RAIL_BTN = 'flex h-9 w-9 items-center justify-center rounded-lg p-0 text-ink-muted hover:bg-sidebar-hover hover:text-ink'
 
 /** 新对话 is always tinted with the neutral active fill, with a black "+", as in claude.ai. */
@@ -120,7 +120,7 @@ export function Sidebar() {
         <nav aria-label="主导航" className="flex shrink-0 flex-col gap-px px-2.5 pb-2">
           <button type="button" onClick={() => navigate('/')} className={`${ROW} ${NEW_CHAT} font-medium`}>
             <span className="flex w-6 justify-center">
-              <IconPlus size={14} strokeWidth={2.4} />
+              <IconPlus size={16} strokeWidth={2.4} />
             </span>
             新对话
           </button>
@@ -129,10 +129,10 @@ export function Sidebar() {
             aria-label="搜索对话"
             aria-keyshortcuts={IS_MAC ? 'Meta+K' : 'Control+K'}
             onClick={() => setSearching(true)}
-            className="my-1 flex h-9 w-full items-center gap-2.5 rounded-lg border border-line-strong bg-surface px-[7px] text-left text-sm text-ink-subtle"
+            className="my-0.5 flex h-9 w-full items-center gap-2.5 rounded-lg border border-line-strong bg-surface px-[7px] text-left text-[15px] text-ink-subtle"
           >
             <span className="flex w-6 justify-center">
-              <IconSearch size={15} />
+              <IconSearch size={17} />
             </span>
             <span className="grow">搜索</span>
             <kbd aria-hidden className="font-sans text-xs text-ink-subtle">
@@ -141,7 +141,7 @@ export function Sidebar() {
           </button>
           <Link to="/cart" className={`${ROW} ${onCart ? 'bg-sidebar-active' : ''}`}>
             <span className="flex w-6 justify-center text-ink-muted">
-              <IconCart size={17} strokeWidth={2} />
+              <IconCart size={19} strokeWidth={1.9} />
             </span>
             <span className="grow">购物车</span>
             {cartCount > 0 && <span className="rounded-full bg-primary-tint px-1.5 text-xs font-semibold leading-5 text-primary-text">{cartCount}</span>}
