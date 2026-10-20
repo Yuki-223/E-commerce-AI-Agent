@@ -60,7 +60,7 @@ export function MobileDrawer() {
         <div className="flex items-center pl-2 pr-1">
           <div className="grow">
             <div className="font-logo text-2xl tracking-[0.3px]">CartPilot</div>
-            <div className="text-xs font-medium text-ink-subtle">购物导购</div>
+            <div className="text-xs font-medium text-ink-subtle">她的补给站</div>
           </div>
           <button type="button" aria-label="关闭菜单" onClick={() => set(false)} className="flex h-11 w-11 items-center justify-center p-0 text-ink-muted">
             <IconClose size={14} />

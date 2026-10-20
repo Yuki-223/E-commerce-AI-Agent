@@ -9,7 +9,7 @@
  * (narrative_override strings, status messages) and the composer JSON otherwise.
  */
 import type {
-  CartToolPayload, ChatRequest, ComposerJson, IntentDecision, ProductCard, SseEvent, ToolResultEventData,
+  CartToolPayload, ChatRequest, ComposerJson, IntentDecision, ProductCard, SseEvent, ToolResultEventData, ProductAttributes, UserPreference
 } from '../api/types'
 import { buildComparison, catalog, compareDim, compareTagline, getProductDetail, priceDisplay, type ProductDetail } from './catalog'
 import { extractPreferenceUpdates } from './memory'
@@ -65,26 +65,46 @@ function card(d: ProductDetail): ProductCard {
   }
 }
 
-/** Mentions alcohol other than to say it is absent (marketing copy and FAQ only). */
-function mentionsAlcohol(d: ProductDetail): boolean {
-  const text = [d.marketing_description, ...d.faqs.map((f) => f.answer)].join('\n')
-  const stripped = text.replace(/(不含|无|没有|零|0)\s*(添加)?\s*酒精/g, '')
-  return /酒精/.test(stripped)
+const CATEGORY_WORDS: [RegExp, string][] = [
+  [/蛋白|补给|能量胶|电解质|肌酸|训练/, '运动营养'],
+  [/维生素|营养素|补铁|铁剂|叶酸|补钙|鱼油|益生菌|备孕|孕期/, '女性营养素'],
+  [/经期|大姨妈|例假|月经|卫生巾|棉条|暖宫|生理期/, '经期关怀'],
+  [/运动服|内衣|瑜伽裤|跑鞋|背心|防晒衣|骑行/, '运动服饰'],
+  [/防晒|洁面|止汗|身体乳|护肤|敏感肌|唇膏/, '运动修护'],
+  [/零食|轻食|早餐|燕麦|酸奶|饮品|茶|巧克力|吃|喝/, '功能轻食'],
+]
+
+/** search/safety.py: query exclusions and profile switches judged on product attributes. */
+const QUERY_SAFETY: [RegExp, (a: ProductAttributes) => boolean, string][] = [
+  [/(不要|不含|无|没有|不碰)\s*(含)?\s*咖啡因?/, (a) => Boolean(a.caffeine), '不含咖啡因'],
+  [/(不要|不含|无)\s*(含)?\s*(香精|香味)/, (a) => Boolean(a.fragrance), '无香精'],
+  [/(不要|不含|无)\s*(含)?\s*酒精/, (a) => Boolean(a.alcohol), '无酒精'],
+  [/(不要|不含|无|过敏).{0,4}(乳制品|牛奶|乳糖)|乳糖不耐/, (a) => (a.allergens ?? []).includes('乳制品'), '避开乳制品'],
+  [/(不要|不含|无|过敏).{0,4}坚果|坚果过敏/, (a) => (a.allergens ?? []).includes('坚果'), '避开坚果'],
+]
+
+function profileViolates(a: ProductAttributes, pref: UserPreference | null): boolean {
+  if (!pref || pref.personalization_enabled === false) return false
+  const flags = pref.safety_flags ?? []
+  if (flags.includes('pregnancy') && a.pregnancy === 'avoid') return true
+  if (flags.includes('no_caffeine') && a.caffeine) return true
+  if (flags.includes('sensitive_skin') && (a.fragrance || a.alcohol)) return true
+  if (flags.includes('vegan') && a.vegan === false) return true
+  return (a.allergens ?? []).some((x) => (pref.allergens_avoid ?? []).includes(x))
 }
 
-const CATEGORY_WORDS: [RegExp, string][] = [
-  [/数码|电子|手机|耳机|平板|电脑|笔记本/, '数码电子'],
-  [/美妆|护肤|化妆|防晒|面霜|精华/, '美妆护肤'],
-  [/服饰|运动|衣服|鞋/, '服饰运动'],
-  [/食品|饮料|零食|吃|喝/, '食品饮料'],
-]
+function safetyLabels(query: string, pref: UserPreference | null): string[] {
+  const out = QUERY_SAFETY.filter(([re]) => re.test(query)).map(([, , label]) => label)
+  if (pref?.personalization_enabled !== false && (pref?.safety_flags ?? []).includes('pregnancy')) out.push('已排除孕期/哺乳期不建议使用的商品')
+  return out
+}
 
 function search(query: string, userId: string | null | undefined) {
   const pref = userId ? preferenceStore.get(userId) : null
   const usePref = pref?.personalization_enabled ?? false
   const priceMatch = query.match(/(\d{2,6})\s*(?:元|块)?\s*(?:以内|以下|之内)/)
   const maxPrice = priceMatch ? Number(priceMatch[1]) : usePref && pref?.budget_max ? pref.budget_max : null
-  const noAlcohol = /(不要|不含|无|没有)\s*(含)?\s*酒精/.test(query)
+  const querySafety = QUERY_SAFETY.filter(([re]) => re.test(query))
   const excluded = new Set(usePref ? pref?.brand_exclude ?? [] : [])
 
   const scored = catalog
@@ -103,17 +123,18 @@ function search(query: string, userId: string | null | undefined) {
     .filter(({ d, score }) => {
       if (score < 3) return false
       if (maxPrice != null && d.price_range.min_price > maxPrice) return false
-      if (noAlcohol && mentionsAlcohol(d)) return false
+      if (querySafety.some(([, bad]) => bad(d.attributes))) return false
+      if (profileViolates(d.attributes, pref)) return false
       if ([...excluded].some((b) => d.brand.includes(b))) return false
       return true
     })
     .sort((a, b) => b.score - a.score || a.d.price_range.min_price - b.d.price_range.min_price)
   const top = scored.slice(0, 4).map((x) => x.d)
-  return { hits: top, maxPrice, noAlcohol }
+  return { hits: top, maxPrice, safety: safetyLabels(query, pref) }
 }
 
 /** Soft preferences the real parser keeps as `soft_terms`. */
-const SOFT_TERMS = ['敏感肌', '清爽', '温和', '保湿', '轻薄', '防水', '降噪', '续航', '学生党', '通勤']
+const SOFT_TERMS = ['敏感肌', '经期', '黄体期', '备孕', '孕期', '马拉松', '温和', '防水', '低糖', '通勤']
 
 /** Composer-style 25–40 character pitch without brand or price, built from compare_index. */
 function itemDescription(d: ProductDetail): string {
@@ -126,20 +147,18 @@ function itemDescription(d: ProductDetail): string {
 
 function recommend(query: string, session: MockSession, userId: string | null | undefined): ToolOutcome {
   session.last_query = query
-  const { hits, maxPrice, noAlcohol } = search(query, userId)
+  const { hits, maxPrice, safety } = search(query, userId)
   session.last_products = hits.map((d) => ({ product_id: d.product_id, title: d.title }))
   const sub = hits[0]?.sub_category ?? ''
-  const limits = [maxPrice != null ? `${maxPrice} 元以内` : '', noAlcohol ? '不含酒精' : ''].filter(Boolean).join('、')
+  const limits = maxPrice != null ? `${maxPrice} 元以内` : ''
   const composer: ComposerJson = hits.length
     ? {
-        opening: noAlcohol
-          ? `已帮你排除含酒精的款，为你推荐了 ${hits.length} 款${limits ? ` ${limits}的` : ''}${sub}`
-          : `为你推荐了 ${hits.length} 款${limits ? ` ${limits}的` : ''}${sub || '商品'}`,
+        opening: safety.length
+          ? `已按「${safety.join('、')}」筛过，为你挑了 ${hits.length} 款${limits ? ` ${limits}的` : ''}${sub || '补给'}`
+          : `为你挑了 ${hits.length} 款${limits ? ` ${limits}的` : ''}${sub || '补给'}`,
         items: hits.map((d) => ({ productId: d.product_id, description: itemDescription(d) })),
         followup:
-          sub === '防晒'
-            ? ['敏感肌更推荐哪一款？', '有没有 200 元以内的？', '对比一下这两款']
-            : ['推荐一些更平价的选择', `推荐其他品牌的${sub || '商品'}`, '对比一下刚才推荐的两款'],
+          ['推荐一些更平价的选择', '只看孕期也能用的', '对比一下刚才推荐的两款'],
       }
     : {
         opening: '抱歉，暂时没有找到完全符合条件的商品',
@@ -153,13 +172,13 @@ function recommend(query: string, session: MockSession, userId: string | null | 
       payload: {
         query,
         products: hits.map(card),
-        summary: { hit_count: hits.length, needs_clarification: false, category: hits[0]?.category ?? null },
+        summary: { hit_count: hits.length, needs_clarification: false, category: hits[0]?.category ?? null, safety },
         debug: {
           parsed: {
             category: hits[0]?.category ?? null,
             sub_category: sub || null,
             max_price: maxPrice,
-            negative_ingredients: noAlcohol ? ['酒精'] : [],
+            negative_ingredients: QUERY_SAFETY.filter(([re]) => re.test(query)).map(([, , label]) => label.replace(/^(不含|无|避开)/, '')),
             soft_terms: SOFT_TERMS.filter((t) => query.includes(t)),
           },
         },
@@ -346,10 +365,10 @@ function route(query: string, session: MockSession, userId: string | null | unde
 function visualSearch(req: ChatRequest, session: MockSession, userId: string | null | undefined): ToolOutcome {
   const hint = (req.query ?? '').trim()
   // The mock cannot see the picture; it treats it as a sunscreen photo plus the text hint.
-  const outcome = recommend(`防晒 ${hint}`, session, userId)
-  outcome.decision = { tool: 'recommend', rewritten_query: `防晒霜 ${hint}`.trim(), confidence: 'high', reasoning: 'image visual search' }
+  const outcome = recommend(`运动防晒 ${hint}`, session, userId)
+  outcome.decision = { tool: 'recommend', rewritten_query: `运动防晒 ${hint}`.trim(), confidence: 'high', reasoning: 'image visual search' }
   const composer = JSON.parse(outcome.narrative) as ComposerJson
-  composer.opening = `根据图片为你找到了 ${composer.items.length} 款相似的防晒`
+  composer.opening = `根据图片为你找到了 ${composer.items.length} 款相似的运动防晒`
   outcome.narrative = JSON.stringify(composer)
   ;(outcome.result.payload as Record<string, unknown>).summary = { hit_count: composer.items.length, needs_clarification: false, source: 'visual_search' }
   return outcome

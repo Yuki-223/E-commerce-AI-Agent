@@ -14,6 +14,8 @@ export interface SpecSelection {
   quantity?: number
   /** Candidate SKUs with prices; older backends send none and the card reads GET /products. */
   skus?: SpecSku[]
+  /** Options preselected from the body profile (size, shade). */
+  suggested?: Record<string, string>
   /** Set once the user confirmed a choice in the card. */
   chosen?: Record<string, string>
   chosenQuantity?: number

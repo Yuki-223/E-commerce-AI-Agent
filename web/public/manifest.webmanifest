@@ -1,13 +1,13 @@
 {
-  "name": "CartPilot · 购物导购",
+  "name": "CartPilot · 她的补给站",
   "short_name": "CartPilot",
-  "description": "说需求、拍图片，AI 导购帮你挑商品、对比和加购。",
+  "description": "运动营养、经期关怀、女性营养素，AI 按你的身体和周期帮你挑。",
   "lang": "zh-CN",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#FBFAF7",
-  "theme_color": "#FBFAF7",
+  "background_color": "#FCF9F8",
+  "theme_color": "#FCF9F8",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },

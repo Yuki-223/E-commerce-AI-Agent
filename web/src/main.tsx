@@ -19,8 +19,7 @@ bindQueryClient(queryClient)
 useAuth.subscribe((s, prev) => {
   if (s.token !== prev.token) void queryClient.resetQueries()
 })
-void hydrateConversations()
-void hydrateProfiles()
+const hydrated = Promise.all([hydrateConversations(), hydrateProfiles()])
 initTheme()
 // Handy in the console during development: await __cartpilotApi.cart()
 if (import.meta.env.DEV) (window as unknown as { __cartpilotApi: typeof api }).__cartpilotApi = api
@@ -34,6 +33,27 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </React.StrictMode>,
 )
+
+/**
+ * Fade the boot splash (index.html) once local history is loaded and the backend has
+ * answered or 1.8 s have passed, never before 600 ms so it does not flash.
+ */
+async function dismissSplash() {
+  const splash = document.getElementById('splash')
+  if (!splash) return
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
+  if (!document.documentElement.classList.contains('splash-skip')) {
+    await Promise.all([wait(600), Promise.race([Promise.all([hydrated, api.health().catch(() => undefined)]), wait(1800)])])
+  }
+  splash.classList.add('out')
+  setTimeout(() => splash.remove(), 400)
+  try {
+    sessionStorage.setItem('cartpilot.booted', '1')
+  } catch {
+    /* ignore */
+  }
+}
+void dismissSplash()
 
 // 添加到主屏幕: register the offline shell in production builds only, so dev HMR is untouched.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {

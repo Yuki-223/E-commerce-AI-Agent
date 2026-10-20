@@ -1,3 +1,4 @@
+import { getProductDetail } from '../mock/catalog'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { interpretToolResult, parseComposerJson } from './agentEvents'
 import { decodeSseEvent, readSseStream, SseParser } from './sse'
@@ -119,12 +120,20 @@ describe('mock /chat/stream end to end', () => {
   }
 
   it('emits the backend event order for a recommendation', async () => {
-    const events = await turn({ query: '推荐一款 500 元以内、不要含酒精的防晒' })
+    const events = await turn({ query: '推荐 200 元以内、不要咖啡因的长跑补给' })
     expect(events.map((e) => e.event)).toEqual(['session', 'status', 'meta', 'status', 'tool_result', 'status', 'token', 'done'])
     const tool = events.find((e) => e.event === 'tool_result')!
-    expect(interpretToolResult(tool.data as ToolResultEventData)).toEqual({ kind: 'products', productIds: ['p_beauty_006', 'p_beauty_023'] })
+    const effect = interpretToolResult(tool.data as ToolResultEventData)
+    expect(effect.kind).toBe('products')
+    const ids = effect.kind === 'products' ? effect.productIds : []
+    expect(ids.length).toBeGreaterThan(0)
+    // Attribute-based safety: nothing with caffeine, nothing over budget.
+    for (const id of ids) {
+      expect(getProductDetail(id)?.attributes.caffeine).toBe(false)
+      expect(getProductDetail(id)!.price_range.min_price).toBeLessThanOrEqual(200)
+    }
     const token = events.find((e) => e.event === 'token')!.data as string
-    expect(parseComposerJson(token)?.items.map((i) => i.productId)).toEqual(['p_beauty_006', 'p_beauty_023'])
+    expect(parseComposerJson(token)?.items.map((i) => i.productId)).toEqual(ids)
   }, 15000)
 
   it('emits memory_update before done and supports undo', async () => {
@@ -146,13 +155,13 @@ describe('mock /chat/stream end to end', () => {
   }, 15000)
 
   it('asks for a spec, then adds to the cart through the cart tool', async () => {
-    const first = await turn({ query: '推荐一款 500 元以内、不要含酒精的防晒' })
+    const first = await turn({ query: '推荐 200 元以内的瑜伽裤' })
     const sid = (first[0].data as { session_id: string }).session_id
     const ask = await turn({ query: '把第一个加入购物车', session_id: sid })
     const askEffect = interpretToolResult(ask.find((e) => e.event === 'tool_result')!.data as ToolResultEventData)
-    expect(askEffect).toMatchObject({ kind: 'specSelection', productId: 'p_beauty_006' })
-    const add = await turn({ query: '40ml 清爽型', session_id: sid })
+    expect(askEffect).toMatchObject({ kind: 'specSelection', productId: 'p_wear_003' })
+    const add = await turn({ query: '黑色 M', session_id: sid })
     const addEffect = interpretToolResult(add.find((e) => e.event === 'tool_result')!.data as ToolResultEventData)
-    expect(addEffect).toMatchObject({ kind: 'cart', action: 'add', cart: { item_count: 1, total: 190 } })
+    expect(addEffect).toMatchObject({ kind: 'cart', action: 'add', cart: { item_count: 1, total: 199 } })
   }, 20000)
 })

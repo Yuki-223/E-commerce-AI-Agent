@@ -79,10 +79,10 @@ struct GuideView: View {
 
     /// Example-query pool from which four unique items are sampled for each empty state.
     private static let examplePool = [
-        "适合油皮的洗面奶", "200 元内蓝牙耳机", "轻量跑鞋", "不要含酒精的防晒",
-        "通勤双肩包推荐", "敏感肌身体乳", "适合送女友的香水", "300 元内机械键盘",
-        "冬天保暖羽绒服", "学生党平价护眼台灯", "适合露营的折叠椅", "低糖代餐零食",
-        "降噪头戴式耳机", "夏天透气运动短裤", "适合新手的口红色号", "家用空气炸锅"
+        "经期也能训练的经期用品", "200 元内的乳清蛋白", "温和不便秘的补铁", "不含咖啡因的长跑补给",
+        "跑跳不晃的运动内衣", "敏感肌运动防晒", "备孕可以吃的营养素", "经前想吃的健康零食",
+        "深蹲不透的瑜伽裤", "帮助放松睡眠的镁", "游泳可用的卫生棉条", "低糖高蛋白早餐",
+        "女款缓震跑鞋", "热瑜伽后的电解质", "无香的暖宫贴", "素食女生的蛋白粉"
     ]
 
     /// Samples four unique examples from the pool.
@@ -431,7 +431,7 @@ struct GuideView: View {
     private var displayedCategories: [CategoryEntry] {
         let names = suggestions?.categories.isEmpty == false
             ? suggestions!.categories
-            : ["数码电子", "服饰运动", "美妆护肤", "食品饮料"]
+            : ["运动营养", "女性营养素", "经期关怀", "运动服饰", "运动修护", "功能轻食"]
         return names.map { CategoryEntry(name: $0) }
     }
 
@@ -2305,10 +2305,12 @@ struct CategoryEntry: Identifiable {
     var icon: String {
         switch name {
         // Use simple icons with a consistent outlined style.
-        case "数码电子": return "laptopcomputer"
-        case "服饰运动": return "figure.run"
-        case "美妆护肤": return "drop"
-        case "食品饮料", "食品生活": return "cup.and.saucer"
+        case "运动营养": return "bolt.heart"
+        case "女性营养素": return "pills"
+        case "经期关怀": return "drop"
+        case "运动服饰": return "figure.run"
+        case "运动修护": return "sun.max"
+        case "功能轻食": return "leaf"
         default: return "bag"
         }
     }
@@ -2316,10 +2318,12 @@ struct CategoryEntry: Identifiable {
     var tint: Color {
         switch name {
         // Use muted earth tones that complement the terracotta accent without saturated AI-style colors.
-        case "数码电子": return Color(hex: "6E89A6")   // 雾蓝
-        case "服饰运动": return Color(hex: "7E9B6B")   // 橄榄绿
-        case "美妆护肤": return Color(hex: "C77B82")   // 豆沙粉
-        case "食品饮料", "食品生活": return Color(hex: "D69A4C")   // 芥末黄
+        case "运动营养": return Color(hex: "C9705A")   // 珊瑚
+        case "女性营养素": return Color(hex: "B07C2E")   // 琥珀
+        case "经期关怀": return Color(hex: "B4506A")   // 玫瑰
+        case "运动服饰": return Color(hex: "4E7486")   // 雾蓝
+        case "运动修护": return Color(hex: "5B7F57")   // 鼠尾草绿
+        case "功能轻食": return Color(hex: "8A6440")   // 燕麦
         default: return AppTheme.primary
         }
     }

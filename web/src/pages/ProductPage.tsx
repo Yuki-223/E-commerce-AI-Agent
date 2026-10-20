@@ -6,6 +6,7 @@ import { BackButton, MobileHeader, MobileTitle } from '../components/layout/Mobi
 import { Basis, QuantityStepper, SpecPicker, useAddToCart } from '../components/product/ProductPanel'
 import { ProductImage } from '../components/product/ProductImage'
 import { Reviews } from '../components/product/Reviews'
+import { SafetyFacts } from '../components/product/SafetyFacts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useProduct } from '../hooks/useProducts'
 import { useRecordView } from '../stores/recentProducts'
@@ -31,6 +32,7 @@ function Body({ product }: { product: Product }) {
           <div className="text-lg font-bold leading-[25px]">{product.title}</div>
         </div>
         <SpecPicker product={product} selection={cart.selection} onChoose={cart.choose} />
+        <SafetyFacts product={product} />
         <Basis product={product} />
         <Reviews reviews={product.reviews} />
       </div>

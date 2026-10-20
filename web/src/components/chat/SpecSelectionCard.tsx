@@ -22,7 +22,7 @@ interface Props {
  * same card turns into the receipt instead of a new message appearing.
  */
 export function SpecSelectionCard({ spec, disabled, onAddToCart, onOrder }: Props) {
-  const [selected, setSelected] = useState<Record<string, string>>(spec.chosen ?? {})
+  const [selected, setSelected] = useState<Record<string, string>>(spec.chosen ?? spec.suggested ?? {})
   const [quantity, setQuantity] = useState(spec.chosenQuantity ?? spec.quantity ?? 1)
   const [ordering, setOrdering] = useState(false)
   const { data: product } = useProduct(spec.product_id)

@@ -20,7 +20,7 @@
   Bytedance Outstanding Project Award
 </h3>
 
-CartPilot is a conversational shopping assistant for iOS. Users can describe a need by text or voice, upload a product photo, refine recommendations across multiple turns, compare products, inspect details, and manage a persistent cart in one conversation.
+CartPilot is a **women's supply platform**. It is built around themes that recur in research on women's sport and nutrition (iron and energy intake, bone health, the menstrual cycle, sports-bra support), and it sells sports nutrition, women's micronutrients, cycle care, sportswear, recovery care and functional food. Shoppers describe a need by text, voice or photo. The assistant recommends with their body profile, ingredient restrictions and current cycle phase in mind, and handles comparison, product detail, cart and checkout in the same conversation.
 
 The project uses a native SwiftUI client, a FastAPI backend, a controllable `router → tool → composer` agent, hybrid RAG retrieval, and SQLite-backed product facts.
 
@@ -38,10 +38,11 @@ The project uses a native SwiftUI client, a FastAPI backend, a controllable `rou
 - **Conversational shopping:** recommendation, refinement, clarification, comparison, product detail, and cart operations.
 - **Context and memory:** resolves references such as “the second one,” keeps session context, and stores undoable user preferences.
 - **Hybrid retrieval:** structured filters + Chroma vector recall + BM25/RRF + optional reranking.
-- **Negative constraints:** handles requests such as “sunscreen without alcohol” at the product level.
+- **Ingredient safety:** pregnancy/trying-to-conceive/breastfeeding, sensitive skin, no caffeine, vegan and allergens (dairy, soy, nuts, gluten, fish) hard-filter products on structured attributes. Phrases such as “no caffeine” use the same rules (`backend/search/safety.py`).
+- **Body profile and cycle care:** skin type, undertone and sizes preselect size and shade options. The web app can record the menstrual cycle locally. The home page then suggests supplies for the menstrual, follicular, ovulatory and luteal phases, and cycle data never leaves the device.
 - **Grounded facts:** prices, SKUs, stock, and cart totals come from SQLite rather than generated text.
 
-The included catalog contains 100 products and 585 SKUs across beauty, electronics, apparel, and food/lifestyle categories.
+The included catalog contains 48 products and 166 SKUs across six categories: sports nutrition, women's micronutrients, cycle care, sportswear, recovery care and functional food. All brands are fictional, and the data is generated from `scripts/women_catalog_spec.py` (`python3 scripts/generate_women_catalog.py`). Descriptions cover use and audience and make no treatment claims.
 
 ## Architecture
 
@@ -126,6 +127,8 @@ cd ..
 
 `rag.build_chroma` calls the embedding endpoint configured in `.env`.
 
+> With the women's supply catalog, `backend/storage/image_index.json` (image vectors for photo search) starts empty. The bundled product images are SVG placeholders. After switching to real product photos, list their URLs in `backend/cdn/image_manifest.json` and run `python -m rag.build_image_index` so photo search can rerank by image similarity again.
+
 ### 4. Start the backend
 
 ```bash
@@ -157,7 +160,7 @@ In Xcode, open **Product → Scheme → Edit Scheme → Run → Arguments**. Set
 Select an iPhone simulator, press **Run**, and try:
 
 ```text
-推荐一款 500 元以内、不要含酒精的防晒
+经期也想照常训练，推荐 200 元以内、不含咖啡因的补给
 ```
 
 ### 6. Run the web app
@@ -185,7 +188,7 @@ Shoppers and merchants share one backend. Requests without a login still act as 
 ```bash
 cd backend
 python -m store.manage create-admin --username admin --password <password>        # platform admin: manages every shop and the platform-operated catalog
-python -m store.manage assign-products --merchant-user shop1 --brand 珀莱雅        # hand bundled products to a merchant for demos
+python -m store.manage assign-products --merchant-user shop1 --brand 她力          # hand bundled products to a merchant for demos
 ```
 
 | Variable | Effect |
@@ -203,7 +206,7 @@ FastAPI documentation is available at `http://127.0.0.1:8000/docs`.
 ```bash
 curl -N http://127.0.0.1:8000/chat/stream \
   -H 'Content-Type: application/json' \
-  -d '{"query":"推荐 500 元以内的降噪耳机","user_id":"demo_user"}'
+  -d '{"query":"推荐温和补铁的营养素","user_id":"demo_user"}'
 ```
 
 The stream emits session metadata, progress status, structured tool results, text tokens, optional preference updates, and a final `done` event.

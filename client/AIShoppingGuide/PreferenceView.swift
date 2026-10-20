@@ -171,7 +171,7 @@ struct PreferenceView: View {
     @State private var editingKeywordText = ""
     @State private var notesDraft = ""
 
-    private let categories = ["美妆护肤", "数码电子", "服饰运动", "食品生活"]
+    private let categories = ["运动营养", "女性营养素", "经期关怀", "运动服饰", "运动修护", "功能轻食"]
     private let recommendedKeywords = ["轻量", "通勤", "高性价比", "品质优先", "便携", "送礼", "环保", "耐用"]
     private let tiers = [("value", "省心价"), ("balanced", "均衡"), ("premium", "品质")]
 

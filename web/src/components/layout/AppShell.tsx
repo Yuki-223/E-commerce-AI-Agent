@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Navigate, Outlet, useSearchParams } from 'react-router-dom'
+import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router-dom'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
 import { usePresence } from '../../hooks/usePresence'
 import { SettingsDialog } from '../../pages/settings/SettingsLayout'
@@ -39,6 +39,19 @@ function ProductColumn({ productId, onClose }: { productId: string | null; onClo
 }
 
 /**
+ * Pages fade in when the top-level section changes (首页 → 购物车 → 订单 …). Moving
+ * between conversations keeps the same key, so a streaming chat is never remounted.
+ */
+function RoutedPage() {
+  const section = useLocation().pathname.split('/')[1] || 'home'
+  return (
+    <div key={section} className="relative flex min-h-0 grow animate-fade-in flex-col motion-reduce:animate-none">
+      <Outlet />
+    </div>
+  )
+}
+
+/**
  * Desktop: three columns, history sidebar · main · product detail (?product=).
  * Phone (< 768 px): one column, the drawer replaces the sidebar and product
  * detail is its own page at /p/:productId. 100dvh keeps the bottom bars above
@@ -59,7 +72,7 @@ export function AppShell() {
     return (
       <div className="flex h-[100dvh] min-h-0 flex-col bg-bg text-ink">
         <main className="relative flex min-h-0 grow flex-col">
-          <Outlet />
+          <RoutedPage />
           <div className="pointer-events-none absolute inset-x-0 top-[calc(56px+env(safe-area-inset-top))] z-30 [&>*]:pointer-events-auto">
             <OfflineBanner />
           </div>
@@ -76,7 +89,7 @@ export function AppShell() {
       <Sidebar />
       <main className="relative flex min-w-0 grow flex-col">
         <OfflineBanner />
-        <Outlet />
+        <RoutedPage />
         <Toaster />
       </main>
       <ProductColumn productId={productId} onClose={closeProduct} />

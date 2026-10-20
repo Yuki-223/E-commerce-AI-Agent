@@ -127,8 +127,8 @@ export function ProductEditor({ product, onDone }: { product?: MerchantProduct; 
       <input className={FIELD} placeholder="商品标题" required maxLength={80} aria-label="商品标题" {...field('title')} />
       <div className="grid gap-3 sm:grid-cols-3">
         <input className={FIELD} placeholder="品牌" required maxLength={40} aria-label="品牌" {...field('brand')} />
-        <input className={FIELD} placeholder="类目，如 数码电子" required maxLength={20} aria-label="类目" {...field('category')} />
-        <input className={FIELD} placeholder="子类目，如 耳机" maxLength={20} aria-label="子类目" {...field('sub_category')} />
+        <input className={FIELD} placeholder="类目，如 运动营养" required maxLength={20} aria-label="类目" {...field('category')} />
+        <input className={FIELD} placeholder="子类目，如 蛋白粉" maxLength={20} aria-label="子类目" {...field('sub_category')} />
       </div>
       <input className={FIELD} placeholder={product ? '商品图片 URL（留空不修改）' : '商品图片 URL'} required={!product} maxLength={500} aria-label="图片 URL" {...field('image_url')} />
       <textarea

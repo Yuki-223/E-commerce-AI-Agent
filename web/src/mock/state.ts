@@ -170,6 +170,9 @@ export function emptyPreference(userId: string): UserPreference {
     category_specific: {},
     preference_note: null,
     notes: null,
+    body_profile: {},
+    safety_flags: [],
+    allergens_avoid: [],
   }
 }
 

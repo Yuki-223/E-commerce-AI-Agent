@@ -182,6 +182,24 @@ def product_payload(detail: ProductDetail) -> dict[str, Any]:
     }
 
 
+_SIZE_ORDER = {size: i for i, size in enumerate(["XXS", "XS", "S", "M", "L", "XL", "XXL"])}
+
+
+def option_sort_key(option: str) -> tuple[int, float, str]:
+    """XS < S < M < L, then numbers by value (35, 36…, 70B, 75B…), then text."""
+    head = option.split("（")[0].strip().upper()
+    if head in _SIZE_ORDER:
+        return (0, _SIZE_ORDER[head], option)
+    digits = ""
+    for char in head:
+        if not (char.isdigit() or char == "."):
+            break
+        digits += char
+    if digits:
+        return (1, float(digits), option)
+    return (2, 0.0, option)
+
+
 def specifications_payload(skus: list[ProductSku]) -> list[dict[str, Any]]:
     option_sets: dict[str, set[str]] = {}
     for sku in skus:
@@ -194,7 +212,7 @@ def specifications_payload(skus: list[ProductSku]) -> list[dict[str, Any]]:
             "name": name,
             "options": [
                 {"id": f"{name}_{option}", "label": option, "isAvailable": True}
-                for option in sorted(options)
+                for option in sorted(options, key=option_sort_key)
             ],
         }
         for name, options in sorted(option_sets.items())

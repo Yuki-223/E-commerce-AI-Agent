@@ -232,7 +232,7 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={onKeyDown}
-        placeholder={placeholder ?? (home ? '说说你想买什么，比如「500 元以内不含酒精的防晒」' : '继续追问，或把商品图片拖进来 / 直接粘贴截图')}
+        placeholder={placeholder ?? (home ? '说说你的需求，比如「经期也想训练，推荐不含咖啡因的补给」' : '继续追问，或把商品图片拖进来 / 直接粘贴截图')}
         className={`min-w-0 grow resize-none overflow-y-hidden bg-transparent leading-[22px] [scrollbar-width:thin] text-ink outline-none placeholder:text-ink-subtle focus-visible:outline-none ${home ? 'min-h-[48px] w-full px-1.5 pt-1 text-base' : 'px-1 text-[15px]'}`}
       />
     </>

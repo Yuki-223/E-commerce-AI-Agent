@@ -70,6 +70,8 @@ export interface Product {
   skus: Sku[]
   reviews: Review[]
   evidence: Evidence[]
+  /** Ingredients and safety flags; absent from older backends and merchant products. */
+  attributes?: ProductAttributes
   updatedAt: null
 }
 
@@ -175,6 +177,36 @@ export interface UserPreference {
   category_specific: Record<string, Record<string, unknown>>
   preference_note: string | null
   notes: string | null
+  /** Absent from backends before the women's supply profile. */
+  body_profile?: BodyProfile
+  /** search/safety.py SAFETY_FLAGS keys. */
+  safety_flags?: SafetyFlag[]
+  allergens_avoid?: string[]
+}
+
+export type SafetyFlag = 'pregnancy' | 'sensitive_skin' | 'no_caffeine' | 'vegan'
+
+/** UserPreference.body_profile; drives size and shade preselection (store/sku_match.py). */
+export interface BodyProfile {
+  skin_type?: string
+  skin_tone?: 'cool' | 'neutral' | 'warm'
+  clothing_size?: string
+  bra_size?: string
+  shoe_size?: string
+}
+
+/** Product.attributes (products.attributes_json). */
+export interface ProductAttributes {
+  ingredients?: string[]
+  allergens?: string[]
+  pregnancy?: 'safe' | 'caution' | 'avoid'
+  pregnancy_note?: string
+  caffeine?: boolean
+  fragrance?: boolean
+  alcohol?: boolean
+  vegan?: boolean
+  tags?: string[]
+  cycle_phases?: ('menstrual' | 'follicular' | 'ovulatory' | 'luteal')[]
 }
 
 /** PUT body: PreferenceRequest has every field except user_id. */
@@ -359,6 +391,8 @@ export type CartToolPayload =
       /** Quantity taken from the conversation; absent from older backends. */
       quantity?: number
       skus?: SpecSku[]
+      /** Options the backend preselected from the body profile (store/sku_match.py). */
+      suggested_options?: Record<string, string>
     }
   | { action: 'add'; added: CartLine; cart: CartSnapshot; resolution?: unknown }
   | { action: 'set_quantity'; cart: CartSnapshot }

@@ -20,7 +20,7 @@
   🏆 字节跳动优秀项目奖
 </h3>
 
-CartPilot 是一款面向 iOS 的对话式智能导购。用户可以通过文字、语音或商品图片表达需求，并在同一段对话中完成推荐、条件细化、商品对比、详情查询和购物车管理。
+CartPilot 是一个**女性补给平台**：围绕女性运动与营养研究中反复出现的话题——铁和能量摄入、骨骼健康、经期周期、运动内衣支撑——提供运动营养、女性营养素、经期关怀、运动服饰、运动修护和功能轻食。用户用文字、语音或图片说出需求，AI 会结合她的身体档案、成分禁忌和所处的周期阶段来推荐，并在同一段对话中完成对比、详情查询、加购和下单。
 
 项目采用原生 SwiftUI 客户端、FastAPI 后端、可控的 `router → tool → composer` Agent、混合 RAG 检索与 SQLite 商品事实库。
 
@@ -38,10 +38,11 @@ CartPilot 是一款面向 iOS 的对话式智能导购。用户可以通过文�
 - **对话式导购：** 支持推荐、细化、澄清、对比、商品详情和购物车操作。
 - **上下文与记忆：** 能理解“第二个”等指代，保存会话上下文，并记录可撤销的用户偏好。
 - **混合检索：** 结构化过滤 + Chroma 向量召回 + BM25/RRF + 可选精排。
-- **否定条件：** 在商品级处理“不要含酒精”等排他需求。
+- **成分安全筛选：** 孕期/备孕/哺乳、敏感肌、不碰咖啡因、纯素和过敏原（乳制品、大豆、坚果、麸质、鱼）按商品的结构化属性硬过滤，“不要含咖啡因”这类说法也走同一套规则（`backend/search/safety.py`）。
+- **身体档案与周期关怀：** 肤质、肤色冷暖和尺码用于自动预选尺码/色号；网页版可在本机记录经期周期，首页按经期、卵泡期、排卵期前后、黄体期给出补给建议，周期数据不上传。
 - **事实一致性：** 价格、SKU、库存和购物车总价来自 SQLite，不由大模型生成。
 
-仓库内置 100 个商品和 585 个 SKU，覆盖美妆护肤、数码电子、服饰运动、食品生活四大类目。
+仓库内置 48 个商品、166 个 SKU，覆盖运动营养、女性营养素、经期关怀、运动服饰、运动修护、功能轻食六大类目。品牌均为虚构示例，商品数据由 `scripts/women_catalog_spec.py` 生成（`python3 scripts/generate_women_catalog.py`），描述只介绍用途与适合人群，不做疗效承诺。
 
 ## 系统架构
 
@@ -126,6 +127,8 @@ cd ..
 
 `rag.build_chroma` 会调用 `.env` 中配置的 embedding 接入点。
 
+> 商品目录换成女性补给后，`backend/storage/image_index.json`（拍照找同款用的图片向量）被清空了。内置商品图是 SVG 占位图，换成真实商品照片后，把图片地址写进 `backend/cdn/image_manifest.json`，再运行 `python -m rag.build_image_index` 重建，拍照搜索才会按图片相似度精排。
+
 ### 4. 启动后端
 
 ```bash
@@ -157,7 +160,7 @@ open client/AIShoppingGuide.xcodeproj
 选择一个 iPhone 模拟器，点击 **Run**，然后尝试：
 
 ```text
-推荐一款 500 元以内、不要含酒精的防晒
+经期也想照常训练，推荐 200 元以内、不含咖啡因的补给
 ```
 
 ### 6. 运行网页版
@@ -211,7 +214,7 @@ npm run preview   # 本地预览生产构建（含 PWA，可“添加到主屏�
 ```bash
 cd backend
 python -m store.manage create-admin --username admin --password 你的密码            # 平台管理员，可管理所有店铺和自营商品
-python -m store.manage assign-products --merchant-user shop1 --brand 珀莱雅          # 把内置商品分给某个商家，方便演示
+python -m store.manage assign-products --merchant-user shop1 --brand 她力            # 把内置商品分给某个商家，方便演示
 ```
 
 | 环境变量 | 作用 |
@@ -229,7 +232,7 @@ FastAPI 交互式文档位于 `http://127.0.0.1:8000/docs`。
 ```bash
 curl -N http://127.0.0.1:8000/chat/stream \
   -H 'Content-Type: application/json' \
-  -d '{"query":"推荐 500 元以内的降噪耳机","user_id":"demo_user"}'
+  -d '{"query":"推荐温和补铁的营养素","user_id":"demo_user"}'
 ```
 
 SSE 会依次返回会话信息、执行进度、结构化工具结果、文本 token、可选偏好更新和最终 `done` 事件。

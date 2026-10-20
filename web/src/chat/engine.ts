@@ -115,7 +115,7 @@ async function run(convId: string, msgId: string, request: ChatRequest) {
               const effect = interpretToolResult(ev.data)
               if (effect.kind === 'products') patch({ productIds: effect.productIds })
               else if (effect.kind === 'specSelection') {
-                patch({ specSelection: { product_id: effect.productId, title: effect.title, dimensions: effect.dimensions, quantity: effect.quantity, skus: effect.skus } })
+                patch({ specSelection: { product_id: effect.productId, title: effect.title, dimensions: effect.dimensions, quantity: effect.quantity, skus: effect.skus, suggested: effect.suggested } })
               } else if (effect.kind === 'comparison') patch({ comparison: effect.comparison })
               else if (effect.kind === 'cart') {
                 patch({ cartAction: effect.action })

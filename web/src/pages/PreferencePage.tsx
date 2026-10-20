@@ -5,14 +5,15 @@ import type { UserPreference } from '../api/types'
 import { IconCheckCircle, IconChevronDown, IconClose, IconPencil } from '../components/Icons'
 import { Avatar } from '../components/layout/AccountButton'
 import { Segmented } from '../components/Segmented'
+import { BodySafetySections } from '../components/preferences/BodySafetySections'
 import { preferenceKey, usePreference } from '../hooks/usePreference'
 import { profileLabel, useActiveProfile, useProfiles } from '../stores/profiles'
 import { useSettings } from '../stores/ui'
 import { FIELD, Row, Section, Switch } from './settings/ui'
 
-/** The same option sets as PreferenceView.swift. */
-const CATEGORIES = ['美妆护肤', '数码电子', '服饰运动', '食品生活']
-const KEYWORDS = ['轻量', '通勤', '高性价比', '品质优先', '便携', '送礼', '环保', '耐用']
+/** The catalog's categories (scripts/women_catalog_spec.py). */
+const CATEGORIES = ['运动营养', '女性营养素', '经期关怀', '运动服饰', '运动修护', '功能轻食']
+const KEYWORDS = ['温和', '天然配方', '低糖', '高蛋白', '便携', '经期友好', '环保', '高性价比']
 const TIERS: [string, string][] = [['value', '省心价'], ['balanced', '均衡'], ['premium', '品质']]
 
 type Sync = 'synced' | 'saving' | 'error'
@@ -73,7 +74,7 @@ function KeywordChip({ value, onRename, onRemove }: { value: string; onRename: (
     )
   }
   return (
-    <span className="flex items-center gap-2 rounded-full border border-[rgba(206,135,99,0.35)] bg-primary-soft py-[7px] pl-3.5 pr-2 text-sm font-semibold">
+    <span className="flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--primary)_35%,transparent)] bg-primary-soft py-[7px] pl-3.5 pr-2 text-sm font-semibold">
       {value}
       <button type="button" aria-label={`编辑 ${value}`} onClick={() => (setDraft(value), setEditing(true))} className="flex h-[22px] w-[22px] items-center justify-center rounded-full p-0 text-primary-text">
         <IconPencil size={12} />
@@ -213,6 +214,8 @@ export function PreferencePage() {
             </Row>
           </Section>
 
+          <BodySafetySections pref={pref} mutate={mutate} />
+
           <Section title="关注品类" description="首页和推荐会优先展示这些品类。">
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((c) => {
@@ -301,12 +304,12 @@ export function PreferencePage() {
           </Section>
 
           <Section title="补充偏好">
-            <Row label="还有什么想让 CartPilot 知道的？" hint="例如肤质、过敏成分、尺码，推荐时会一并考虑" htmlFor="pref-notes" stacked>
+            <Row label="还有什么想让 CartPilot 知道的？" hint="例如训练习惯、口味偏好，推荐时会一并考虑" htmlFor="pref-notes" stacked>
               <textarea
                 id="pref-notes"
                 value={notes}
                 rows={4}
-                placeholder="例如：敏感肌，护肤品尽量不要含酒精和香精。"
+                placeholder="例如：每周跑步三次，备赛半马，喜欢清淡口味。"
                 onChange={(e) => setNotes(e.target.value)}
                 onBlur={() => {
                   const clean = notes.trim()

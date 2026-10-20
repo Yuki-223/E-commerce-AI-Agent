@@ -45,7 +45,7 @@ describe('mock commerce endpoints', () => {
     const created = await (
       await post(
         '/merchant/products',
-        { title: '帆布包', brand: '小店', category: '服饰运动', sub_category: '', image_url: 'https://img/bag.jpg', description: '', skus: [{ properties: { 颜色: '米白' }, price: 59, stock_qty: 4 }] },
+        { title: '帆布包', brand: '小店', category: '运动服饰', sub_category: '', image_url: 'https://img/bag.jpg', description: '', skus: [{ properties: { 颜色: '米白' }, price: 59, stock_qty: 4 }] },
         shop,
       )
     ).json()

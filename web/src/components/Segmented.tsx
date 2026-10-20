@@ -14,7 +14,9 @@ interface Props<T extends string> {
  */
 export function Segmented<T extends string>({ label, options, value, onChange, size = 'md' }: Props<T>) {
   const n = options.length
-  const i = Math.max(0, options.findIndex(([v]) => v === value))
+  const found = options.findIndex(([v]) => v === value)
+  // No thumb while nothing is chosen yet (e.g. an empty profile field).
+  const i = Math.max(0, found)
   return (
     <div
       role="radiogroup"
@@ -25,7 +27,7 @@ export function Segmented<T extends string>({ label, options, value, onChange, s
       <span
         aria-hidden="true"
         className="pointer-events-none absolute bottom-[2px] top-[2px] rounded-full bg-[var(--segment-thumb)] shadow-[inset_0_0_0_1px_var(--line),0_1px_2px_rgba(0,0,0,0.08)] transition-[left] duration-snap ease-snap"
-        style={{ left: `calc(2px + ${i} * (100% - 4px) / ${n})`, width: `calc((100% - 4px) / ${n})` }}
+        style={{ left: `calc(2px + ${i} * (100% - 4px) / ${n})`, width: `calc((100% - 4px) / ${n})`, opacity: found < 0 ? 0 : 1 }}
       />
       {options.map(([v, text]) => (
         <button

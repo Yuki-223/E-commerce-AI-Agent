@@ -6,7 +6,7 @@ export const useDrawer = create<{ open: boolean; set: (open: boolean) => void }>
   set: (open) => set({ open }),
 }))
 
-export type SettingsTab = 'general' | 'preferences' | 'profiles' | 'addresses' | 'data'
+export type SettingsTab = 'general' | 'preferences' | 'cycle' | 'profiles' | 'addresses' | 'data'
 
 /** Settings dialog (claude.ai-style floating window); null when closed. */
 export const useSettings = create<{ tab: SettingsTab | null; open: (tab?: SettingsTab) => void; close: () => void }>((set) => ({

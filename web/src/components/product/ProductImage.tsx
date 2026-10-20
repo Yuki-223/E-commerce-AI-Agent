@@ -1,3 +1,4 @@
+import { API_BASE, USE_MOCK } from '../../api/http'
 import { useLayoutEffect, useRef, useState } from 'react'
 
 /**
@@ -5,7 +6,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
  * field-coloured block, no text. null (or a failed load) is 暂无图片. A photo
  * fades in over dur-base once it has loaded, unless it was already cached.
  */
-export function ProductImage({ src, alt, className = '', fit = 'contain' }: { src: string | null | undefined; alt: string; className?: string; fit?: 'contain' | 'cover' }) {
+export function ProductImage({ src: raw, alt, className = '', fit = 'contain' }: { src: string | null | undefined; alt: string; className?: string; fit?: 'contain' | 'cover' }) {
+  const src = mediaURL(raw)
   const [failed, setFailed] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const img = useRef<HTMLImageElement>(null)
@@ -43,4 +45,9 @@ export function ProductImage({ src, alt, className = '', fit = 'contain' }: { sr
       />
     </span>
   )
+}
+
+/** Bundled catalog images come back as /media/… from the backend; route them through the /api proxy. */
+export function mediaURL(src: string | null | undefined): string | null | undefined {
+  return !USE_MOCK && src?.startsWith('/media/') ? API_BASE + src : src
 }

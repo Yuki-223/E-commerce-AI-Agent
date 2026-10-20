@@ -3,7 +3,7 @@
  * shaped exactly like backend/api/products.py product_payload(). Imported only in
  * mock mode (dynamic import from api/http.ts), so production builds skip it.
  */
-import type { Evidence, Money, Product, Review, Sku, Specification } from '../api/types'
+import type { Evidence, Money, Product, ProductAttributes, Review, Sku, Specification } from '../api/types'
 import compareIndexJson from '../../../backend/storage/compare_index.json'
 
 interface RawProduct {
@@ -15,6 +15,7 @@ interface RawProduct {
   base_price: number
   image_path?: string | null
   skus: { sku_id: string; properties: Record<string, string>; price: number }[]
+  attributes?: ProductAttributes
   rag_knowledge?: {
     marketing_description?: string
     official_faq?: { question: string; answer: string }[]
@@ -36,6 +37,7 @@ export interface ProductDetail {
   marketing_description: string
   faqs: { source_index: number; question: string; answer: string }[]
   reviews: { source_index: number; nickname: string; rating: number; content: string; polarity: Review['polarity'] }[]
+  attributes: ProductAttributes
 }
 
 const rawModules = import.meta.glob<RawProduct>('../../../data/*/data/*.json', { eager: true, import: 'default' })
@@ -79,6 +81,7 @@ function toDetail(p: RawProduct): ProductDetail {
       sku_count: skus.length,
     },
     skus,
+    attributes: p.attributes ?? {},
     marketing_description: rag.marketing_description ?? '',
     faqs: (rag.official_faq ?? []).map((f, i) => ({ source_index: i, question: f.question ?? '', answer: f.answer ?? '' })),
     reviews: (rag.user_reviews ?? []).map((r, i) => {
@@ -86,6 +89,23 @@ function toDetail(p: RawProduct): ProductDetail {
       return { source_index: i, nickname: r.nickname ?? '', rating, content: r.content ?? '', polarity: reviewPolarity(rating) }
     }),
   }
+}
+
+const SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL']
+
+/** api/products.py option_sort_key: sizes in wear order, then numbers by value, then text. */
+function optionKey(option: string): [number, number, string] {
+  const head = option.split('（')[0].trim().toUpperCase()
+  const size = SIZE_ORDER.indexOf(head)
+  if (size >= 0) return [0, size, option]
+  const num = /^\d+(\.\d+)?/.exec(head)
+  if (num) return [1, Number(num[0]), option]
+  return [2, 0, option]
+}
+
+function optionCmp(a: string, b: string): number {
+  const [ka, kb] = [optionKey(a), optionKey(b)]
+  return ka[0] - kb[0] || ka[1] - kb[1] || cmp(ka[2], kb[2])
 }
 
 /** Python str ordering (code point) for ASCII/BMP strings. */
@@ -131,7 +151,7 @@ function specifications(skus: ProductDetail['skus']): Specification[] {
     .map(([name, options]) => ({
       id: name,
       name,
-      options: [...options].sort(cmp).map((option) => ({ id: `${name}_${option}`, label: option, isAvailable: true })),
+      options: [...options].sort(optionCmp).map((option) => ({ id: `${name}_${option}`, label: option, isAvailable: true })),
     }))
 }
 
@@ -182,6 +202,7 @@ export function productPayload(d: ProductDetail): Product {
     ),
     reviews: d.reviews.map((r) => ({ id: `review_${r.source_index}`, nickname: r.nickname, rating: r.rating, content: r.content, polarity: r.polarity })),
     evidence: evidence(d),
+    attributes: d.attributes,
     updatedAt: null,
   }
 }
@@ -194,10 +215,12 @@ type CompareIndex = Record<string, { dims?: Record<string, string>; tagline?: st
 const compareIndex = compareIndexJson as CompareIndex
 
 const CATEGORY_DIMENSIONS: Record<string, string[]> = {
-  数码电子: ['性能/芯片', '续航', '屏幕', '存储规格'],
-  美妆护肤: ['核心功效', '关键成分', '适用肤质', '容量规格'],
-  服饰运动: ['材质面料', '版型', '适用场景', '尺码颜色'],
-  食品生活: ['口味风味', '配料成分', '规格分量', '适用场景'],
+  运动营养: ['核心作用', '关键成分', '每份含量', '适用场景'],
+  女性营养素: ['补充重点', '关键成分', '每日用量', '适合人群'],
+  经期关怀: ['使用场景', '材质成分', '吸收规格', '舒适度'],
+  运动服饰: ['支撑强度', '面料', '版型', '尺码颜色'],
+  运动修护: ['核心功效', '关键成分', '适用肤质', '容量规格'],
+  功能轻食: ['营养亮点', '配料成分', '规格分量', '食用场景'],
 }
 const GENERIC_DIMENSIONS = ['品牌定位', '核心卖点', '适用场景']
 

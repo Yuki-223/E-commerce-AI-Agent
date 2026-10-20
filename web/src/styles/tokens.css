@@ -1,30 +1,31 @@
 /*
- * Design tokens. Base values come from client/AIShoppingGuide/AppTheme.swift;
+ * Design tokens: a soft rose palette for the women's supply positioning (the iOS
+ * AppTheme.swift still carries the original terracotta);
  * the *-text variants are the darker shades the web artboards use for small text.
  * Dark mode swaps values only, so components never branch on theme.
  */
 :root {
-  --primary: #CE8763;
-  --primary-text: #B8704D;
-  --primary-hover: #B06C4A;
+  --primary: #C46F82;
+  --primary-text: #A8566A;
+  --primary-hover: #B05F73;
   --on-primary: #FFFFFF;
-  --scrim: rgba(251, 250, 247, 0.82);
-  --primary-soft: #FBEFE8;
-  --primary-tint: rgba(206, 135, 99, 0.12);
-  --secondary: #F5EFE7;
-  --soft-blue: #F6F0E8;
-  --soft-purple: #F4EEE5;
-  --background: #FBFAF7;
+  --scrim: rgba(252, 249, 248, 0.82);
+  --primary-soft: #FBEDF0;
+  --primary-tint: rgba(196, 111, 130, 0.12);
+  --secondary: #F6EEEF;
+  --soft-blue: #F2EEF6;
+  --soft-purple: #F4EDF4;
+  --background: #FCF9F8;
   --surface: #FFFFFF;
-  --sidebar: #F5F0E9;
+  --sidebar: #F7EFF0;
   --sidebar-hover: rgba(43, 37, 32, 0.05);
   --sidebar-active: rgba(43, 37, 32, 0.08);
-  --field: #FAF6F1;
-  --chip: rgba(245, 239, 231, 0.9);
-  --text-primary: #2B2520;
-  --text-secondary: #8A7E72;
-  --text-muted: #6F655B;
-  --text-subtle: #7A6F63;
+  --field: #FBF5F5;
+  --chip: rgba(246, 238, 239, 0.9);
+  --text-primary: #2E2328;
+  --text-secondary: #8C7C82;
+  --text-muted: #6E5F65;
+  --text-subtle: #7C6C72;
   --error: #D2543E;
   --error-text: #C24E3A;
   --success: #3F9F6B;
@@ -33,12 +34,12 @@
   --line-strong: rgba(43, 37, 32, 0.12);
   --line-faint: rgba(43, 37, 32, 0.06);
   --disabled: #CFC9C2;
-  --avatar: #D9CFC4;
+  --avatar: #E2CDD3;
   --star-empty: #D9D1C8;
-  --compare-head: #F8F3EC;
+  --compare-head: #F9F1F2;
   --segment: #F1EEEA;
   --segment-thumb: #FFFFFF;
-  --compare-zebra: rgba(246, 240, 232, 0.42);
+  --compare-zebra: rgba(246, 238, 239, 0.45);
   --overlay: rgba(255, 255, 255, 0.7);
   --shadow-card: 0 2px 5px rgba(43, 30, 18, 0.03);
   --shadow-pop: 0 16px 40px rgba(43, 30, 18, 0.16);
@@ -73,23 +74,23 @@
 }
 
 :root[data-theme="dark"] {
-  --primary: #EBA886;
-  --primary-text: #EBA886;
-  --primary-hover: #F2BB9E;
-  --on-primary: #2B1A10;
+  --primary: #EBA3B4;
+  --primary-text: #EBA3B4;
+  --primary-hover: #F2B8C6;
+  --on-primary: #2B1219;
   --scrim: rgba(19, 17, 15, 0.82);
-  --primary-soft: #3A2A21;
-  --primary-tint: rgba(235, 168, 134, 0.16);
-  --secondary: #2A231D;
-  --soft-blue: #211C17;
-  --soft-purple: #241E18;
-  --background: #13110F;
-  --surface: #1E1A16;
-  --sidebar: #181512;
+  --primary-soft: #3A242B;
+  --primary-tint: rgba(235, 163, 180, 0.16);
+  --secondary: #2A2024;
+  --soft-blue: #211B20;
+  --soft-purple: #251C22;
+  --background: #141012;
+  --surface: #1E181B;
+  --sidebar: #181316;
   --sidebar-hover: rgba(242, 236, 228, 0.05);
   --sidebar-active: rgba(242, 236, 228, 0.09);
-  --field: #241E18;
-  --chip: rgba(42, 35, 29, 0.9);
+  --field: #241D21;
+  --chip: rgba(42, 32, 36, 0.9);
   --text-primary: #F2ECE4;
   --text-secondary: #A89C8E;
   --text-muted: #B3A698;
@@ -102,12 +103,12 @@
   --line-strong: rgba(242, 236, 228, 0.16);
   --line-faint: rgba(242, 236, 228, 0.07);
   --disabled: #4A423A;
-  --avatar: #5A4E43;
+  --avatar: #5A4650;
   --star-empty: #4A423A;
-  --compare-head: #241E18;
-  --segment: #2A231D;
-  --segment-thumb: #3D342C;
-  --compare-zebra: rgba(42, 35, 29, 0.6);
+  --compare-head: #241D21;
+  --segment: #2A2024;
+  --segment-thumb: #3D3036;
+  --compare-zebra: rgba(42, 32, 36, 0.6);
   --overlay: rgba(255, 255, 255, 0.05);
   --shadow-card: 0 2px 5px rgba(0, 0, 0, 0.25);
   --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.5);

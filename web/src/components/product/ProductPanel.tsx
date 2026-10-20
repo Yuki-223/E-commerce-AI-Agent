@@ -1,14 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Product } from '../../api/types'
 import { useCartMutation } from '../../hooks/useCart'
+import { usePreference } from '../../hooks/usePreference'
 import { useProduct } from '../../hooks/useProducts'
 import { ApiError } from '../../api/http'
 import { defaultSelection, findSku, optionPrice } from '../../lib/sku'
+import { suggestOptions } from '../../lib/skuMatch'
+import { useActiveProfile } from '../../stores/profiles'
 import { useRecordView } from '../../stores/recentProducts'
 import { toast } from '../../stores/toast'
 import { IconBulb, IconCartAdd, IconClose } from '../Icons'
 import { ProductImage } from './ProductImage'
 import { Reviews } from './Reviews'
+import { SafetyFacts } from './SafetyFacts'
 
 /** Spec choice + quantity + POST /cart/mutate add, shared by the side panel and the phone page. */
 export function useAddToCart(product: Product | undefined) {
@@ -16,9 +20,23 @@ export function useAddToCart(product: Product | undefined) {
   const [quantity, setQuantity] = useState(1)
   const mutation = useCartMutation()
   const sku = product ? findSku(product, selection) : undefined
+  const { data: pref } = usePreference(useActiveProfile().userId)
+  const touched = useRef(false)
+
+  // Preselect the profile's size or shade once preferences arrive, unless the shopper already chose.
+  useEffect(() => {
+    if (!product || touched.current) return
+    const dims = Object.fromEntries(product.specifications.map((s) => [s.name, s.options.map((o) => o.label)]))
+    const suggested = suggestOptions(dims, pref)
+    if (!Object.keys(suggested).length) return
+    const next = { ...defaultSelection(product), ...suggested }
+    const exact = findSku(product, next)
+    if (exact) setSelection({ ...exact.selectedOptions })
+  }, [product, pref])
 
   const choose = (name: string, option: string) => {
     if (!product) return
+    touched.current = true
     const next = { ...selection, [name]: option }
     // Jump to a real SKU when the combination does not exist.
     const exact = findSku(product, next)
@@ -122,6 +140,7 @@ function PanelBody({ product }: { product: Product }) {
           <div className="text-[17px] font-bold leading-6">{product.title}</div>
         </div>
         <SpecPicker product={product} selection={cart.selection} onChoose={cart.choose} />
+        <SafetyFacts product={product} />
         <Basis product={product} />
         <Reviews reviews={product.reviews} />
       </div>

@@ -151,7 +151,7 @@ function Products() {
           {products.map((p, i) => (
             <div key={p.product_id} className={`flex flex-wrap items-center gap-3 px-5 py-3.5 ${i ? 'border-t border-line-faint' : ''}`}>
               <span className="block h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line">
-                <ProductImage src={p.image_url} alt={p.title} className="h-full w-full" fit="cover" />
+                <ProductImage src={p.image_url ?? (p.image_path ? `/media/${p.image_path}` : null)} alt={p.title} className="h-full w-full" fit="cover" />
               </span>
               <div className="flex min-w-0 grow basis-[220px] flex-col gap-0.5">
                 <span className="line-clamp-1 text-sm font-semibold">{p.title}</span>
