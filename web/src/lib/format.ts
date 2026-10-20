@@ -32,3 +32,12 @@ export function yuan(n: number): string {
 export function optionsText(options: Record<string, string>): string {
   return Object.values(options).join(' / ')
 }
+
+/** Home greeting by local hour: 5–11 早上, 11–13 中午, 13–18 下午, otherwise 晚上. */
+export function greeting(now = new Date()): string {
+  const h = now.getHours()
+  if (h >= 5 && h < 11) return '早上好'
+  if (h >= 11 && h < 13) return '中午好'
+  if (h >= 13 && h < 18) return '下午好'
+  return '晚上好'
+}

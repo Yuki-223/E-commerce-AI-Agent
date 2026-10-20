@@ -364,3 +364,12 @@ export const IconCheck = (p: P) => (
     <path d="M5 12.5l4.5 4.5L19 7.5" />
   </svg>
 )
+
+/** CartPilot mark: a shopping bag with a four-point glint on its face. */
+export const IconCartPilot = (p: P) => (
+  <svg {...base('0 0 32 32', p.size, 32, 32, p)} {...S} strokeWidth={p.strokeWidth ?? 1.8}>
+    <path d="M6.5 10.5h19l-1.4 15.2a2 2 0 0 1-2 1.8H9.9a2 2 0 0 1-2-1.8z" />
+    <path d="M11.5 13.5V9a4.5 4.5 0 0 1 9 0v4.5" />
+    <path d="M16 15.5c.35 2.4 1.1 3.15 3.5 3.5-2.4.35-3.15 1.1-3.5 3.5-.35-2.4-1.1-3.15-3.5-3.5 2.4-.35 3.15-1.1 3.5-3.5z" />
+  </svg>
+)

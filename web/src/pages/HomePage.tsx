@@ -6,10 +6,11 @@ import { send } from '../chat/engine'
 import type { ProductRef } from '../lib/productRef'
 import { CartButton } from '../components/CartButton'
 import { Composer } from '../components/chat/Composer'
-import { IconCup, IconDrop, IconLaptop, IconRunner } from '../components/Icons'
+import { IconCartPilot, IconCup, IconDrop, IconLaptop, IconRunner } from '../components/Icons'
 import { MainHeader } from '../components/layout/MainHeader'
 import { MenuButton, MobileCartLink, MobileHeader } from '../components/layout/MobileHeader'
 import { useIsNarrow } from '../hooks/useIsNarrow'
+import { greeting } from '../lib/format'
 import { useActiveProfile } from '../stores/profiles'
 
 const FALLBACK_CATEGORIES = ['数码电子', '服饰运动', '美妆护肤', '食品饮料']
@@ -20,7 +21,7 @@ const CATEGORY_ICON: Record<string, ComponentType<{ className?: string }>> = {
   食品饮料: IconCup,
 }
 
-/** ⑯ WebHome: empty state with category shortcuts and the large composer. */
+/** ⑯ WebHome: serif greeting, the large composer and category shortcuts. */
 export function HomePage() {
   const navigate = useNavigate()
   const profile = useActiveProfile()
@@ -46,10 +47,12 @@ export function HomePage() {
         </MainHeader>
       )}
       <div className="flex grow flex-col items-center justify-center gap-6 overflow-y-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] md:gap-7 md:px-10 md:pb-20">
-        <div className="flex flex-col items-center gap-2.5 text-center">
-          <h1 className="m-0 text-[26px] font-bold md:text-[34px]">想找点什么</h1>
-          <p className="m-0 text-sm text-ink-muted md:text-base">直接说需求，拖入或粘贴商品图片，或选个分类</p>
-        </div>
+        <h1 className="m-0 flex items-center justify-center gap-2.5 text-center font-serif text-2xl font-normal leading-tight md:gap-3.5 md:text-[32px]">
+          <IconCartPilot className="h-6 w-6 shrink-0 text-primary md:h-8 md:w-8" />
+          <span>
+            {greeting()}，想买点什么？
+          </span>
+        </h1>
         <div className="flex flex-wrap justify-center gap-3">
           {categories.map((c) => {
             const Icon = CATEGORY_ICON[c] ?? IconLaptop
