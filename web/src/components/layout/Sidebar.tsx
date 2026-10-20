@@ -11,14 +11,8 @@ import { SearchDialog } from './SearchDialog'
 const ROW = 'flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-left text-sm text-ink no-underline hover:bg-sidebar-hover hover:text-ink'
 const RAIL_BTN = 'flex h-9 w-9 items-center justify-center rounded-lg p-0 text-ink-muted hover:bg-sidebar-hover hover:text-ink'
 
-/** Round terracotta "+" used for 新对话, as in claude.ai's sidebar. */
-function NewChatDot() {
-  return (
-    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
-      <IconPlus size={11} />
-    </span>
-  )
-}
+/** 新对话 is always tinted with the neutral active fill, with a black "+", as in claude.ai. */
+const NEW_CHAT = 'bg-sidebar-active hover:bg-sidebar-active hover:text-ink active:bg-sidebar-hover'
 
 function RailButton({ label, onClick, children, to }: { label: string; onClick?: () => void; children: ReactNode; to?: string }) {
   if (to)
@@ -86,8 +80,8 @@ export function Sidebar() {
           <RailButton label="展开侧栏" onClick={toggle}>
             <IconSidebar />
           </RailButton>
-          <button type="button" aria-label="新对话" title="新对话" onClick={() => navigate('/')} className={`${RAIL_BTN} mt-2`}>
-            <NewChatDot />
+          <button type="button" aria-label="新对话" title="新对话" onClick={() => navigate('/')} className={`${RAIL_BTN} ${NEW_CHAT} mt-2 text-ink`}>
+            <IconPlus size={14} strokeWidth={2.4} />
           </button>
           <RailButton label="搜索对话" onClick={() => setSearching(true)}>
             <IconSearch size={16} />
@@ -119,8 +113,10 @@ export function Sidebar() {
         </div>
 
         <nav aria-label="主导航" className="flex shrink-0 flex-col gap-px px-2.5 pb-2">
-          <button type="button" onClick={() => navigate('/')} className={`${ROW} font-medium text-primary-text hover:text-primary-text`}>
-            <NewChatDot />
+          <button type="button" onClick={() => navigate('/')} className={`${ROW} ${NEW_CHAT} font-medium`}>
+            <span className="flex w-6 justify-center">
+              <IconPlus size={14} strokeWidth={2.4} />
+            </span>
             新对话
           </button>
           <button type="button" onClick={() => setSearching(true)} className={`${ROW} group`}>
