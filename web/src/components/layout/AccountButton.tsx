@@ -5,7 +5,7 @@ import { preferenceSummary, usePreference } from '../../hooks/usePreference'
 import { profileLabel, useActiveProfile, type Profile } from '../../stores/profiles'
 import { useSettings } from '../../stores/ui'
 import { ProfilesView } from '../chat/ComposerMenu'
-import { IconCart, IconChevronRight, IconChevronUpDown, IconGear, IconHelp, IconHistory, IconUsers } from '../Icons'
+import { IconCart, IconChevronDown, IconChevronRight, IconGear, IconHelp, IconHistory, IconUsers } from '../Icons'
 import { HistoryManagerDialog } from './HistoryManagerDialog'
 
 export function Avatar({ profile, size = 32 }: { profile: Profile; size?: number }) {
@@ -25,9 +25,10 @@ const ICON = 'flex w-5 shrink-0 justify-center text-ink-muted'
 const REPO = 'https://github.com/Yuki-223/E-commerce-AI-Agent'
 
 /**
- * Sidebar footer + account menu, compact like claude.ai's: a header with the
- * active profile (opens 购物偏好), 切换档案 ▸, then 36px rows and a one-line
- * footer. `compact` is the collapsed rail's avatar-only button.
+ * Sidebar footer + account menu, compact like claude.ai's. The footer row is
+ * one line (avatar + profile name + ▾); the menu header carries the
+ * preference summary and opens 购物偏好, then 切换档案 ▸, 36px rows and a
+ * one-line footer. `compact` is the collapsed rail's avatar-only button.
  */
 export function AccountButton({ compact = false }: { compact?: boolean }) {
   const profile = useActiveProfile()
@@ -140,17 +141,14 @@ export function AccountButton({ compact = false }: { compact?: boolean }) {
         className={
           compact
             ? `flex h-10 w-10 items-center justify-center rounded-lg p-0 hover:bg-sidebar-hover ${open ? 'bg-sidebar-active' : ''}`
-            : `flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-ink hover:bg-sidebar-hover ${open ? 'bg-sidebar-active hover:bg-sidebar-active' : ''}`
+            : `flex h-10 w-full items-center gap-2.5 rounded-lg px-2 text-left text-ink hover:bg-sidebar-hover ${open ? 'bg-sidebar-active hover:bg-sidebar-active' : ''}`
         }
       >
-        <Avatar profile={profile} size={compact ? 30 : 32} />
+        <Avatar profile={profile} size={compact ? 30 : 28} />
         {!compact && (
           <>
-            <span className="flex min-w-0 grow flex-col">
-              <span className="text-sm font-semibold">{profileLabel(profile)}</span>
-              <span className="truncate text-xs text-ink-subtle">{preferenceSummary(data)}</span>
-            </span>
-            <IconChevronUpDown className="shrink-0 text-ink-subtle" />
+            <span className="min-w-0 grow truncate text-sm font-medium">{profileLabel(profile)}</span>
+            <IconChevronDown size={11} className="mr-1 shrink-0 text-ink-subtle" />
           </>
         )}
       </button>
