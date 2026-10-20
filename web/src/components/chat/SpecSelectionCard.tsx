@@ -18,7 +18,7 @@ export function SpecSelectionCard({ spec, disabled, onSubmit }: { spec: SpecSele
   return (
     <section aria-label="选择规格" className="flex w-full max-w-[380px] flex-col gap-3 rounded-[18px] border border-line bg-surface p-3.5 shadow-[0_2px_6px_rgba(43,30,18,0.04)]">
       <div className="flex items-center gap-2.5">
-        <ProductImage src={product?.imageURL ?? null} alt="" className="h-9 w-9 shrink-0 rounded-lg border border-line" />
+        <ProductImage src={product?.imageURL} alt="" className="h-9 w-9 shrink-0 rounded-lg border border-line" />
         <span className="line-clamp-2 text-[13px] font-semibold">{spec.title}</span>
       </div>
       {spec.dimensions.map((d) => (

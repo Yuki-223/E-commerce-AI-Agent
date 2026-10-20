@@ -22,6 +22,8 @@ button:disabled { cursor: default; }
 a { color: var(--primary); }
 a:hover { color: var(--primary-hover); }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* An overlay playing its exit never catches clicks meant for what is under it. */
+[data-state=closed], [data-state=closed] * { pointer-events: none !important; }
 
 @layer components {
   .sr-only-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -32,5 +34,16 @@ a:hover { color: var(--primary-hover); }
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+  }
+  /* The thinking dots keep a slow opacity-only breath instead of freezing; no movement.
+     (Keyframes live here: Tailwind only emits keyframes its own utilities use.) */
+  @keyframes quiet-breathe {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  .animate-quiet-dot {
+    animation-name: quiet-breathe !important;
+    animation-duration: 1.9s !important;
+    animation-iteration-count: infinite !important;
   }
 }

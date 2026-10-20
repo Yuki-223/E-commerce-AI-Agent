@@ -1,14 +1,20 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/endpoints'
 import type { Product } from '../api/types'
 
-/** GET /products?ids= in the given order; also seeds the single-product cache. */
-export function useProducts(ids: string[] | undefined) {
+/**
+ * GET /products?ids= in the given order; also seeds the single-product cache.
+ * `keepPrevious` keeps the last list while a changed id set loads, for callers
+ * that look products up by id (the cart): removing a line then changes nothing
+ * but that line, instead of blanking every row's photo and summary.
+ */
+export function useProducts(ids: string[] | undefined, { keepPrevious = false } = {}) {
   const qc = useQueryClient()
   const key = (ids ?? []).join(',')
   return useQuery({
     queryKey: ['products', key],
     enabled: Boolean(ids?.length),
+    placeholderData: keepPrevious ? keepPreviousData : undefined,
     staleTime: 5 * 60_000,
     queryFn: async ({ signal }) => {
       const products = await api.products(ids!, signal)

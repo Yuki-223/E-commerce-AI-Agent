@@ -1,19 +1,20 @@
 import { useNavigate } from 'react-router-dom'
+import type { PresenceProps } from '../../hooks/usePresence'
 import { useConversations } from '../../stores/conversations'
 
-/** WebStates ⑥ 清空全部历史对话 confirmation. */
-export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
+/** WebStates ⑥ 清空全部历史对话 confirmation. `onCleared` runs only after a confirmed clear, not on 取消. */
+export function ClearHistoryDialog({ onClose, onCleared, presence }: { onClose: () => void; onCleared?: () => void; presence?: PresenceProps }) {
   const navigate = useNavigate()
   const count = useConversations((s) => Object.values(s.conversations).filter((c) => c.messages.length).length)
   const clear = useConversations((s) => s.clear)
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={onClose}>
+    <div {...presence} className="fixed inset-0 z-50 flex animate-fade-in closing:animate-fade-out items-center justify-center bg-[rgba(20,16,12,0.4)]" onMouseDown={(e) => (e.stopPropagation(), onClose())}>
       <div
         role="alertdialog"
         aria-label="确认清空"
         aria-modal="true"
         onMouseDown={(e) => e.stopPropagation()}
-        className="flex w-[320px] animate-dialog-in flex-col gap-2.5 rounded-[14px] border border-line-strong bg-surface p-3.5 shadow-[0_10px_24px_rgba(43,30,18,0.12)]"
+        className="flex w-[320px] animate-dialog-in closing-in:animate-dialog-out flex-col gap-2.5 rounded-[14px] border border-line-strong bg-surface p-3.5 shadow-[0_10px_24px_rgba(43,30,18,0.12)]"
       >
         <span className="text-sm font-semibold">清空全部历史对话？</span>
         <span className="text-xs text-ink-muted">此操作不能撤销。</span>
@@ -27,6 +28,7 @@ export function ClearHistoryDialog({ onClose }: { onClose: () => void }) {
             onClick={() => {
               clear()
               onClose()
+              onCleared?.()
               navigate('/')
             }}
             className="h-8 grow-[2] rounded-lg active:scale-[0.97] bg-error-text text-[13px] font-semibold text-on-primary disabled:opacity-50"

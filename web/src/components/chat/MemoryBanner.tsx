@@ -4,6 +4,7 @@ import { api } from '../../api/endpoints'
 import type { UserPreference } from '../../api/types'
 import { preferenceKey } from '../../hooks/usePreference'
 import { useConversations, type ChatMessage } from '../../stores/conversations'
+import { Collapse } from '../Collapse'
 import { useSettings } from '../../stores/ui'
 import { IconCheckCircle, IconClose, IconUndo } from '../Icons'
 
@@ -16,8 +17,10 @@ export function MemoryBanner({ convId, message }: { convId: string; message: Cha
   const patchMessage = useConversations((s) => s.patchMessage)
   const openSettings = useSettings((s) => s.open)
   const [busy, setBusy] = useState(false)
+  // Expand only for a fresh answer; a reopened conversation shows the banner in place.
+  const [fresh] = useState(() => Date.now() - message.createdAt < 60_000)
   const notices = message.memory ?? []
-  if (!notices.length || notices.every((n) => n.dismissed)) return null
+  const visible = notices.length > 0 && !notices.every((n) => n.dismissed)
 
   const userId = message.request?.user_id ?? ''
   const undone = notices.every((n) => n.undone)
@@ -44,34 +47,35 @@ export function MemoryBanner({ convId, message }: { convId: string; message: Cha
 
   const box = 'mx-auto mt-3 flex w-[calc(100%-24px)] md:w-[calc(100%-64px)] max-w-[820px] shrink-0 items-center gap-2.5 rounded-[14px] border bg-surface px-3.5 py-2.5 shadow-[0_2px_8px_rgba(43,30,18,0.05)]'
 
-  if (undone) {
-    return (
-      <div role="status" className={`${box} border-line-strong`}>
-        <IconUndo className="shrink-0 text-ink-muted" />
-        <span className="grow text-[13px]">已撤销刚才记住的偏好</span>
-        <button type="button" aria-label="关闭提示" onClick={() => update(() => ({ dismissed: true }))} className="flex h-7 w-7 items-center justify-center p-0 text-ink-subtle">
-          <IconClose />
-        </button>
-      </div>
-    )
-  }
-
+  // The banner opens and closes its height, so the conversation below slides instead of jumping.
   return (
-    <div role="status" className={`${box} border-[rgba(206,135,99,0.45)]`}>
-      <IconCheckCircle size={18} tone="var(--primary)" className="shrink-0" />
-      <span className="grow text-[13px] font-medium">
-        {notices.map((n) => n.message).join('；')} <span className="font-normal text-ink-subtle">· 以后推荐会自动参考</span>
-        {failed && <span className="ml-2 font-normal text-error-text">撤销失败</span>}
-      </span>
-      <button type="button" disabled={busy} onClick={() => void undo()} className="h-7 rounded-full bg-soft-purple px-3 text-[13px] font-semibold text-primary-text disabled:opacity-60">
-        {busy ? '撤销中…' : failed ? '重试撤销' : '撤销'}
-      </button>
-      <button type="button" onClick={() => openSettings('preferences')} className="p-0 text-[13px] text-ink-muted">
-        管理偏好
-      </button>
-      <button type="button" aria-label="关闭提示" onClick={() => update(() => ({ dismissed: true }))} className="flex h-7 w-7 items-center justify-center p-0 text-ink-subtle">
-        <IconClose />
-      </button>
-    </div>
+    <Collapse show={visible} appear={fresh} className="shrink-0">
+      {undone ? (
+        <div role="status" className={`${box} border-line-strong`}>
+          <IconUndo className="shrink-0 text-ink-muted" />
+          <span className="grow text-[13px]">已撤销刚才记住的偏好</span>
+          <button type="button" aria-label="关闭提示" onClick={() => update(() => ({ dismissed: true }))} className="flex h-7 w-7 items-center justify-center p-0 text-ink-subtle">
+            <IconClose />
+          </button>
+        </div>
+      ) : (
+        <div role="status" className={`${box} border-[rgba(206,135,99,0.45)]`}>
+          <IconCheckCircle size={18} tone="var(--primary)" className="shrink-0" />
+          <span className="grow text-[13px] font-medium">
+            {notices.map((n) => n.message).join('；')} <span className="font-normal text-ink-subtle">· 以后推荐会自动参考</span>
+            {failed && <span className="ml-2 font-normal text-error-text">撤销失败</span>}
+          </span>
+          <button type="button" disabled={busy} onClick={() => void undo()} className="h-7 rounded-full bg-soft-purple px-3 text-[13px] font-semibold text-primary-text disabled:opacity-60">
+            {busy ? '撤销中…' : failed ? '重试撤销' : '撤销'}
+          </button>
+          <button type="button" onClick={() => openSettings('preferences')} className="p-0 text-[13px] text-ink-muted">
+            管理偏好
+          </button>
+          <button type="button" aria-label="关闭提示" onClick={() => update(() => ({ dismissed: true }))} className="flex h-7 w-7 items-center justify-center p-0 text-ink-subtle">
+            <IconClose />
+          </button>
+        </div>
+      )}
+    </Collapse>
   )
 }

@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useBump } from '../../hooks/useBump'
+import { usePresence } from '../../hooks/usePresence'
 import { useSpeech } from '../../hooks/useSpeech'
 import { compressImage, firstImage, IMAGE_ACCEPT } from '../../lib/image'
 import type { ProductRef } from '../../lib/productRef'
 import { IconClose, IconImage, IconMic, IconPlus, IconSend, IconStop } from '../Icons'
+import { Collapse } from '../Collapse'
 import { ComposerMenu } from './ComposerMenu'
 import { ProductRefChip } from './ProductRefChip'
 
@@ -41,7 +44,15 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
   const [dragging, setDragging] = useState(false)
   const [imageError, setImageError] = useState('')
   const [refProduct, setRefProduct] = useState<ProductRef | null>(null)
+  // What a leaving attachment keeps showing while it collapses.
+  const lastImage = useRef(image)
+  if (image) lastImage.current = image
+  const shownImage = image ?? lastImage.current
+  const lastRef = useRef(refProduct)
+  if (refProduct) lastRef.current = refProduct
+  const shownRef = refProduct ?? lastRef.current
   const [menu, setMenu] = useState(false)
+  const menuPresence = usePresence(menu)
   const fileRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -168,8 +179,9 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
       >
         <IconPlus size={15} strokeWidth={2.2} className={`transition-transform duration-snap ease-snap ${menu ? 'rotate-45' : ''}`} />
       </button>
-      {menu && (
+      {menuPresence.mounted && (
         <ComposerMenu
+          presence={menuPresence.props}
           onClose={() => setMenu(false)}
           onImage={() => fileRef.current?.click()}
           onCamera={canCapture ? () => cameraRef.current?.click() : undefined}
@@ -238,17 +250,20 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
     </button>
   )
 
+  // Send and stop swap places with a quick scale-in rather than a hard cut.
+  const swap = useBump(Boolean(busy && onStop), 'animate-swap-in')
   const sendButton =
     busy && onStop ? (
-      <button type="button" aria-label="停止生成" onClick={onStop} className={`flex ${btn} shrink-0 items-center justify-center rounded-full bg-ink p-0 text-bg`}>
+      <button key={swap.key} type="button" aria-label="停止生成" onClick={onStop} className={`flex ${btn} shrink-0 items-center justify-center rounded-full bg-ink p-0 text-bg ${swap.className}`}>
         <IconStop />
       </button>
     ) : (
       <button
+        key={swap.key}
         type="submit"
         aria-label="发送"
         disabled={!canSend}
-        className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-on-primary ${canSend ? 'bg-primary' : 'bg-disabled'}`}
+        className={`flex ${btn} shrink-0 items-center justify-center rounded-full p-0 text-on-primary ${canSend ? 'bg-primary' : 'bg-disabled'} ${swap.className}`}
       >
         <IconSend size={home ? 15 : 16} />
       </button>
@@ -264,10 +279,11 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
             : `${SHELL} gap-2 px-2.5 py-2`
         }
       >
-        {image && (
-          <div className="flex items-center gap-3 p-1">
+        {/* Attachments grow in (200ms) and leave in 120ms; -mb-2/pb-2 fold the form's gap into the collapse. */}
+        <Collapse show={Boolean(image)} exit="snap" className="-mb-2">
+          <div className="flex items-center gap-3 p-1 pb-3">
             <div className="relative shrink-0">
-              <img src={image} alt="待发送的图片" className="h-16 w-16 rounded-xl border border-line-strong object-cover" />
+              <img src={shownImage ?? undefined} alt="待发送的图片" className="h-16 w-16 rounded-xl border border-line-strong object-cover" />
               <button
                 type="button"
                 aria-label="移除图片"
@@ -282,21 +298,23 @@ export function Composer({ variant, busy, disabled, onSend, onStop, handleRef, p
               <span className="text-xs text-ink-subtle">发送后会先识别图片，再为你匹配商品</span>
             </div>
           </div>
-        )}
-        {refProduct && (
-          <div className="flex p-1">
-            <ProductRefChip productRef={refProduct}>
-              <button
-                type="button"
-                aria-label="取消引用"
-                onClick={() => setRefProduct(null)}
-                className="-mr-1 ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full p-0 text-ink-subtle hover:bg-secondary hover:text-ink"
-              >
-                <IconClose size={9} strokeWidth={2.4} />
-              </button>
-            </ProductRefChip>
+        </Collapse>
+        <Collapse show={Boolean(refProduct)} exit="snap" className="-mb-2">
+          <div className="flex p-1 pb-3">
+            {shownRef && (
+              <ProductRefChip productRef={shownRef}>
+                <button
+                  type="button"
+                  aria-label="取消引用"
+                  onClick={() => setRefProduct(null)}
+                  className="-mr-1 ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full p-0 text-ink-subtle hover:bg-secondary hover:text-ink"
+                >
+                  <IconClose size={9} strokeWidth={2.4} />
+                </button>
+              </ProductRefChip>
+            )}
           </div>
-        )}
+        </Collapse>
         {home ? (
           <>
             {textarea}

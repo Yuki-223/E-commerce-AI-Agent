@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import type { Product } from '../api/types'
+import { CopiedTip, shareOrCopy, useCopiedTip } from '../components/CopiedTip'
 import { IconShare } from '../components/Icons'
 import { BackButton, MobileHeader, MobileTitle } from '../components/layout/MobileHeader'
 import { Basis, QuantityStepper, SpecPicker, useAddToCart } from '../components/product/ProductPanel'
@@ -8,12 +9,6 @@ import { Reviews } from '../components/product/Reviews'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useProduct } from '../hooks/useProducts'
 import { useRecordView } from '../stores/recentProducts'
-
-function share(product: Product) {
-  const data = { title: product.title, url: window.location.href }
-  if (navigator.share) void navigator.share(data).catch(() => undefined)
-  else void navigator.clipboard?.writeText(data.url)
-}
 
 function Body({ product }: { product: Product }) {
   const cart = useAddToCart(product)
@@ -60,15 +55,24 @@ export function ProductPage() {
   const { data: product, isPending, isError, refetch } = useProduct(productId)
   useDocumentTitle(product?.title ?? '商品详情')
   useRecordView(product?.productID)
+  const copied = useCopiedTip()
   return (
     <>
       <MobileHeader
         left={<BackButton label="返回对话" />}
         right={
           product && (
-            <button type="button" aria-label="分享商品" onClick={() => share(product)} className="flex h-11 w-11 items-center justify-center p-0 text-ink">
-              <IconShare size={18} />
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                aria-label="分享商品"
+                onClick={() => void shareOrCopy({ title: product.title, url: window.location.href }).then((c) => c && copied.show())}
+                className="flex h-11 w-11 items-center justify-center p-0 text-ink"
+              >
+                <IconShare size={18} />
+              </button>
+              <CopiedTip tip={copied} className="right-1 top-full" />
+            </div>
           )
         }
       >

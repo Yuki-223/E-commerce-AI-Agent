@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ClearHistoryDialog } from '../../components/layout/ClearHistoryDialog'
 import { HistoryManagerDialog } from '../../components/layout/HistoryManagerDialog'
 import { useCart } from '../../hooks/useCart'
+import { usePresence } from '../../hooks/usePresence'
 import { useConversations } from '../../stores/conversations'
 import { useSettings } from '../../stores/ui'
 import { BUTTON, BUTTON_DANGER, Row, Section } from './ui'
@@ -15,6 +16,8 @@ export function DataSettings() {
   const count = useConversations((s) => Object.values(s.conversations).filter((c) => c.messages.length).length)
   const [manage, setManage] = useState(false)
   const [clear, setClear] = useState(false)
+  const manageDialog = usePresence(manage)
+  const clearDialog = usePresence(clear)
 
   return (
     <>
@@ -37,8 +40,8 @@ export function DataSettings() {
           </button>
         </Row>
       </Section>
-      {manage && <HistoryManagerDialog onClose={() => setManage(false)} />}
-      {clear && <ClearHistoryDialog onClose={() => setClear(false)} />}
+      {manageDialog.mounted && <HistoryManagerDialog presence={manageDialog.props} onClose={() => setManage(false)} />}
+      {clearDialog.mounted && <ClearHistoryDialog presence={clearDialog.props} onClose={() => setClear(false)} />}
     </>
   )
 }

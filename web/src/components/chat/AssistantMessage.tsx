@@ -75,8 +75,9 @@ export function AssistantMessage({ convId, message, isLatest, onFollowup, compar
     <div className="flex flex-col gap-3">
       {thinking}
       {opening && (
-        <div className="max-w-[640px] self-start whitespace-pre-line rounded-[18px] border border-line bg-surface px-4 py-[11px] text-[15px] leading-[22px]">
-          <StreamText text={opening} />
+        // A live answer's bubble fades in where the status bubble was.
+        <div className={`max-w-[640px] self-start whitespace-pre-line rounded-[18px] border border-line bg-surface px-4 py-[11px] text-[15px] leading-[22px] ${live ? 'animate-fade-in' : ''}`}>
+          <StreamText text={opening} done={done} />
           {!done && <span aria-hidden="true" className="ml-0.5 inline-block h-[15px] w-0.5 animate-pulse bg-primary align-[-2px]" />}
         </div>
       )}

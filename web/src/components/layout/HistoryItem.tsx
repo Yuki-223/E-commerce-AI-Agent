@@ -1,8 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useMatch, useNavigate } from 'react-router-dom'
+import { usePresence, usePresenceList } from '../../hooks/usePresence'
 import { historyTime } from '../../lib/format'
 import { productCount, useConversations, type Conversation } from '../../stores/conversations'
+import { CollapseBox } from '../Collapse'
 import { IconMore, IconPencil, IconTrash } from '../Icons'
+
+/** History rows where a deleted conversation collapses away instead of vanishing. */
+export function HistoryList({ conversations, dense = false }: { conversations: Conversation[]; dense?: boolean }) {
+  const rows = usePresenceList(conversations, (c) => c.id)
+  return (
+    <>
+      {rows.map(({ key, item, props }) => (
+        <CollapseBox key={key} presence={props} appear={false}>
+          <HistoryItem conv={item} dense={dense} />
+        </CollapseBox>
+      ))}
+    </>
+  )
+}
 
 /**
  * One history row with the WebStates ⑥ ⋯ menu (重命名 / 删除对话).
@@ -14,6 +30,7 @@ export function HistoryItem({ conv, dense = false }: { conv: Conversation; dense
   const active = useMatch(`/c/${conv.id}`)
   const { rename, remove } = useConversations()
   const [menu, setMenu] = useState(false)
+  const menuPresence = usePresence(menu)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(conv.title)
   const wrap = useRef<HTMLDivElement>(null)
@@ -97,8 +114,8 @@ export function HistoryItem({ conv, dense = false }: { conv: Conversation; dense
       >
         <IconMore />
       </button>
-      {menu && (
-        <div role="menu" className="absolute right-1 top-[calc(100%-4px)] z-30 flex origin-top-right animate-pop-up w-[150px] flex-col rounded-xl border border-line-strong bg-surface p-1.5 shadow-[0_10px_24px_rgba(43,30,18,0.14)]">
+      {menuPresence.mounted && (
+        <div {...menuPresence.props} role="menu" className="absolute right-1 top-[calc(100%-4px)] z-30 flex origin-top-right animate-pop-up closing:animate-pop-up-out w-[150px] flex-col rounded-xl border border-line-strong bg-surface p-1.5 shadow-[0_10px_24px_rgba(43,30,18,0.14)]">
           <button
             type="button"
             role="menuitem"

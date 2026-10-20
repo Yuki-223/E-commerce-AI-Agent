@@ -2,6 +2,7 @@ import { useEffect, useRef, type ComponentType } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { IconClose, IconDatabase, IconGear, IconSliders, IconUsers } from '../../components/Icons'
 import { useIsNarrow } from '../../hooks/useIsNarrow'
+import { usePresence } from '../../hooks/usePresence'
 import { useSettings, type SettingsTab } from '../../stores/ui'
 import { PreferencePage } from '../PreferencePage'
 import { DataSettings } from './DataSettings'
@@ -35,12 +36,17 @@ export function SettingsDialog() {
   const narrow = useIsNarrow()
   const panel = useRef<HTMLDivElement>(null)
   const body = useRef<HTMLDivElement>(null)
+  const presence = usePresence(!!tab)
+  // Keep showing the last tab while the window plays its exit.
+  const lastTab = useRef(tab)
+  if (tab) lastTab.current = tab
 
   useEffect(() => {
     if (!tab) return
     const onKey = (e: KeyboardEvent) => {
       // Let nested dialogs (history manager, clear confirmation) take Escape first.
-      if (e.key === 'Escape' && !document.querySelector('[role=alertdialog], [aria-label="管理历史对话"]')) close()
+      const nested = [...document.querySelectorAll('[role=alertdialog], [aria-label="管理历史对话"]')].some((el) => !el.closest('[data-state=closed]'))
+      if (e.key === 'Escape' && !nested) close()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
@@ -50,8 +56,8 @@ export function SettingsDialog() {
     body.current?.scrollTo({ top: 0 })
   }, [tab])
 
-  if (!tab) return null
-  const current = SETTINGS_TABS.find((t) => t.id === tab) ?? SETTINGS_TABS[0]
+  if (!presence.mounted) return null
+  const current = SETTINGS_TABS.find((t) => t.id === (tab ?? lastTab.current)) ?? SETTINGS_TABS[0]
   const { Page } = current
 
   const closeButton = (
@@ -62,7 +68,8 @@ export function SettingsDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-[45] flex animate-fade-in items-center justify-center bg-[rgba(20,16,12,0.36)] backdrop-blur-[2px] md:p-6"
+      {...presence.props}
+      className="fixed inset-0 z-[45] flex animate-fade-in closing:animate-fade-out items-center justify-center bg-[rgba(20,16,12,0.36)] backdrop-blur-[2px] md:p-6"
       onMouseDown={(e) => !panel.current?.contains(e.target as Node) && close()}
     >
       <div
@@ -72,8 +79,8 @@ export function SettingsDialog() {
         aria-label="设置"
         className={
           narrow
-            ? 'flex h-[100dvh] w-full animate-fade-in flex-col bg-bg pt-[env(safe-area-inset-top)]'
-            : 'flex h-[min(720px,calc(100dvh-48px))] animate-dialog-in w-[920px] max-w-full overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-[0_24px_64px_rgba(20,16,12,0.24),0_2px_8px_rgba(20,16,12,0.08)]'
+            ? 'flex h-[100dvh] w-full animate-fade-in closing-in:animate-fade-out flex-col bg-bg pt-[env(safe-area-inset-top)]'
+            : 'flex h-[min(720px,calc(100dvh-48px))] animate-dialog-in closing-in:animate-dialog-out w-[920px] max-w-full overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-[0_24px_64px_rgba(20,16,12,0.24),0_2px_8px_rgba(20,16,12,0.08)]'
         }
       >
         {narrow ? (
@@ -87,9 +94,9 @@ export function SettingsDialog() {
                 <button
                   key={id}
                   type="button"
-                  aria-current={id === tab ? 'page' : undefined}
+                  aria-current={id === current.id ? 'page' : undefined}
                   onClick={() => open(id)}
-                  className={`flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm ${id === tab ? 'bg-secondary font-medium text-ink' : 'text-ink-muted'}`}
+                  className={`flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm ${id === current.id ? 'bg-secondary font-medium text-ink' : 'text-ink-muted'}`}
                 >
                   <Icon size={15} />
                   {label}
@@ -104,10 +111,10 @@ export function SettingsDialog() {
               <button
                 key={id}
                 type="button"
-                aria-current={id === tab ? 'page' : undefined}
+                aria-current={id === current.id ? 'page' : undefined}
                 onClick={() => open(id)}
                 className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-left text-sm ${
-                  id === tab ? 'bg-[color-mix(in_srgb,var(--text-primary)_7%,transparent)] font-medium text-ink' : 'text-ink-muted hover:bg-[color-mix(in_srgb,var(--text-primary)_4%,transparent)] hover:text-ink'
+                  id === current.id ? 'bg-[color-mix(in_srgb,var(--text-primary)_7%,transparent)] font-medium text-ink' : 'text-ink-muted hover:bg-[color-mix(in_srgb,var(--text-primary)_4%,transparent)] hover:text-ink'
                 }`}
               >
                 <Icon size={16} />

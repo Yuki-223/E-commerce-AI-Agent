@@ -3,12 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/http'
 import type { ComparisonProduct } from '../api/types'
 import { CartButton } from '../components/CartButton'
+import { CopiedTip, shareOrCopy, useCopiedTip } from '../components/CopiedTip'
 import { IconCheckCircle, IconChevronLeft, IconClose, IconCrown, IconPlusCircle, IconSwipe } from '../components/Icons'
 import { ProductImage } from '../components/product/ProductImage'
 import { useCart, useCartMutation } from '../hooks/useCart'
 import { MAX_COMPARE, useComparison } from '../hooks/useComparison'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useIsNarrow } from '../hooks/useIsNarrow'
+import { usePresence } from '../hooks/usePresence'
 import { BackButton, MobileCartLink, MobileHeader, MobileTitle } from '../components/layout/MobileHeader'
 import { useProducts } from '../hooks/useProducts'
 import { useConversations } from '../stores/conversations'
@@ -34,7 +36,8 @@ function useCandidates(exclude: string[], fromConv: string | null) {
 function AddSlot({ candidates, onAdd }: { candidates: string[]; onAdd: (id: string) => void }) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
-  const { data: products } = useProducts(open ? candidates : undefined)
+  const picker = usePresence(open)
+  const { data: products } = useProducts(picker.mounted ? candidates : undefined)
   const list = (products ?? []).filter((p) => !q || p.title.includes(q) || p.brand.includes(q))
   return (
     <div className={`relative px-2.5 py-3 md:p-4 ${CELL_BORDER}`}>
@@ -49,8 +52,8 @@ function AddSlot({ candidates, onAdd }: { candidates: string[]; onAdd: (id: stri
         <span className="hidden md:inline">添加商品对比</span>
         <span className="hidden text-xs font-normal text-ink-subtle md:inline">从对话推荐或搜索中选择</span>
       </button>
-      {open && (
-        <div role="dialog" aria-label="选择要对比的商品" className="fixed inset-x-4 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 flex max-h-[360px] md:absolute md:inset-x-4 md:bottom-auto md:top-[calc(100%-8px)] md:z-30 flex-col gap-2 rounded-2xl animate-pop-up border border-line-strong bg-surface p-3 shadow-pop">
+      {picker.mounted && (
+        <div {...picker.props} role="dialog" aria-label="选择要对比的商品" className="fixed inset-x-4 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 flex max-h-[360px] md:absolute md:inset-x-4 md:bottom-auto md:top-[calc(100%-8px)] md:z-30 flex-col gap-2 rounded-2xl animate-pop-up closing:animate-pop-up-out border border-line-strong bg-surface p-3 shadow-pop">
           <label className="flex items-center gap-2 rounded-[10px] bg-field px-2.5">
             <span className="sr-only-label">搜索商品</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索对话里推荐过的商品" className="h-[34px] grow bg-transparent text-[13px] outline-none" />
@@ -126,12 +129,16 @@ export function ComparePage() {
   const ids = useMemo(() => [...new Set((params.get('ids') ?? '').split(',').map((s) => s.trim()).filter(Boolean))].slice(0, MAX_COMPARE), [params])
   const fromConv = params.get('from')
   const conv = useConversations((s) => (fromConv ? s.conversations[fromConv] : undefined))
-  const { data, isPending, isError, error, refetch } = useComparison(ids)
+  const { data, isPending, isError, error, refetch, isPlaceholderData } = useComparison(ids)
+  // An added column is still loading: the old table stays, dimmed, until the new one lands.
+  const loadingColumn = isPlaceholderData && data && data.products.length !== Math.min(ids.length, MAX_COMPARE)
+  const dim = `transition-opacity duration-snap ${loadingColumn ? 'opacity-60' : ''}`
   const { data: cart } = useCart()
   const inCart = new Set(cart?.cart.lines.map((l) => l.product_id))
   const candidates = useCandidates(ids, fromConv)
   useDocumentTitle('商品对比')
   const narrow = useIsNarrow()
+  const copied = useCopiedTip()
 
   const setIds = (next: string[]) => {
     const p = new URLSearchParams(params)
@@ -164,7 +171,7 @@ export function ComparePage() {
           ) : !data ? (
             <div className="rounded-2xl border border-line bg-surface p-6 text-center text-sm text-ink-muted">{isError ? (error as ApiError)?.message ?? '对比失败' : '正在生成对比…'}</div>
           ) : (
-            <section aria-label="对比表" className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_2px_6px_rgba(43,30,18,0.04)]">
+            <section aria-label="对比表" className={`overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_2px_6px_rgba(43,30,18,0.04)] ${dim}`}>
               <div className="overflow-x-auto overscroll-x-contain">
                 <div className="w-max text-[13px] leading-[19px]">
                   <div className="grid bg-[var(--compare-head)]" style={{ gridTemplateColumns: mcols }}>
@@ -213,13 +220,16 @@ export function ComparePage() {
           <Link to={fromConv ? `/c/${fromConv}` : '/'} className="flex h-11 grow items-center justify-center rounded-xl border border-line-strong text-sm font-semibold text-ink no-underline">
             问问 AI 选哪个
           </Link>
-          <button
-            type="button"
-            onClick={() => (navigator.share ? void navigator.share({ title: '商品对比', url: window.location.href }).catch(() => undefined) : void navigator.clipboard?.writeText(window.location.href))}
-            className="flex h-11 grow items-center justify-center rounded-xl bg-primary active:scale-[0.98] text-sm font-semibold text-on-primary"
-          >
-            分享对比
-          </button>
+          <div className="relative flex grow">
+            <button
+              type="button"
+              onClick={() => void shareOrCopy({ title: '商品对比', url: window.location.href }).then((c) => c && copied.show())}
+              className="flex h-11 grow items-center justify-center rounded-xl bg-primary active:scale-[0.98] text-sm font-semibold text-on-primary"
+            >
+              分享对比
+            </button>
+            <CopiedTip tip={copied} className="inset-x-0 bottom-full mx-auto mb-2" />
+          </div>
         </div>
       </>
     )
@@ -258,7 +268,7 @@ export function ComparePage() {
             </button>
           </div>
         ) : (
-          <section aria-label="对比表" className="overflow-hidden rounded-[18px] border border-line bg-surface shadow-[0_2px_8px_rgba(43,30,18,0.04)]">
+          <section aria-label="对比表" className={`overflow-hidden rounded-[18px] border border-line bg-surface shadow-[0_2px_8px_rgba(43,30,18,0.04)] ${dim}`}>
             <div className="grid bg-[var(--compare-head)]" style={{ gridTemplateColumns: cols }}>
               <div />
               {data.products.map((p) => (

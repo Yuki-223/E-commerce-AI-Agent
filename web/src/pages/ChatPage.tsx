@@ -10,6 +10,7 @@ import { IconArrowDown, IconClose, IconCompare } from '../components/Icons'
 import { MainHeader } from '../components/layout/MainHeader'
 import { MenuButton, MobileCartLink, MobileHeader } from '../components/layout/MobileHeader'
 import { useIsNarrow } from '../hooks/useIsNarrow'
+import { usePresence } from '../hooks/usePresence'
 import { useConversations } from '../stores/conversations'
 import { useActiveProfile } from '../stores/profiles'
 
@@ -27,6 +28,7 @@ export function ChatPage() {
   const composer = useRef<ComposerHandle | null>(null)
   const scroller = useRef<HTMLDivElement>(null)
   const [atBottom, setAtBottom] = useState(true)
+  const latest = usePresence(!atBottom)
 
   const messages = conv?.messages ?? []
   const last = messages[messages.length - 1]
@@ -35,7 +37,9 @@ export function ChatPage() {
 
   const scrollToBottom = useCallback((smooth = false) => {
     const el = scroller.current
-    if (el) el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' })
+    // 回到最新 glides down, unless the reader asked for less motion.
+    const glide = smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: glide ? 'smooth' : 'auto' })
   }, [])
 
   // Follow new content while the reader is at the bottom; otherwise offer 回到最新.
@@ -64,6 +68,8 @@ export function ChatPage() {
   }
 
   const openProduct = (productId: string) => {
+    // Phones show detail as its own page; going there directly skips the ?product= redirect's blank frame.
+    if (narrow) return navigate(`/p/${productId}`)
     const next = new URLSearchParams(params)
     next.set('product', productId)
     setParams(next)
@@ -138,11 +144,12 @@ export function ChatPage() {
               </button>
             </div>
           )}
-          {!atBottom && (
+          {latest.mounted && (
             <button
               type="button"
+              {...latest.props}
               onClick={() => scrollToBottom(true)}
-              className="flex h-8 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3.5 text-[13px] font-semibold text-ink shadow-[0_6px_16px_rgba(43,30,18,0.12)]"
+              className="flex h-8 animate-pop-in closing:animate-pop-out items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3.5 text-[13px] font-semibold text-ink shadow-[0_6px_16px_rgba(43,30,18,0.12)]"
             >
               <IconArrowDown />
               回到最新
